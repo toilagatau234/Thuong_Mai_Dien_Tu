@@ -2,10 +2,9 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-// GHI CHÚ: Hãy thay thế các đường dẫn ảnh này bằng ảnh của bạn
-// trong 'public/assets/img/'
-import logo from '../../assets/img/logo.svg'; // Bạn cần import logo hoặc dùng đường dẫn public
-import avatar from '../../assets/img/avatar.jpg';
+
+import logo from '../../../public/assets/img/logo.png'; 
+import avatar from '../../../public/assets/img/avatar.jpg';
 
 const HeaderComponent = () => {
   const navigate = useNavigate();

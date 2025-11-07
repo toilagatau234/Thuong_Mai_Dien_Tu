@@ -1,34 +1,40 @@
-// Import tất cả các trang
-import DashboardPage from '../pages/DashboardPage/DashboardPage';
-import LoginPage from '../pages/LoginPage/LoginPage';
-import CategoryPage from '../pages/CategoryPage/CategoryPage';
-import ProductPage from '../pages/ProductPage/ProductPage';
-import ProductAddPage from '../pages/ProductAddPage/ProductAddPage';
-import OrderPage from '../pages/OrderPage/OrderPage';
+import React from 'react';
+// CHÚNG TA IMPORT 'Navigate' TỪ ĐÂY
+import { Navigate } from 'react-router-dom';
+
+// Import các trang (đường dẫn đã sửa cho đúng)
+import DashboardPage from '../pages/Dashboard/DashboardPage';
+import LoginPage from '../pages/Login/LoginPage';
+import CategoryPage from '../pages/Category/CategoryPage';
+import ProductPage from '../pages/Product/ProductPage';
+import ProductAddPage from '../pages/ProductAdd/ProductAddPage';
+// (Bạn chưa tạo ProductEditPage, nên tôi tạm thời comment lại)
+// import ProductEditPage from '../pages/Product/ProductEditPage'; 
+import OrderPage from '../pages/Order/OrderPage';
 import OrderDetailPage from '../pages/Order/OrderDetailPage';
-import UserPage from '../pages/UserPage/UserPage';
+import UserPage from '../pages/User/UserPage';
 import UserAddPage from '../pages/User/UserAddPage';
 import UserEditPage from '../pages/User/UserEditPage';
-import CouponPage from '../pages/CouponPage/CouponPage';
-import FeedbackPage from '../pages/FeedbackPage/FeedbackPage';
+import CouponPage from '../pages/Coupon/CouponPage';
+import FeedbackPage from '../pages/Feedback/FeedbackPage';
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
 
-// Định nghĩa các tuyến đường
+// HÀM HELPER: ĐỔI TÊN HÀM NÀY
+// Tên cũ là 'Navigate', bị trùng với thư viện
+const NavigateToDashboard = () => <Navigate to="/admin/dashboard" replace />;
+
 export const routes = [
-  // --- Trang không cần đăng nhập ---
   {
     path: '/login',
     page: LoginPage,
-    isShowHeader: false, // Không hiển thị Header/Sidebar
-    isPrivate: false,     // Không cần đăng nhập
+    isShowHeader: false,
+    isPrivate: false,
   },
-
-  // --- Các trang cần đăng nhập ---
   {
     path: '/admin/dashboard',
     page: DashboardPage,
-    isShowHeader: true, // Hiển thị Header/Sidebar
-    isPrivate: true,    // Cần đăng nhập
+    isShowHeader: true,
+    isPrivate: true,
   },
   {
     path: '/admin/category',
@@ -48,10 +54,10 @@ export const routes = [
     isShowHeader: true,
     isPrivate: true,
   },
-  // Thêm route cho Sửa sản phẩm (ví dụ)
+  // (Thêm route cho ProductEditPage khi bạn tạo nó)
   // {
   //   path: '/admin/product/edit/:id',
-  //   page: ProductEditPage, // Bạn sẽ cần tạo trang này
+  //   page: ProductEditPage,
   //   isShowHeader: true,
   //   isPrivate: true,
   // },
@@ -97,35 +103,22 @@ export const routes = [
     isShowHeader: true,
     isPrivate: true,
   },
-
-  // --- Điều hướng mặc định ---
   {
     path: '/',
-    page: () => <Navigate to="/admin/dashboard" replace />, // Tự động chuyển / sang /admin/dashboard
-    isShowHeader: false,
-    isPrivate: true, // Cần đăng nhập để được chuyển hướng
-  },
-  {
-    path: '/admin',
-    page: () => <Navigate to="/admin/dashboard" replace />, // Tự động chuyển /admin sang /admin/dashboard
+    page: NavigateToDashboard, // <-- SỬ DỤNG TÊN MỚI
     isShowHeader: false,
     isPrivate: true,
   },
-
-  // --- Trang 404 ---
   {
-    path: '*', // Bất kỳ đường dẫn nào không khớp
+    path: '/admin',
+    page: NavigateToDashboard, // <-- SỬ DỤNG TÊN MỚI
+    isShowHeader: false,
+    isPrivate: true,
+  },
+  {
+    path: '*', // Trang 404
     page: NotFoundPage,
     isShowHeader: false,
     isPrivate: false,
   },
 ];
-
-// Hàm giúp điều hướng (tạm thời chưa dùng)
-const Navigate = ({ to }) => {
-  const navigate = require('react-router-dom').useNavigate();
-  React.useEffect(() => {
-    navigate(to, { replace: true });
-  }, [navigate, to]);
-  return null;
-};
