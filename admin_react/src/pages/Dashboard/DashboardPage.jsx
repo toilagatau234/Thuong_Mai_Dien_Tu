@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getApi } from '../../services/apiService'; // Import hàm gọi API
 
 const DashboardPage = () => {
-  // 1. Dùng useState để lưu trữ dữ liệu (thay thế $scope)
+  // Dùng useState để lưu trữ dữ liệu
   const [stats, setStats] = useState({
     totalProduct: 0,
     totalOrder: 0,
@@ -12,13 +12,13 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 2. Dùng useEffect để tải dữ liệu (thay thế code trong controller)
+  // Dùng useEffect để tải dữ liệu
   // Nó sẽ chạy 1 lần khi trang được tải
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // GHI CHÚ: Thay thế các URL này bằng URL API thực tế của bạn
+        // Thay thế các URL này bằng URL API thực tế của bạn
         const productRes = await getApi('/product/getAll?limit=1'); // Lấy tổng số SP
         const orderRes = await getApi('/order/getAll?limit=1');     // Lấy tổng số ĐH
         const userRes = await getApi('/user/getAll?limit=1');      // Lấy tổng số User
@@ -43,8 +43,6 @@ const DashboardPage = () => {
     fetchDashboardData();
   }, []); // [] rỗng nghĩa là chỉ chạy 1 lần
 
-  // 3. Copy HTML từ dashboard.html và chuyển sang JSX
-  // Đổi 'class' -> 'className'
 
   if (loading) {
     return <div>Đang tải dữ liệu...</div>;
@@ -137,8 +135,7 @@ const DashboardPage = () => {
         </div>
       </div>
       
-      {/* ... (Bạn dán phần còn lại của dashboard.html vào đây) ... */}
-      {/* Ví dụ: Bảng Đơn hàng gần đây */}
+      {/* ... (phần còn lại của dashboard.html) ... */}
       
     </div>
   );

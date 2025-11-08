@@ -2,61 +2,58 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginAdmin } from '../../services/apiService';
 import Cookies from 'js-cookie';
+import '../../../public/assets/css/style.css';
+import '../../../public/assets/css/bootstrap.min.css';
 
 const LoginPage = () => {
-  // 1. Thay thế $scope bằng 'useState'
   // Dùng để lưu trữ giá trị của các ô input
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null); // Dùng để lưu thông báo lỗi
-  const navigate = useNavigate(); // Dùng để chuyển trang (thay thế $location)
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  // 2. Thay thế hàm $scope.login()
   const handleSubmit = async (e) => {
     e.preventDefault(); // Ngăn form reload lại trang
-    setError(null); // Xóa lỗi cũ
+    setError(null);
 
     try {
-      // 3. Gọi API service
+      // Gọi API service
       const response = await loginAdmin({ email: email, password: password });
 
-      // 4. Kiểm tra API trả về thành công (Giả sử API trả về token)
+      // Kiểm tra API trả về thành công
       if (response.data && response.data.token) {
         
-        // 5. Lưu token vào cookie (thay thế $cookieStore.put)
-        Cookies.set('admin_token', response.data.token, { expires: 1 }); // Lưu 1 ngày
+        // Lưu token vào cookie
+        Cookies.set('admin_token', response.data.token, { expires: 0.01 }); // ~15p 
 
-        // 6. Chuyển hướng đến trang dashboard
+        // Chuyển hướng đến trang dashboard
         navigate('/admin/dashboard');
       } else {
         setError('Thông tin đăng nhập không hợp lệ.');
       }
     } catch (err) {
-      // 7. Bắt lỗi từ API
+      // Bắt lỗi từ API
       setError('Email hoặc mật khẩu không chính xác.');
       console.error("Lỗi đăng nhập:", err);
     }
   };
 
-  // 3. Render giao diện (Copy từ login.html)
+  // Render giao diện 
   return (
     <div className="main-wrapper login-body">
       <div className="login-wrapper">
         <div className="container">
           <div className="loginbox">
             <div className="login-left">
-              {/* Sửa đường dẫn ảnh logo */}
-              <img className="img-fluid" src={"/assets/img/logo2.png"} alt="Logo" />
+              <img className="img-fluid" src={"../../assets/img/logo.svg"} alt="Logo" />
             </div>
             <div className="login-right">
               <div className="login-right-wrap">
                 <h1>Đăng nhập Admin</h1>
                 <p className="account-subtitle">Truy cập vào trang quản trị</p>
 
-                {/* GHI CHÚ: ng-submit -> onSubmit */}
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
-                    {/* GHI CHÚ: ng-model -> value + onChange */}
                     <input
                       className="form-control"
                       type="text"

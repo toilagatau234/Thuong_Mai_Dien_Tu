@@ -10,13 +10,6 @@ const SidebarComponent = () => {
             <li className="menu-title">
               <span>Main Menu</span>
             </li>
-            
-            {/* GHI CHÚ:
-              Chúng ta dùng <NavLink> thay cho <a>
-              Nó sẽ tự động thêm class 'active' vào thẻ <a> khi
-              đường dẫn URL khớp với thuộc tính 'to'
-            */}
-
             <li>
               <NavLink to="/admin/dashboard">
                 <i className="fas fa-home"></i> <span> Dashboard</span>

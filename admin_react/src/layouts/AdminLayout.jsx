@@ -1,15 +1,15 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom'; // Outlet là nơi nội dung trang con sẽ hiển thị
+import { Outlet } from 'react-router-dom';
 import Header from '../components/HeaderComponent/HeaderComponent';
 import Sidebar from '../components/SidebarComponent/SidebarComponent';
 
 const AdminLayout = () => {
   return (
-    <div className="main-wrapper"> {/* Class bọc ngoài cùng từ index.html cũ */}
+    <div className="main-wrapper"> 
       <Header />
       <Sidebar />
       
-      {/* Đây là nơi nội dung trang (dashboard, product...) sẽ xuất hiện */}
+      {/* nơi nội dung trang (dashboard, product...) xuất hiện */}
       <div className="page-wrapper">
         <div className="content container-fluid">
           <Outlet />

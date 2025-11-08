@@ -3,10 +3,10 @@ import { useParams, Link } from 'react-router-dom'; // Dùng useParams để l�
 import { getApi, putApi } from '../../services/apiService'; // Dùng putApi để cập nhật
 
 const OrderDetailPage = () => {
-  // 1. Lấy ID từ URL (thay thế $routeParams.id)
+  // Lấy ID từ URL
   const { id } = useParams();
 
-  // 2. State để lưu chi tiết đơn hàng, loading, lỗi
+  // State để lưu chi tiết đơn hàng, loading, lỗi
   const [order, setOrder] = useState(null); // Bắt đầu là null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,12 +16,12 @@ const OrderDetailPage = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
 
-  // 3. Hàm tải chi tiết đơn hàng
+  // Hàm tải chi tiết đơn hàng
   const fetchOrderDetail = async () => {
     setLoading(true);
     setError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       const response = await getApi(`/order/detail/${id}`);
       if (response.data) {
         setOrder(response.data);
@@ -37,18 +37,17 @@ const OrderDetailPage = () => {
     }
   };
 
-  // 4. useEffect để gọi hàm fetchOrderDetail khi trang tải (hoặc khi id thay đổi)
+  // useEffect để gọi hàm fetchOrderDetail khi trang tải
   useEffect(() => {
     fetchOrderDetail();
   }, [id]); // Phụ thuộc vào 'id'
 
-  // 5. Hàm cập nhật trạng thái (thay thế $scope.updateStatus)
+  // Hàm cập nhật trạng thái
   const handleUpdateStatus = async () => {
     setUpdateLoading(true);
     setUpdateError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
-      // Giả sử API nhận { status: newStatus }
+      // Thay thế URL API nếu cần
       await putApi(`/order/updateStatus/${id}`, { status: newStatus });
       
       alert('Cập nhật trạng thái thành công!');
@@ -63,7 +62,7 @@ const OrderDetailPage = () => {
     }
   };
   
-  // --- Helper Functions (Hàm hỗ trợ) ---
+  // --- Helper Functions ---
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('vi-VN');
@@ -73,7 +72,6 @@ const OrderDetailPage = () => {
     return parseInt(price || 0).toLocaleString('vi-VN') + 'đ';
   };
   
-  // 6. Render JSX (từ detail.html)
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!order) return <div className="alert alert-warning">Không có dữ liệu đơn hàng.</div>;
@@ -114,7 +112,6 @@ const OrderDetailPage = () => {
                   </thead>
                   <tbody>
                     {/* GHI CHÚ: ng-repeat -> .map() */}
-                    {/* Giả sử API trả về order.order_details là một mảng */}
                     {order.order_details && order.order_details.map((item) => (
                       <tr key={item.id}>
                         <td>{item.product?.name || 'N/A'}</td>
@@ -144,7 +141,6 @@ const OrderDetailPage = () => {
               <h5 className="card-title">Thông tin chung</h5>
             </div>
             <div className="card-body">
-              {/* Giả sử API trả về order.user */}
               <h5>Khách hàng</h5>
               <p className="text-muted">
                 {order.user?.name || 'N/A'}<br />
@@ -155,7 +151,7 @@ const OrderDetailPage = () => {
               <h5>Địa chỉ giao hàng</h5>
               <p className="text-muted">
                 {order.shipping_address || 'N/A'}<br />
-                {/* (Thêm phường/xã, quận/huyện... nếu có) */}
+                {/* (Thêm phường/xã, quận/huyện hoặc API gg map) */}
               </p>
               
               <hr />

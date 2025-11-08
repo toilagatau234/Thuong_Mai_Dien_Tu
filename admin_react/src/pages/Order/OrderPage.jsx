@@ -3,19 +3,19 @@ import { Link } from 'react-router-dom'; // Dùng để tạo link
 import { getApi } from '../../services/apiService';
 
 const OrderPage = () => {
-  // 1. State để lưu danh sách, loading và lỗi
+  // State để lưu danh sách, loading và lỗi
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // (Bạn có thể thêm state cho phân trang ở đây)
+  // (có thể thêm state cho phân trang ở đây)
 
-  // 2. Hàm tải danh sách đơn hàng
+  // Hàm tải danh sách đơn hàng
   const fetchOrders = async () => {
     setLoading(true);
     setError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       const response = await getApi('/order/getAll');
       if (response.data && Array.isArray(response.data.data)) {
         setOrders(response.data.data);
@@ -30,12 +30,12 @@ const OrderPage = () => {
     }
   };
 
-  // 3. useEffect để gọi hàm fetchOrders khi trang tải
+  // useEffect để gọi hàm fetchOrders khi trang tải
   useEffect(() => {
     fetchOrders();
-  }, []); // [] rỗng nghĩa là chỉ chạy 1 lần
+  }, []);
 
-  // --- Helper Functions (Hàm hỗ trợ) ---
+  // --- Helper Functions  ---
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('vi-VN');
@@ -45,7 +45,7 @@ const OrderPage = () => {
     return parseInt(price || 0).toLocaleString('vi-VN') + 'đ';
   };
 
-  // Hàm hiển thị trạng thái (giống logic trong controller)
+  // Hàm hiển thị trạng thái
   const getStatusLabel = (status) => {
     switch (status) {
       case 0: return <span className="badge badge-warning">Chờ xác nhận</span>;
@@ -57,7 +57,6 @@ const OrderPage = () => {
     }
   };
 
-  // 5. Render JSX (từ order.html)
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
 
@@ -95,7 +94,7 @@ const OrderPage = () => {
                     {orders.map((order) => (
                       <tr key={order.id}>
                         <td>{order.id}</td>
-                        <td>{order.user?.name || 'N/A'}</td> {/* Giả sử API trả về user.name */}
+                        <td>{order.user?.name || 'N/A'}</td>
                         <td>{formatDate(order.created_at)}</td>
                         <td>{formatPrice(order.total_amount)}</td>
                         <td>{getStatusLabel(order.status)}</td>
@@ -118,7 +117,7 @@ const OrderPage = () => {
             </div>
           </div>
           
-          {/* (Thêm code phân trang của bạn ở đây nếu có) */}
+          {/* (Thêm code phân trang) */}
           
         </div>
       </div>

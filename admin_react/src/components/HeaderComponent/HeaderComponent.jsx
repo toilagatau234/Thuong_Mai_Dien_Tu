@@ -3,18 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 
-import logo from '../../../public/assets/img/logo.png'; 
-import avatar from '../../../public/assets/img/avatar.jpg';
+import logo from '../../assets/img/logo.png'; 
+import avatar from '../../assets/img/avatar.jpg';
 
 const HeaderComponent = () => {
   const navigate = useNavigate();
 
   // Hàm đăng xuất
-  // Giống hệt $scope.logout trong AppController.js
   const handleLogout = () => {
-    // Xóa token khỏi cookie
     Cookies.remove('admin_token');
-    // Điều hướng về trang login
     navigate('/login');
   };
 
@@ -23,10 +20,10 @@ const HeaderComponent = () => {
       {/* Logo */}
       <div className="header-left">
         <Link to="/admin/dashboard" className="logo">
-          <img src={"/assets/img/logo.png"} alt="Logo" />
+          <img src={"../assets/img/logo.png"} alt="Logo" />
         </Link>
         <Link to="/admin/dashboard" className="logo logo-small">
-          <img src={"/assets/img/logo2.png"} alt="Logo" width="30" height="30" />
+          <img src={"../assets/img/logo2.png"} alt="Logo" width="30" height="30" />
         </Link>
       </div>
 
@@ -42,7 +39,7 @@ const HeaderComponent = () => {
             <span className="user-img">
               <img
                 className="rounded-circle"
-                src={"/assets/img/avatar.jpg"} // Sửa đường dẫn ảnh
+                src={"/assets/img/avatar.jpg"}
                 width="31"
                 alt="Admin"
               />
@@ -52,7 +49,7 @@ const HeaderComponent = () => {
             <div className="user-header">
               <div className="avatar avatar-sm">
                 <img
-                  src={"/assets/img/avatar.jpg"} // Sửa đường dẫn ảnh
+                  src={"/assets/img/avatar.jpg"}
                   alt="User Image"
                   className="avatar-img rounded-circle"
                 />
@@ -63,11 +60,6 @@ const HeaderComponent = () => {
               </div>
             </div>
             <a className="dropdown-item" href="#">Hồ sơ của tôi</a>
-            
-            {/* GHI CHÚ:
-              Thay vì dùng <a>, chúng ta dùng <button> và sự kiện onClick
-              để gọi hàm handleLogout()
-            */}
             <button className="dropdown-item" onClick={handleLogout}>
               Đăng xuất
             </button>

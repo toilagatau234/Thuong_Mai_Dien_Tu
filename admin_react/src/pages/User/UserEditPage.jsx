@@ -3,11 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getApi, putApi } from '../../services/apiService';
 
 const UserEditPage = () => {
-  // 1. Lấy ID từ URL (thay thế $routeParams.id)
+  // Lấy ID từ URL
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // 2. State
+  // State
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,12 +19,12 @@ const UserEditPage = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 3. useEffect để tải dữ liệu user (thay thế $scope.getUser)
+  // useEffect để tải dữ liệu user
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        // GHI CHÚ: Thay thế URL API nếu cần
+        // Thay thế URL API nếu cần
         const response = await getApi(`/user/detail/${id}`);
         if (response.data) {
           // Gán dữ liệu vào form
@@ -48,7 +48,7 @@ const UserEditPage = () => {
     fetchUser();
   }, [id]); // Chạy lại nếu id thay đổi
 
-  // 4. Hàm cập nhật state khi gõ
+  // Hàm cập nhật state khi gõ
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevData => ({
@@ -57,13 +57,13 @@ const UserEditPage = () => {
     }));
   };
 
-  // 5. Hàm submit form (thay thế $scope.updateUser)
+  // Hàm submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaveLoading(true);
     setError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       await putApi(`/user/update/${id}`, formData);
       alert('Cập nhật người dùng thành công!');
       navigate('/admin/user'); // Quay về trang danh sách
@@ -75,7 +75,6 @@ const UserEditPage = () => {
     }
   };
   
-  // 6. Render JSX (từ user/edit.html)
   if (loading) return <div>Đang tải dữ liệu...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
 
@@ -168,9 +167,7 @@ const UserEditPage = () => {
                   </select>
                 </div>
 
-                {/* Ghi chú: Thường không cho phép sửa mật khẩu ở đây 
-                    hoặc sẽ là một form riêng. Bỏ qua trường mật khẩu.
-                */}
+                {/* sửa mật khẩu ở đây hoặc sẽ là một form riêng.*/}
 
                 {error && <div className="alert alert-danger">{error}</div>}
 

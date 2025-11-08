@@ -3,17 +3,17 @@ import { Link } from 'react-router-dom';
 import { getApi, deleteApi } from '../../services/apiService';
 
 const UserPage = () => {
-  // 1. State
+  // State
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 2. Hàm tải danh sách
+  // Hàm tải danh sách
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       const response = await getApi('/user/getAll');
       if (response.data && Array.isArray(response.data.data)) {
         setUsers(response.data.data);
@@ -28,12 +28,12 @@ const UserPage = () => {
     }
   };
 
-  // 3. useEffect để tải dữ liệu khi vào trang
+  // useEffect để tải dữ liệu khi vào trang
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // 4. Hàm xóa (thay thế $scope.deleteUser)
+  // Hàm xóa (thay thế $scope.deleteUser)
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
       try {
@@ -50,7 +50,7 @@ const UserPage = () => {
   
   // --- Helper Functions ---
   const getRoleLabel = (roleId) => {
-    // Giả sử: 0 = Khách hàng, 1 = Admin/Nhân viên
+    // 0 = Khách hàng, 1 = Admin/Nhân viên
     return roleId === 1 ? 
       <span className="badge badge-success">Admin</span> : 
       <span className="badge badge-info">Khách hàng</span>;
@@ -61,7 +61,6 @@ const UserPage = () => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  // 5. Render JSX (từ user.html)
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { postApi } from '../../services/apiService';
 
 const UserAddPage = () => {
-  // 1. State cho form
+  // State cho form
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,7 +17,7 @@ const UserAddPage = () => {
   
   const navigate = useNavigate(); // Dùng để chuyển trang
 
-  // 2. Hàm cập nhật state khi gõ
+  // Hàm cập nhật state khi gõ
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevData => ({
@@ -26,13 +26,13 @@ const UserAddPage = () => {
     }));
   };
 
-  // 3. Hàm submit form (thay thế $scope.addUser)
+  // Hàm submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       await postApi('/user/add', formData);
       alert('Thêm người dùng thành công!');
       navigate('/admin/user'); // Quay về trang danh sách
@@ -44,7 +44,6 @@ const UserAddPage = () => {
     }
   };
 
-  // 4. Render JSX (từ user/add.html)
   return (
     <div>
       <div className="page-header">

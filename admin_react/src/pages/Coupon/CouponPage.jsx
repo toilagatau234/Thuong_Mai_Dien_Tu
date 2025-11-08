@@ -5,7 +5,7 @@ import { getApi, postApi, deleteApi } from '../../services/apiService';
 const initialFormState = {
   code: '',
   discount_value: '',
-  discount_type: 'percentage', // 'percentage' hoặc 'fixed_amount'
+  discount_type: 'percentage',
   quantity: '',
   expiration_date: ''
 };
@@ -21,12 +21,12 @@ const CouponPage = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // 1. Hàm tải danh sách coupon (từ coupon.html)
+  // Hàm tải danh sách coupon
   const fetchCoupons = async () => {
     setListLoading(true);
     setListError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       const response = await getApi('/coupon/getAll');
       if (response.data && Array.isArray(response.data.data)) {
         setCoupons(response.data.data);
@@ -41,12 +41,12 @@ const CouponPage = () => {
     }
   };
 
-  // 2. useEffect để tải danh sách khi trang được mở
+  // useEffect để tải danh sách khi trang được mở
   useEffect(() => {
     fetchCoupons();
   }, []); // [] rỗng nghĩa là chỉ chạy 1 lần
 
-  // 3. Hàm xử lý khi gõ vào form (thay thế ng-model)
+  // Hàm xử lý khi gõ vào form
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewCoupon(prevCoupon => ({
@@ -55,13 +55,13 @@ const CouponPage = () => {
     }));
   };
 
-  // 4. Hàm submit form (từ add.html và CouponController.js)
+  // Hàm submit form
   const handleSubmit = async (e) => {
     e.preventDefault(); // Ngăn form reload
     setFormLoading(true);
     setFormError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       await postApi('/coupon/add', newCoupon);
       
       alert('Thêm mã giảm giá thành công!');
@@ -76,11 +76,11 @@ const CouponPage = () => {
     }
   };
 
-  // 5. Hàm xóa coupon (từ coupon.html và CouponController.js)
+  // Hàm xóa coupon
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) {
       try {
-        // GHI CHÚ: Thay thế URL API nếu cần
+        // Thay thế URL API nếu cần
         await deleteApi(`/coupon/delete/${id}`);
         alert('Xóa thành công!');
         fetchCoupons(); // Tải lại danh sách
@@ -91,13 +91,13 @@ const CouponPage = () => {
     }
   };
 
-  // 6. Hàm định dạng ngày
+  // Hàm định dạng ngày
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  // 7. Hàm định dạng giá trị giảm
+  // Hàm định dạng giá trị giảm
   const formatDiscount = (value, type) => {
     if (type === 'percentage') {
       return `${value}%`;
@@ -106,7 +106,6 @@ const CouponPage = () => {
   };
 
 
-  // 8. Render JSX (Gộp 2 file HTML)
   return (
     <div>
       <div className="page-header">
@@ -117,7 +116,7 @@ const CouponPage = () => {
         </div>
       </div>
 
-      {/* ===== PHẦN 1: FORM THÊM MỚI (TỪ add.html) ===== */}
+      {/* ===== FORM THÊM MỚI  ===== */}
       <div className="row">
         <div className="col-md-12">
           <div className="card">
@@ -125,7 +124,6 @@ const CouponPage = () => {
               <h5 className="card-title">Thêm mã giảm giá mới</h5>
             </div>
             <div className="card-body">
-              {/* Chuyển đổi form */}
               <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-md-6">
@@ -221,7 +219,7 @@ const CouponPage = () => {
         </div>
       </div>
 
-      {/* ===== PHẦN 2: DANH SÁCH (TỪ coupon.html) ===== */}
+      {/* ===== DANH SÁCH ===== */}
       <div className="row">
         <div className="col-md-12">
           <div className="card">
@@ -272,7 +270,7 @@ const CouponPage = () => {
                           <span className="badge badge-success">Hoạt động</span>
                         </td>
                         <td className="text-right">
-                          {/* (Bạn có thể thêm nút Sửa ở đây) */}
+                          {/* (có thể thêm nút Sửa ở đây) */}
                           {/* <button className="btn btn-sm btn-warning me-2">Sửa</button> */}
                           <button
                             onClick={() => handleDelete(coupon.id)}

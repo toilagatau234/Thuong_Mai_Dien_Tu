@@ -1,15 +1,14 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// GHI CHÚ: Thay thế URL này bằng URL API backend của bạn
-const API_BASE_URL = 'http://localhost:3000/api/v1'; // Ví dụ
+// Thay thế URL này bằng URL API backend
+const API_BASE_URL = 'http://localhost:3000/api/';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Đây là "interceptor" - nó sẽ tự động đính kèm token vào *mỗi* request
-// Giống hệt chức năng bạn làm trong AngularJS
+// "interceptor" - tự động đính kèm token vào mỗi request
 apiClient.interceptors.request.use(
   (config) => {
     const token = Cookies.get('admin_token');
@@ -25,36 +24,38 @@ apiClient.interceptors.request.use(
 
 // --- Định nghĩa các hàm gọi API ---
 
+// --- Các API gọi chung ---
+
 // Hàm đăng nhập
 export const loginAdmin = (credentials) => {
-  // credentials là một object { email, password }
   return apiClient.post('/admin/login', credentials);
 };
 
-// Hàm lấy dữ liệu (thay thế hàm get() cũ)
+// Hàm lấy dữ liệu
 export const getApi = (url) => {
   return apiClient.get(url);
 };
 
-// Hàm đăng dữ liệu (thay thế hàm post() cũ)
+// Hàm đăng dữ liệu
 export const postApi = (url, data) => {
   return apiClient.post(url, data);
 };
 
-// Hàm cập nhật dữ liệu (thay thế hàm put() cũ)
+// Hàm cập nhật dữ liệu
 export const putApi = (url, data) => {
   return apiClient.put(url, data);
 };
 
-// Hàm xóa dữ liệu (thay thế hàm delete() cũ)
+// Hàm xóa dữ liệu
 export const deleteApi = (url) => {
   return apiClient.delete(url);
 };
 
-// Bạn cũng có thể định nghĩa các hàm cụ thể hơn
-// Ví dụ cho trang Sản phẩm
+// --- API cụ thể từng trang ---
+
+// Product 
 export const getAllProducts = () => {
-  return apiClient.get('/product/getAll'); // Giả sử URL API là vậy
+  return apiClient.get('/product/getAll'); // Đổi API
 };
 
 export const deleteProduct = (id) => {
@@ -63,12 +64,12 @@ export const deleteProduct = (id) => {
 
 export const addProduct = (productData) => {
   // productData là object chứa { name, price, ... }
-  // Lưu ý: Tệp `file.js` cũ của bạn xử lý upload ảnh.
-  // Trong React, bạn sẽ dùng FormData. Tạm thời hàm này cho dữ liệu text.
+  // Thêm phần xử lý upload ảnh
   return apiClient.post('/product/add', productData); 
 };
 
-// Ví dụ cho trang Danh mục
+
+// Category
 export const getAllCategories = () => {
   return apiClient.get('/category/getAll');
 }
@@ -81,4 +82,4 @@ export const deleteCategory = (id) => {
   return apiClient.delete(`/category/delete/${id}`);
 }
 
-// ... (Bạn tự thêm các hàm cho User, Order, Coupon... theo mẫu trên)
+// ... (thêm các hàm cho User, Order, Coupon và các hàm mới)

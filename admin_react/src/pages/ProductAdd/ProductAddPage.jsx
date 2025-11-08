@@ -3,25 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { postApi, getApi } from '../../services/apiService';
 
 const ProductAddPage = () => {
-  // 1. Dùng 1 state object để lưu tất cả dữ liệu form
+  // Dùng 1 state object để lưu tất cả dữ liệu form
   const [product, setProduct] = useState({
     name: '',
     price: 0,
     quantity: 0,
     description: '',
     categoryId: '',
-    // Thêm các trường khác...
   });
   
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   // (Thêm state cho upload ảnh)
-  // const [selectedImage, setSelectedImage] = useState(null); 
+  const [selectedImage, setSelectedImage] = useState(null); 
   
   const navigate = useNavigate();
 
-  // 2. Tải danh mục cho thẻ <select>
+  // Tải danh mục cho thẻ <select>
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -36,7 +35,7 @@ const ProductAddPage = () => {
     fetchCategories();
   }, []);
 
-  // 3. Hàm cập nhật state khi gõ vào input
+  // Hàm cập nhật state khi gõ vào input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct(prevProduct => ({
@@ -46,19 +45,17 @@ const ProductAddPage = () => {
   };
   
   // (Hàm xử lý khi chọn ảnh)
-  // const handleImageChange = (e) => {
-  //   setSelectedImage(e.target.files[0]);
-  // };
+  const handleImageChange = (e) => {
+    setSelectedImage(e.target.files[0]);
+  };
 
-  // 4. Hàm submit form (thay thế $scope.addProduct)
+  // Hàm submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     
-    // GHI CHÚ: Xử lý upload ảnh phức tạp hơn
-    // Bạn cần dùng FormData nếu có upload ảnh
-    // Tạm thời, chúng ta chỉ gửi dữ liệu text
+    // GHI CHÚ: Xử lý upload ảnh phức tạp hơn cần dùng FormData để có upload ảnh Tạm thời, chúng ta chỉ gửi dữ liệu text
     
     try {
       // Thay thế URL API
@@ -89,7 +86,7 @@ const ProductAddPage = () => {
         <div className="col-md-12">
           <div className="card">
             <div className="card-body">
-              {/* 5. Chuyển đổi form */}
+              {/* Chuyển đổi form */}
               <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-md-6">

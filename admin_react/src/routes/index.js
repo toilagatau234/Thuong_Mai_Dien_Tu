@@ -1,15 +1,12 @@
 import React from 'react';
-// CHÚNG TA IMPORT 'Navigate' TỪ ĐÂY
 import { Navigate } from 'react-router-dom';
 
-// Import các trang (đường dẫn đã sửa cho đúng)
 import DashboardPage from '../pages/Dashboard/DashboardPage';
 import LoginPage from '../pages/Login/LoginPage';
 import CategoryPage from '../pages/Category/CategoryPage';
 import ProductPage from '../pages/Product/ProductPage';
 import ProductAddPage from '../pages/ProductAdd/ProductAddPage';
-// (Bạn chưa tạo ProductEditPage, nên tôi tạm thời comment lại)
-// import ProductEditPage from '../pages/Product/ProductEditPage'; 
+import ProductEditPage from '../pages/ProductEditPage/ProductEditPage'; 
 import OrderPage from '../pages/Order/OrderPage';
 import OrderDetailPage from '../pages/Order/OrderDetailPage';
 import UserPage from '../pages/User/UserPage';
@@ -19,8 +16,7 @@ import CouponPage from '../pages/Coupon/CouponPage';
 import FeedbackPage from '../pages/Feedback/FeedbackPage';
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
 
-// HÀM HELPER: ĐỔI TÊN HÀM NÀY
-// Tên cũ là 'Navigate', bị trùng với thư viện
+
 const NavigateToDashboard = () => <Navigate to="/admin/dashboard" replace />;
 
 export const routes = [
@@ -54,13 +50,12 @@ export const routes = [
     isShowHeader: true,
     isPrivate: true,
   },
-  // (Thêm route cho ProductEditPage khi bạn tạo nó)
-  // {
-  //   path: '/admin/product/edit/:id',
-  //   page: ProductEditPage,
-  //   isShowHeader: true,
-  //   isPrivate: true,
-  // },
+  {
+    path: '/admin/product/edit/:id',
+    page: ProductEditPage,
+    isShowHeader: true,
+    isPrivate: true,
+  },
   {
     path: '/admin/order',
     page: OrderPage,
@@ -105,13 +100,13 @@ export const routes = [
   },
   {
     path: '/',
-    page: NavigateToDashboard, // <-- SỬ DỤNG TÊN MỚI
+    page: NavigateToDashboard,
     isShowHeader: false,
     isPrivate: true,
   },
   {
     path: '/admin',
-    page: NavigateToDashboard, // <-- SỬ DỤNG TÊN MỚI
+    page: NavigateToDashboard,
     isShowHeader: false,
     isPrivate: true,
   },

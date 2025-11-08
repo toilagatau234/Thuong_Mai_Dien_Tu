@@ -7,11 +7,11 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. Hàm tải danh mục
+  //Hàm tải danh mục
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await getApi('/category/getAll'); // Thay URL API
+      const response = await getApi('/category/getAll'); // Thay URL API nếu caanân
       if (response.data && Array.isArray(response.data.data)) {
         setCategories(response.data.data);
       }
@@ -22,30 +22,30 @@ const CategoryPage = () => {
     }
   };
 
-  // 2. useEffect để tải khi vào trang
+  //useEffect để tải khi vào trang
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // 3. Hàm thêm danh mục
+  // Hàm thêm danh mục
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!newCategoryName) return;
     try {
       await postApi('/category/add', { name: newCategoryName }); // Thay URL API
-      setNewCategoryName(''); // Xóa ô input
+      setNewCategoryName('');
       fetchCategories(); // Tải lại danh sách
     } catch (err) {
       alert('Thêm thất bại');
     }
   };
 
-  // 4. Hàm xóa danh mục
+  // Hàm xóa danh mục
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
       try {
         await deleteApi(`/category/delete/${id}`); // Thay URL API
-        fetchCategories(); // Tải lại danh sách
+        fetchCategories();
       } catch (err) {
         alert('Xóa thất bại');
       }
@@ -55,7 +55,6 @@ const CategoryPage = () => {
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
   
-  // 5. Copy HTML từ category.html
   return (
     <div>
       <div className="page-header">
@@ -112,7 +111,7 @@ const CategoryPage = () => {
                         <td>{cat.id}</td>
                         <td>{cat.name}</td>
                         <td>
-                          {/* (Thêm nút sửa ở đây) */}
+                          {/* (Thêm nút sửa) */}
                           <button 
                             onClick={() => handleDelete(cat.id)}
                             className="btn btn-sm btn-danger"

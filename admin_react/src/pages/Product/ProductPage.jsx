@@ -3,23 +3,21 @@ import { Link } from 'react-router-dom';
 import { getApi, deleteApi } from '../../services/apiService'; // Dùng hàm chung
 
 const ProductPage = () => {
-  // 1. Dùng useState để lưu danh sách sản phẩm
+  // Dùng useState để lưu danh sách sản phẩm
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // (Bạn có thể thêm state cho phân trang giống controller cũ)
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-  // 2. Hàm tải dữ liệu
+  // Hàm tải dữ liệu
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // GHI CHÚ: Thay thế URL API
+      // Thay thế URL API
       const response = await getApi('/product/getAll'); // Thêm ?page=... nếu phân trang
 
-      // Giả sử API trả về { data: [...], total: ... }
       if (response.data && Array.isArray(response.data.data)) {
         setProducts(response.data.data);
         // setTotalPages(Math.ceil(response.data.total / 10)); // 10 là limit
@@ -34,26 +32,19 @@ const ProductPage = () => {
     }
   };
 
-  // 3. Dùng useEffect để gọi hàm fetchProducts khi trang tải
+  // Dùng useEffect để gọi hàm fetchProducts khi trang tải
   useEffect(() => {
     fetchProducts();
-  }, []); // [] rỗng nghĩa là chỉ chạy 1 lần
+  }, []); 
 
-  // 4. Hàm xử lý xóa (thay thế $scope.deleteProduct)
+  // Hàm xử lý xóa
   const handleDelete = async (id) => {
     // Xác nhận trước khi xóa
     if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
       try {
-        // GHI CHÚ: Thay thế URL API
+        // Thay thế URL API
         await deleteApi(`/product/delete/${id}`);
-        
-        // Tải lại danh sách sản phẩm sau khi xóa
-        // Cách 1: Gọi lại API
-        fetchProducts(); 
-        
-        // Cách 2: Xóa khỏi state (nhanh hơn)
-        // setProducts(products.filter(p => p.id !== id));
-
+        fetchProducts();
       } catch (err) {
         alert('Xóa sản phẩm thất bại!');
         console.error(err);
@@ -61,7 +52,6 @@ const ProductPage = () => {
     }
   };
 
-  // 5. Render giao diện
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
 
@@ -74,7 +64,6 @@ const ProductPage = () => {
             <h3 className="page-title">Sản phẩm</h3>
           </div>
           <div className="col-auto text-right">
-            {/* GHI CHÚ: dùng <Link> của React Router */}
             <Link to="/admin/product/add" className="btn btn-primary">
               <i className="fas fa-plus"></i> Thêm sản phẩm
             </Link>
@@ -101,7 +90,6 @@ const ProductPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* GHI CHÚ: ng-repeat -> .map() */}
                     {products.map((product) => (
                       // 'key' là bắt buộc trong React
                       <tr key={product.id}>
@@ -109,13 +97,13 @@ const ProductPage = () => {
                         <td>
                           {/* Sửa đường dẫn ảnh nếu cần */}
                           <img 
-                            src={product.image || '/assets/img/logo2.png'} 
+                            src={product.image || '/assets/img/logo.png'} 
                             alt={product.name} 
                             width="50" 
                           />
                         </td>
                         <td>{product.name}</td>
-                        <td>{product.category?.name || 'N/A'}</td> {/* Giả sử có product.category.name */}
+                        <td>{product.category?.name || 'N/A'}</td>
                         <td>{product.price?.toLocaleString('vi-VN')}đ</td>
                         <td>{product.quantity}</td>
                         <td>
@@ -125,7 +113,6 @@ const ProductPage = () => {
                           >
                             Sửa
                           </Link>
-                          {/* GHI CHÚ: ng-click -> onClick */}
                           <button
                             onClick={() => handleDelete(product.id)}
                             className="btn btn-sm btn-danger"
@@ -141,7 +128,7 @@ const ProductPage = () => {
             </div>
           </div>
           
-          {/* (Thêm code phân trang của bạn ở đây nếu có) */}
+          {/* (Thêm code phân trang) */}
 
         </div>
       </div>

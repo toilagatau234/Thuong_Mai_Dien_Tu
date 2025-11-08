@@ -2,15 +2,15 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { routes } from './routes';
 import DefaultComponent from './components/DefaultComponent/DefaultComponent';
-import AdminLayout from './layouts/AdminLayout'; // Import Layout từ Bước 7
+import AdminLayout from './layouts/AdminLayout';
 import Cookies from 'js-cookie';
 
 // Component này dùng để bảo vệ các trang Admin
 // Nó kiểm tra xem đã đăng nhập (có cookie) chưa
 const PrivateRoute = ({ children }) => {
-  const token = Cookies.get('admin_token');
-  // Nếu có token, cho phép vào. Nếu không, đá về trang /login
-  return token ? children : <Navigate to="/login" replase />;
+  // const token = Cookies.get('admin_token');
+  // // Nếu có token, cho phép vào. Nếu không, đá về trang /login
+  // return token ? children : <Navigate to="/login" replase />;
 };
 
 function App() {
@@ -26,22 +26,36 @@ function App() {
           // Kiểm tra xem route này có cần bảo vệ (đăng nhập) không
           const isProtected = route.isShowHeader; // Tạm dùng isShowHeader để quyết định bảo vệ
 
+          // return (
+          //   <Route
+          //     key={route.path}
+          //     path={route.path}
+          //     element={
+          //       isProtected ? (
+          //         <PrivateRoute>
+          //           <Layout>
+          //             <Page />
+          //           </Layout>
+          //         </PrivateRoute>
+          //       ) : (
+          //         <Layout>e
+          //           <Page />
+          //         </Layout>
+          //       )
+          //     }
+          //   />
+          // );
+
           return (
             <Route
               key={route.path}
               path={route.path}
               element={
-                isProtected ? (
-                  <PrivateRoute>
-                    <Layout>
-                      <Page />
-                    </Layout>
-                  </PrivateRoute>
-                ) : (
-                  <Layout>
-                    <Page />
-                  </Layout>
-                )
+                // BỎ LOGIC 'isProtected' VÀ 'PrivateRoute'
+                // Giờ đây, tất cả các trang sẽ được render trực tiếp
+                <Layout>
+                  <Page />
+                </Layout>
               }
             />
           );

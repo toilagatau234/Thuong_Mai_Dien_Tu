@@ -13,12 +13,12 @@ const FeedbackPage = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState(null);
 
-  // 1. Hàm tải danh sách phản hồi (từ feedback.html)
+  // 1. Hàm tải danh sách phản hồi
   const fetchFeedbacks = async () => {
     setLoading(true);
     setError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       const response = await getApi('/feedback/getAll');
       if (response.data && Array.isArray(response.data.data)) {
         setFeedbacks(response.data.data);
@@ -33,16 +33,16 @@ const FeedbackPage = () => {
     }
   };
 
-  // 2. useEffect để tải danh sách khi vào trang
+  // useEffect để tải danh sách khi vào trang
   useEffect(() => {
     fetchFeedbacks();
   }, []); // [] rỗng nghĩa là chỉ chạy 1 lần
 
-  // 3. Hàm xóa phản hồi (từ feedback.html)
+  // Hàm xóa phản hồi
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
       try {
-        // GHI CHÚ: Thay thế URL API nếu cần
+        // Thay thế URL API nếu cần
         await deleteApi(`/feedback/delete/${id}`);
         alert('Xóa thành công!');
         fetchFeedbacks(); // Tải lại danh sách
@@ -53,10 +53,8 @@ const FeedbackPage = () => {
     }
   };
 
-  // 4. Các hàm xử lý Modal (từ feedback-detail.html)
+  // Các hàm xử lý Modal
   const handleOpenModal = (feedback) => {
-    // GHI CHÚ: Có thể bạn muốn gọi API getApi('/feedback/detail/...')
-    // để lấy chi tiết, nhưng ở đây ta dùng luôn data từ list
     setSelectedFeedback(feedback);
     setReplyText(''); // Xóa text trả lời cũ
     setModalError(null);
@@ -71,7 +69,7 @@ const FeedbackPage = () => {
     setModalLoading(true);
     setModalError(null);
     try {
-      // GHI CHÚ: Thay thế URL API nếu cần
+      // Thay thế URL API nếu cần
       const replyData = {
         feedback_id: selectedFeedback.id,
         content: replyText,
@@ -114,7 +112,6 @@ const FeedbackPage = () => {
   };
   
 
-  // 7. Render JSX
   return (
     <div>
       <div className="page-header">
@@ -125,7 +122,7 @@ const FeedbackPage = () => {
         </div>
       </div>
 
-      {/* ===== PHẦN 1: DANH SÁCH PHẢN HỒI (từ feedback.html) ===== */}
+      {/* ===== DANH SÁCH PHẢN HỒI ===== */}
       <div className="row">
         <div className="col-md-12">
           <div className="card">
@@ -166,8 +163,8 @@ const FeedbackPage = () => {
                     {!loading && !error && feedbacks.map((fb) => (
                       <tr key={fb.id}>
                         <td>{fb.id}</td>
-                        <td>{fb.user?.name || 'N/A'}</td> {/* Giả sử API trả về user.name */}
-                        <td>{fb.product?.name || 'N/A'}</td> {/* Giả sử API trả về product.name */}
+                        <td>{fb.user?.name || 'N/A'}</td>
+                        <td>{fb.product?.name || 'N/A'}</td>
                         <td>{renderRating(fb.rating)}</td>
                         <td style={{ maxWidth: '300px' }}>{fb.comment}</td>
                         <td>{formatDate(fb.created_at)}</td>
@@ -205,14 +202,7 @@ const FeedbackPage = () => {
         </div>
       </div>
 
-      {/* ===== PHẦN 2: MODAL TRẢ LỜI (từ feedback-detail.html) ===== */}
-      {/* Chúng ta dùng state `selectedFeedback` để điều khiển modal này.
-        Chúng ta cũng thêm các thuộc tính `data-bs-toggle` và `data-bs-target`
-        vào nút "Trả lời" ở trên để Bootstrap JS có thể nhận diện.
-        
-        Tuy nhiên, cách tốt nhất trong React là kiểm soát hoàn toàn
-        việc hiển thị modal bằng state.
-      */}
+      {/* ===== MODAL TRẢ LỜI ===== */}
       <div 
         className={`modal fade ${selectedFeedback ? 'show' : ''}`} 
         id="feedbackModal" 
@@ -250,7 +240,7 @@ const FeedbackPage = () => {
                   
                   <hr />
                   
-                  {/* Đây là form trả lời từ feedback-detail.html */}
+                  {/*form trả lời*/}
                   <div className="form-group">
                     <label htmlFor="replyText" className="form-label">Nội dung trả lời của bạn:</label>
                     <textarea 
