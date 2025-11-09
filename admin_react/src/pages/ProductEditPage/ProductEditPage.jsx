@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
+import { ProductWrapper, ProductHeader, ProductFilters, ProductGrid, ProductCard } from '../Product/style'
 
 // (VariantManager component - Tái sử dụng từ ProductAddPage)
 const VariantManager = ({ variants, setVariants }) => {

@@ -5,21 +5,20 @@ import reportWebVitals from './reportWebVitals';
 import { Toaster } from 'react-hot-toast';
 
 // Import CSS chính
+// All global CSS removed — using styled-components GlobalStyle instead
 import './assets/css/bootstrap.min.css';
-import './assets/css/style.css';
-import './assets/css/switches.css';
+import GlobalStyle from './styles/GlobalStyle';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  // <React.StrictMode>
-  <>
+  <React.StrictMode>
     <App />
+    <GlobalStyle />
     <Toaster
       position="top-right"
       reverseOrder={false}
     />
-  </>
-  // </React.StrictMode>
+  </React.StrictMode>
 );
 
 reportWebVitals();

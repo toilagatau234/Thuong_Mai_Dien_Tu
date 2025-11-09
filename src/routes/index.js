@@ -1,52 +1,51 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import ProtectedRoutes from '../utils/ProtectedRoutes';
-import PublicRoutes from '../utils/PublicRoutes';
+import HomePage from "../pages/HomePage/HomePage"
+import NotFoundPage from "../pages/NotFoundPage/NotFoundPage"
+import OrderPage from "../pages/OrderPage/OrderPage"
+import PaymentPage from "../pages/PaymentPage/PaymentPage"
+import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage"
+import ProductsPage from "../pages/ProductsPage/ProductsPage"
+import SignInPage from "../pages/SignInPage/SignInPage"
+import SignUpPage from "../pages/SignUpPage/SignUpPage"
 
-// Import Pages
-import LoginPage from '../pages/Login/LoginPage';
-import DashboardPage from '../pages/Dashboard/DashboardPage';
-import CategoryPage from '../pages/Category/CategoryPage';
-import ProductPage from '../pages/Product/ProductPage';
-import ProductAddPage from '../pages/ProductAdd/ProductAddPage';
-import ProductEditPage from '../pages/ProductEditPage/ProductEditPage';
-import OrderPage from '../pages/Order/OrderPage';
-import OrderDetailPage from '../pages/Order/OrderDetailPage';
-import UserPage from '../pages/User/UserPage';
-import UserAddPage from '../pages/User/UserAddPage';
-import UserEditPage from '../pages/User/UserEditPage';
-import CouponPage from '../pages/Coupon/CouponPage';
-import FeedbackPage from '../pages/Feedback/FeedbackPage';
-import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
-
-const AppRoutes = () => {
-  return (
-    <Routes>
-      {/* Routes cho public (Login) */}
-      <Route element={<PublicRoutes />}>
-        <Route path="/login" element={<LoginPage />} />
-      </Route>
-
-      {/* Routes được bảo vệ (Admin Panel) ProtectedRoutes*/}
-      <Route element={<PublicRoutes />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/categories" element={<CategoryPage />} />
-        <Route path="/products" element={<ProductPage />} />
-        <Route path="/product/add" element={<ProductAddPage />} />
-        <Route path="/product/edit/:id" element={<ProductEditPage />} />
-        <Route path="/orders" element={<OrderPage />} />
-        <Route path="/order/detail/:id" element={<OrderDetailPage />} />
-        <Route path="/users" element={<UserPage />} />
-        <Route path="/user/add" element={<UserAddPage />} />
-        <Route path="/user/edit/:id" element={<UserEditPage />} />
-        <Route path="/coupons" element={<CouponPage />} />
-        <Route path="/feedback" element={<FeedbackPage />} />
-      </Route>
-
-      {/* Route cho 404 */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-  );
-};
-
-export default AppRoutes;
+export const routes = [
+    {
+        path: '/',
+        page: HomePage,
+        isShowHeader: true
+    },
+    {
+        path: '/products',
+        page: ProductsPage,
+        isShowHeader: true
+    },
+    {
+        path: '/product-detail/:id',
+        page: ProductDetailPage,
+        isShowHeader: true
+    },
+    {
+        path: '/order',
+        page: OrderPage,
+        isShowHeader: true
+    },
+    {
+        path: '/payment',
+        page: PaymentPage,
+        isShowHeader: true
+    },
+    {
+        path: '/sign-in',
+        page: SignInPage,
+        isShowHeader: false
+    },
+    {
+        path: '/sign-up',
+        page: SignUpPage,
+        isShowHeader: false
+    },
+    {
+        path: '*',
+        page: NotFoundPage,
+        isShowHeader: false
+    }
+]

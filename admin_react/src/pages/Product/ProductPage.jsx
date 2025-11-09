@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import Switch from 'react-switch';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
+import { ProductWrapper, ProductHeader, ProductFilters, ProductGrid, ProductCard } from './style'
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {

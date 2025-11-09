@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import useAddressData from '../../hooks/useAddressData';
 import { toast } from 'react-hot-toast';
+import { UserWrapper, UserHeader, UserTable, UserFilter, ActionButtons } from './style'
 
 const UserEditPage = () => {
   const { id } = useParams();

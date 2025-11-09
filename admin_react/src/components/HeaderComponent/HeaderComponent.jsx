@@ -1,61 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
-// Sửa đường dẫn import ảnh
-import logo from '../../assets/img/logo2.png';
-import logoSmall from '../../assets/img/logo.svg';
+import logo from '../../assets/img/logo.png';
+import logoSmall from '../../assets/img/logo.png';
 import defaultAvatar from '../../assets/img/avatar.jpg';
+import {
+  HeaderContainer,
+  HeaderLeft,
+  ToggleButton,
+  UserMenu,
+  UserDropdown
+} from './style';
 
-const Header = () => {
+const Header = ({ onToggleSidebar, className }) => {
   const { user, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Hàm toggle sidebar (giống script.js)
-  const toggleSidebar = (e) => {
+  const handleToggleDropdown = (e) => {
     e.preventDefault();
-    document.body.classList.toggle('mini-sidebar');
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleToggleSidebar = (e) => {
+    e.preventDefault();
+    if (onToggleSidebar) {
+      onToggleSidebar();
+    }
   };
 
   return (
-    <div className="header">
-      {/* Logo */}
-      <div className="header-left">
+    <HeaderContainer className={className || ''}>
+      <HeaderLeft>
         <Link to="/" className="logo">
           <img src={logo} alt="Logo" />
         </Link>
         <Link to="/" className="logo logo-small">
           <img src={logoSmall} alt="Logo" width="30" height="30" />
         </Link>
-      </div>
+        <ToggleButton onClick={handleToggleSidebar}>
+          <i className="fas fa-bars"></i>
+        </ToggleButton>
+      </HeaderLeft>
 
-      {/* Nút Toggle Sidebar */}
-      <a id="toggle_btn" href="#" onClick={toggleSidebar}>
-        <i className="fas fa-bars"></i>
-      </a>
-
-      {/* Menu User */}
-      <ul className="nav user-menu">
-        <li className="nav-item dropdown has-arrow">
-          <a href="#" className="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+      <UserMenu>
+        <UserDropdown>
+          <button className="dropdown-toggle" type="button" onClick={handleToggleDropdown} aria-expanded={isDropdownOpen}>
             <span className="user-img">
               <img
-                className="rounded-circle"
                 src={user?.avatar || defaultAvatar}
-                width="31"
                 alt={user?.fullname || 'Admin'}
               />
             </span>
-          </a>
-          <div className="dropdown-menu">
+          </button>
+          <div className={`dropdown-menu${isDropdownOpen ? ' show' : ''}`}>
             <div className="user-header">
               <h6>{user?.fullname || 'Admin User'}</h6>
-              <p className="text-muted mb-0">{user?.role || 'admin'}</p>
+              <p>{user?.role || 'admin'}</p>
             </div>
-            {/* <a className="dropdown-item" href="#">My Profile</a> */}
-            <a className="dropdown-item" href="#" onClick={logout}>Logout</a>
+            <button className="dropdown-item" type="button" onClick={logout}>Logout</button>
           </div>
-        </li>
-      </ul>
-    </div>
+        </UserDropdown>
+      </UserMenu>
+    </HeaderContainer>
   );
 };
 

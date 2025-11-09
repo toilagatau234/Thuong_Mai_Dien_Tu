@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
-import logo from '../../assets/img/logo2.png';
+import logo from '../../assets/img/logo.png';
 import { toast } from 'react-hot-toast';
+import { 
+  LoginBody,
+  LoginWrapper,
+  LoginBox,
+  LoginLeft,
+  LoginRight,
+  LoginRightWrap
+} from './style';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -29,56 +37,53 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="main-wrapper login-body">
-      <div className="login-wrapper">
-        <div className="container">
-          <div className="loginbox">
-            <div className="login-left">
-              <img className="img-fluid" src={logo} alt="Logo" />
-            </div>
-            <div className="login-right">
-              <div className="login-right-wrap">
-                <h1>Login</h1>
-                <p className="account-subtitle">Access to our dashboard</p>
-                
-                {/* Form đăng nhập */}
-                <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <input
-                      className="form-control"
-                      type="text"
-                      placeholder="Username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <input
-                      className="form-control"
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <button
-                      className="btn btn-primary btn-block"
-                      type="submit"
-                      disabled={loading}
-                    >
-                      {loading ? 'Đang đăng nhập...' : 'Login'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <LoginBody>
+      <LoginWrapper>
+        <LoginBox>
+          <LoginLeft>
+            <img src={logo} alt="Logo" />
+          </LoginLeft>
+          <LoginRight>
+            <LoginRightWrap>
+              <h1>Login</h1>
+              <p className="account-subtitle">Access to our dashboard</p>
+              
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    className="form-control"
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <button
+                    className="btn-primary"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading ? 'Đang đăng nhập...' : 'Login'}
+                  </button>
+                </div>
+              </form>
+            </LoginRightWrap>
+          </LoginRight>
+        </LoginBox>
+      </LoginWrapper>
+    </LoginBody>
   );
 };
 

@@ -1,25 +1,13 @@
-import React from 'react';
-import HeaderComponent from '../HeaderComponent/HeaderComponent';
-import SidebarComponent from '../SidebarComponent/SidebarComponent';
+import React from 'react'
+import HeaderComponent from '../HeaderComponent/HeaderComponent'
 
 const DefaultComponent = ({ children }) => {
   return (
-    // 'main-wrapper' là class gốc từ template HTML của bạn
-    <div className="main-wrapper"> 
-      
+    <div>
       <HeaderComponent />
-      <SidebarComponent />
-      
-      {/* 'page-wrapper' nơi chứa nội dung chính */}
-      <div className="page-wrapper">
-        <div className="content container-fluid">
-          {/* props.children nội dung của DashboardPage, ProductPage... */}
-          {children} 
-        </div>
-      </div>
-
+      {children}
     </div>
-  );
-};
+  )
+}
 
-export default DefaultComponent;
+export default DefaultComponent

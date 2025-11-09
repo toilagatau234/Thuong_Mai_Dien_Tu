@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllOrders } from '../../services/apiService';
+import { StatisticalWrapper, StatisticalHeader, DateRangePicker, StatisticsCards, StatCard, ChartSection, TopProducts } from './style'
 
 const StatisticalPage = () => {
   const [orders, setOrders] = useState([]);

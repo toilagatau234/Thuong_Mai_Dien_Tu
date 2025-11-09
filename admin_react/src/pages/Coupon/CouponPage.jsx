@@ -4,6 +4,16 @@ import { toast } from 'react-hot-toast';
 import Switch from 'react-switch';
 import Modal from '../../components/Modal/Modal';
 import Pagination from '../../components/Pagination/Pagination';
+import { 
+  CouponWrapper,
+  CouponHeader,
+  CouponFilters,
+  CouponTable,
+  TableResponsive,
+  LoadingWrapper,
+  NoDataMessage,
+  ActionButtons
+} from './style'
 
 // Hàm định dạng ngày tháng (YYYY-MM-DD)
 const formatDateForInput = (dateString) => {
@@ -234,112 +244,86 @@ const CouponPage = () => {
   };
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row align-items-center">
-          <div className="col">
-            <h3 className="page-title">Coupons</h3>
-          </div>
-          <div className="col-auto text-end">
-            <button
-              className="btn btn-primary"
-              onClick={openAddModal}
-            >
-              <i className="fas fa-plus"></i> Add Coupon
-            </button>
-          </div>
+    <CouponWrapper>
+      <CouponHeader>
+        <div className="header-row">
+          <h2 className="page-title">Coupons</h2>
+          <button className="btn-primary" onClick={openAddModal}><i className="fas fa-plus"></i> Add Coupon</button>
         </div>
-      </div>
+      </CouponHeader>
 
-      {/* Thanh Search */}
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <input 
-            type="text"
-            className="form-control"
-            placeholder="Tìm kiếm mã coupon..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-        </div>
-      </div>
+      <CouponFilters>
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Tìm kiếm mã coupon..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </CouponFilters>
 
-      {/* Bảng Coupon */}
-      <div className="row">
-        <div className="col-sm-12">
-          <div className="card card-table">
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-hover table-center mb-0">
-                  <thead>
-                    <tr>
-                      <th>Code</th>
-                      <th>Discount (%)</th>
-                      <th>Quantity</th>
-                      <th>Expiry Date</th>
-                      <th>Status</th>
-                      <th className="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan="6" className="text-center">
-                          <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : coupons.length > 0 ? (
-                      coupons.map((coupon) => (
-                        <tr key={coupon._id}>
-                          <td><b>{coupon.code}</b></td>
-                          <td>{coupon.discount}%</td>
-                          <td>{coupon.quantity}</td>
-                          <td>{formatDateForInput(coupon.expiryDate)}</td>
-                          <td>
-                            <Switch
-                              onChange={() => handleToggleStatus(coupon)}
-                              checked={coupon.status}
-                              onColor="#00D285"
-                              onHandleColor="#ffffff"
-                              handleDiameter={20}
-                              uncheckedIcon={false}
-                              checkedIcon={false}
-                              height={15}
-                              width={35}
-                            />
-                          </td>
-                          <td className="text-end">
-                            <button
-                              className="btn btn-sm btn-warning me-2"
-                              onClick={() => openEditModal(coupon)}
-                            >
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            <button
-                              className="btn btn-sm btn-danger"
-                              onClick={() => handleDelete(coupon)}
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="text-center">No coupons found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Phân trang */}
+      <CouponTable>
+        <TableResponsive>
+          <table className="table table-hover table-center mb-0">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Discount (%)</th>
+                <th>Quantity</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th className="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6">
+                    <LoadingWrapper>
+                      <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
+                    </LoadingWrapper>
+                  </td>
+                </tr>
+              ) : coupons.length > 0 ? (
+                coupons.map((coupon) => (
+                  <tr key={coupon._id}>
+                    <td><b>{coupon.code}</b></td>
+                    <td className="discount">{coupon.discount}%</td>
+                    <td>{coupon.quantity}</td>
+                    <td>{formatDateForInput(coupon.expiryDate)}</td>
+                    <td className="status-cell">
+                      <Switch
+                        onChange={() => handleToggleStatus(coupon)}
+                        checked={coupon.status}
+                        onColor="#00D285"
+                        onHandleColor="#ffffff"
+                        handleDiameter={20}
+                        uncheckedIcon={false}
+                        checkedIcon={false}
+                        height={15}
+                        width={35}
+                      />
+                    </td>
+                    <td className="text-end">
+                      <ActionButtons>
+                        <button className="btn btn-warning" onClick={() => openEditModal(coupon)}><i className="fas fa-edit"></i></button>
+                        <button className="btn btn-danger" onClick={() => handleDelete(coupon)}><i className="fas fa-trash"></i></button>
+                      </ActionButtons>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6">
+                    <NoDataMessage>No coupons found.</NoDataMessage>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </TableResponsive>
+      </CouponTable>
+
       <Pagination 
         currentPage={currentPage}
         totalPages={totalPages}
@@ -372,8 +356,9 @@ const CouponPage = () => {
             </button>
           </>
         }
-      >
-        <form onSubmit={handleSubmit}>
+        >
+        <div className="modal-content-custom">
+          <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Coupon Code</label>
             <input
@@ -424,9 +409,10 @@ const CouponPage = () => {
               required
             />
           </div>
-        </form>
+          </form>
+        </div>
       </Modal>
-    </>
+    </CouponWrapper>
   );
 };
 

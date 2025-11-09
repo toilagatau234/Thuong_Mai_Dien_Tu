@@ -1,30 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
-import Switch from 'react-switch'; // Thay thế Switchery
+import Switch from 'react-switch';
 import Modal from '../../components/Modal/Modal';
 import Pagination from '../../components/Pagination/Pagination';
+import { 
+  CategoryWrapper,
+  PageHeader,
+  SearchSection,
+  TableCard,
+  TableResponsive,
+  LoadingWrapper,
+  NoDataMessage,
+  ModalContent
+} from './style';
 
 const CategoryPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [limit] = useState(10); // Số lượng item mỗi trang
-
-  // Search
+  const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState(null); // Lưu trữ { _id, name } khi sửa
+  const [currentCategory, setCurrentCategory] = useState(null);
   const [categoryName, setCategoryName] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
-  // Hàm gọi API lấy danh mục (sử dụng useCallback để tối ưu)
   const fetchCategories = useCallback(async (page, search = '') => {
     try {
       setLoading(true);
@@ -33,38 +36,30 @@ const CategoryPage = () => {
         limit: limit,
         search: search,
       };
-      // API endpoint: /categories?page=1&limit=10&search=ao
       const response = await apiService.get('/categories', { params });
-      
       setCategories(response.data.categories || []);
       setTotalPages(response.data.totalPages || 1);
       setCurrentPage(response.data.currentPage || 1);
-      
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       toast.error('Không thể tải danh mục.');
     } finally {
       setLoading(false);
     }
-  }, [limit]); // dependency 'limit' là hằng số
+  }, [limit]);
 
-  // Lấy dữ liệu khi component mount hoặc khi page, search thay đổi
   useEffect(() => {
     fetchCategories(currentPage, searchTerm);
   }, [fetchCategories, currentPage, searchTerm]);
 
-  // Xử lý thay đổi trang
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // Xử lý thay đổi search
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset về trang 1 khi search
+    setCurrentPage(1);
   };
-
-  // --- Xử lý Modal ---
 
   const openAddModal = () => {
     setIsEditMode(false);
@@ -82,11 +77,8 @@ const CategoryPage = () => {
 
   const closeModal = () => {
     setShowModal(false);
-    // Hàm reset state sẽ được gọi bởi listener 'hidden.bs.modal' trong Modal component
   };
   
-  // Hàm này được truyền vào Modal component,
-  // được gọi khi modal đã đóng hoàn toàn
   const onModalClose = () => {
     setCategoryName('');
     setIsEditMode(false);
@@ -94,7 +86,6 @@ const CategoryPage = () => {
     setFormLoading(false);
   };
 
-  // Xử lý Submit (Thêm/Sửa)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!categoryName) {
@@ -107,30 +98,22 @@ const CategoryPage = () => {
 
     try {
       if (isEditMode && currentCategory) {
-        // Chế độ Sửa
         await apiService.put(`/categories/${currentCategory._id}`, payload);
         toast.success('Cập nhật danh mục thành công!');
       } else {
-        // Chế độ Thêm
         await apiService.post('/categories', payload);
         toast.success('Thêm danh mục thành công!');
       }
       
       closeModal();
-      // Tải lại danh sách (trang hiện tại)
       fetchCategories(currentPage, searchTerm);
-
     } catch (error) {
       console.error('Failed to save category:', error);
-      // Lỗi đã được toast bởi interceptor
     } finally {
       setFormLoading(false);
     }
   };
 
-  // --- Xử lý Actions ---
-
-  // Thay đổi trạng thái (Toggle Status)
   const handleToggleStatus = async (category) => {
     const newStatus = !category.status;
     const toastId = toast.loading('Đang cập nhật trạng thái...');
@@ -138,8 +121,6 @@ const CategoryPage = () => {
     try {
       await apiService.put(`/categories/toggle-status/${category._id}`, { status: newStatus });
       toast.success('Cập nhật trạng thái thành công!', { id: toastId });
-      
-      // Cập nhật state ngay lập tức để UI phản hồi
       setCategories(categories.map(cat =>
         cat._id === category._id ? { ...cat, status: newStatus } : cat
       ));
@@ -149,9 +130,7 @@ const CategoryPage = () => {
     }
   };
 
-  // Xử lý Xóa (Delete)
   const handleDelete = (category) => {
-    // Sử dụng react-hot-toast để xác nhận
     toast((t) => (
       <span>
         Bạn có chắc muốn xóa <b>{category.name}</b>?
@@ -179,7 +158,6 @@ const CategoryPage = () => {
     try {
       await apiService.delete(`/categories/${id}`);
       toast.success('Xóa danh mục thành công!', { id: toastId });
-      // Tải lại danh sách
       fetchCategories(currentPage, searchTerm);
     } catch (error) {
       console.error('Failed to delete category:', error);
@@ -188,129 +166,119 @@ const CategoryPage = () => {
   };
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row align-items-center">
-          <div className="col">
-            <h3 className="page-title">Categories</h3>
-          </div>
-          <div className="col-auto text-end">
-            <button
-              className="btn btn-primary"
-              onClick={openAddModal}
-            >
-              <i className="fas fa-plus"></i> Add Category
-            </button>
-          </div>
+    <CategoryWrapper>
+      <PageHeader>
+        <div className="header-row">
+          <h1 className="page-title">Categories</h1>
+          <button
+            className="btn-primary"
+            onClick={openAddModal}
+          >
+            <i className="fas fa-plus"></i> Add Category
+          </button>
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Thanh Search */}
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <input 
-            type="text"
-            className="form-control"
-            placeholder="Tìm kiếm danh mục..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-        </div>
-      </div>
+      <SearchSection>
+        <input 
+          type="text"
+          className="search-input"
+          placeholder="Tìm kiếm danh mục..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </SearchSection>
 
-      {/* Bảng Danh mục */}
-      <div className="row">
-        <div className="col-sm-12">
-          <div className="card card-table">
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-hover table-center mb-0">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Status</th>
-                      <th className="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan="4" className="text-center">
-                          <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : categories.length > 0 ? (
-                      categories.map((category) => (
-                        <tr key={category._id}>
-                          <td>{category._id}</td>
-                          <td>{category.name}</td>
-                          <td>
-                            <Switch
-                              onChange={() => handleToggleStatus(category)}
-                              checked={category.status}
-                              onColor="#00D285" // Màu xanh lá giống Switchery
-                              onHandleColor="#ffffff"
-                              handleDiameter={20}
-                              uncheckedIcon={false}
-                              checkedIcon={false}
-                              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-                              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-                              height={15}
-                              width={35}
-                              className="react-switch"
-                            />
-                          </td>
-                          <td className="text-end">
-                            <button
-                              className="btn btn-sm btn-warning me-2"
-                              onClick={() => openEditModal(category)}
-                            >
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            <button
-                              className="btn btn-sm btn-danger"
-                              onClick={() => handleDelete(category)}
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="4" className="text-center">No categories found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TableCard>
+        <TableResponsive>
+          <table className="table table-hover table-center mb-0">
+            <thead>
+              <tr>
+                <th>Category ID</th>
+                <th>Category Name</th>
+                <th>Status</th>
+                <th className="text-end">Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="4">
+                    <LoadingWrapper>
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </LoadingWrapper>
+                  </td>
+                </tr>
+              ) : categories.length > 0 ? (
+                categories.map((category) => (
+                  <tr key={category._id}>
+                    <td className="category-id">{category._id}</td>
+                    <td className="category-name">{category.name}</td>
+                    <td className="status-cell">
+                      <Switch
+                        onChange={() => handleToggleStatus(category)}
+                        checked={category.status}
+                        onColor="#00D285"
+                        onHandleColor="#ffffff"
+                        handleDiameter={20}
+                        uncheckedIcon={false}
+                        checkedIcon={false}
+                        boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                        activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                        height={15}
+                        width={35}
+                        className="react-switch"
+                      />
+                    </td>
+                    <td className="actions-cell">
+                      <button
+                        className="btn btn-warning"
+                        onClick={() => openEditModal(category)}
+                      >
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(category)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">
+                    <NoDataMessage>
+                      No categories found
+                    </NoDataMessage>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </TableResponsive>
+      </TableCard>
       
-      {/* Phân trang */}
       <Pagination 
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
 
-      {/* Modal Thêm/Sửa */}
       <Modal
         id="categoryModal"
         title={isEditMode ? 'Edit Category' : 'Add New Category'}
         show={showModal}
-        onClose={closeModal} // Yêu cầu đóng modal
+        onClose={closeModal}
         footer={
           <>
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={closeModal} // Yêu cầu đóng
+              onClick={closeModal}
             >
               Close
             </button>
@@ -321,7 +289,7 @@ const CategoryPage = () => {
               disabled={formLoading}
             >
               {formLoading ? (
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
               ) : (
                 'Save'
               )}
@@ -329,21 +297,20 @@ const CategoryPage = () => {
           </>
         }
       >
-        <form onSubmit={handleSubmit}>
+        <ModalContent>
           <div className="form-group">
             <label>Category Name</label>
             <input
               type="text"
-              className="form-control"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               placeholder="Enter category name"
               required
             />
           </div>
-        </form>
+        </ModalContent>
       </Modal>
-    </>
+    </CategoryWrapper>
   );
 };
 
