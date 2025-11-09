@@ -3,7 +3,6 @@ import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
-import { exportToExcel } from '../../utils/exportUtils'; // Import
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -32,7 +31,7 @@ const OrderPage = () => {
       const params = {
         page: page,
         limit: limit,
-        search: search, // API cần hỗ trợ search (e.g., by user name or phone)
+        search: search,
         status: status,
       };
       const response = await apiService.get('/orders', { params });
@@ -84,21 +83,6 @@ const OrderPage = () => {
     }
   };
 
-  // Xử lý Export
-  const handleExportExcel = async () => {
-    try {
-      // Tải tất cả đơn hàng (hoặc chỉ các đơn hàng đã lọc)
-      const params = {
-        limit: 1000, // Tăng giới hạn để export
-        search: searchTerm,
-        status: statusFilter,
-      };
-      const response = await apiService.get('/orders', { params });
-      exportToExcel(response.data.orders || []);
-    } catch (error) {
-      toast.error('Không thể tải dữ liệu để export.');
-    }
-  };
 
   return (
     <>
@@ -106,11 +90,6 @@ const OrderPage = () => {
         <div className="row align-items-center">
           <div className="col">
             <h3 className="page-title">Orders</h3>
-          </div>
-          <div className="col-auto text-end">
-            <button className="btn btn-success" onClick={handleExportExcel}>
-              <i className="fas fa-file-excel"></i> Export Excel
-            </button>
           </div>
         </div>
       </div>

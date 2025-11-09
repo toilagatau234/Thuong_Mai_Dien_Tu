@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import './assets/css/bootstrap.min.css';
 import './assets/css/style.css';
 import './assets/css/switches.css';
+import './index.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

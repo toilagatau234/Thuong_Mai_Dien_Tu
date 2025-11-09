@@ -27,8 +27,8 @@ const AppRoutes = () => {
         <Route path="/login" element={<LoginPage />} />
       </Route>
 
-      {/* Routes được bảo vệ (Admin Panel) */}
-      <Route element={<ProtectedRoutes />}>
+      {/* Routes được bảo vệ (Admin Panel) ProtectedRoutes*/}
+      <Route element={<PublicRoutes />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/categories" element={<CategoryPage />} />
         <Route path="/products" element={<ProductPage />} />

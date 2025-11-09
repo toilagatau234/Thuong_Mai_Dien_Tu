@@ -1,11 +1,17 @@
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { toast } from 'react-hot-toast';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { toast } from 'react-hot-toast';
+
+if (pdfFonts.pdfMake) {
+  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+} else {
+  console.log("Không tải được pdfMake vfs_fonts. Tính năng xuất PDF có thể không hoạt động.")
+}
+
 
 // Cài đặt font cho pdfmake (hỗ trợ tiếng Việt)
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 pdfMake.fonts = {
   Roboto: {
     normal: 'Roboto-Regular.ttf',

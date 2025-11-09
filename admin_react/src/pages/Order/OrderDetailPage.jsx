@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
-import { exportToPDF } from '../../utils/exportUtils'; // Import
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -30,11 +29,6 @@ const OrderDetailPage = () => {
     fetchOrder();
   }, [id]);
 
-  const handleExportPDF = () => {
-    if (order) {
-      exportToPDF(order);
-    }
-  };
 
   if (loading) {
     return <div className="spinner-border text-primary" role="status"></div>;
@@ -56,11 +50,6 @@ const OrderDetailPage = () => {
               <li className="breadcrumb-item"><Link to="/orders">Orders</Link></li>
               <li className="breadcrumb-item active">Order Detail</li>
             </ul>
-          </div>
-          <div className="col-auto text-end">
-            <button className="btn btn-danger" onClick={handleExportPDF}>
-              <i className="fas fa-file-pdf"></i> Export PDF
-            </button>
           </div>
         </div>
       </div>
