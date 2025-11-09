@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
-import { Link } from 'react-router-dom';
-import logo from '../../assets/img/logo.png';
-import logoSmall from '../../assets/img/logo.png';
+// import { Link } from 'react-router-dom';
+// import logo from '../../assets/img/logo.png';
+// import logoSmall from '../../assets/img/logo.png';
 import defaultAvatar from '../../assets/img/avatar.jpg';
 import {
   HeaderContainer,
@@ -31,12 +31,12 @@ const Header = ({ onToggleSidebar, className }) => {
   return (
     <HeaderContainer className={className || ''}>
       <HeaderLeft>
-        <Link to="/" className="logo">
+        {/* <Link to="/" className="logo">
           <img src={logo} alt="Logo" />
         </Link>
         <Link to="/" className="logo logo-small">
           <img src={logoSmall} alt="Logo" width="30" height="30" />
-        </Link>
+        </Link> */}
         <ToggleButton onClick={handleToggleSidebar}>
           <i className="fas fa-bars"></i>
         </ToggleButton>

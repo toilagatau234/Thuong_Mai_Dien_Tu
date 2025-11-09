@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import logo from '../../assets/img/logo.svg';
+import logo from '../../assets/img/logo.png';
 import {
   SidebarContainer,
   SidebarInner,
@@ -10,7 +10,7 @@ import {
   MenuItem,
   SidebarTop,
   SidebarFooter,
-  ToggleBtn,
+  // ToggleBtn,
   SidebarLogo
 } from './style';
 
@@ -18,12 +18,13 @@ const Sidebar = ({ isCondensed, onToggle }) => {
   return (
     <SidebarContainer className={isCondensed ? 'condensed' : ''}>
       <SidebarTop>
-        <ToggleBtn type="button" aria-label="Toggle sidebar" onClick={onToggle}>
+        {/* <ToggleBtn type="button" aria-label="Toggle sidebar" onClick={onToggle}>
           <i className="fa-solid fa-bars"></i>
-        </ToggleBtn>
+        </ToggleBtn> */}
         <SidebarLogo>
           <NavLink to="/">
             <img src={logo} alt="logo" />
+            <span className="logo-text">Admin</span>
           </NavLink>
         </SidebarLogo>
       </SidebarTop>
@@ -33,7 +34,7 @@ const Sidebar = ({ isCondensed, onToggle }) => {
           <MenuList>
             <MenuTitle className="menu-title"><span>Main Menu</span></MenuTitle>
             <MenuItem>
-              <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>
+              <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
                 <i className="fas fa-home"></i> <span>Dashboard</span>
               </NavLink>
             </MenuItem>
@@ -72,7 +73,7 @@ const Sidebar = ({ isCondensed, onToggle }) => {
       </SidebarInner>
 
       <SidebarFooter>
-        <button type="button" className="sidebar-link" onClick={() => { /* TODO: wire logout */ }}>
+        <button type="button" className="sidebar-link" onClick={() => {}}>
           <i className="fa-solid fa-right-from-bracket fa-rotate-180"></i>
           <span>Logout</span>
         </button>

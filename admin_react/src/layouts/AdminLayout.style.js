@@ -9,7 +9,7 @@ export const MainWrapper = styled.div`
 
 export const PageWrapper = styled.div`
     flex: 1;
-    margin-left: 260px; // Chiều rộng của sidebar
+    margin-left: 260px; // Khớp với chiều rộng Sidebar
     min-height: 100vh;
     background: #f8f9fc;
     position: relative;
@@ -20,12 +20,12 @@ export const PageWrapper = styled.div`
     }
 
     &.condensed {
-        margin-left: 80px;
+        margin-left: 80px; // Khớp với chiều rộng Sidebar thu gọn
     }
 `;
 
 export const ContentContainer = styled.div`
-    padding: 80px 20px 20px 20px; // Top padding để tránh header
+    padding: 84px 20px 20px 20px; 
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
