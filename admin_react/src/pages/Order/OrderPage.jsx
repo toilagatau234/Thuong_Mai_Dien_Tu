@@ -1,127 +1,214 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Dùng để tạo link
-import { getApi } from '../../services/apiService';
+import React, { useState, useEffect, useCallback } from 'react';
+import apiService from '../../services/apiService';
+import { toast } from 'react-hot-toast';
+import Pagination from '../../components/Pagination/Pagination';
+import { Link } from 'react-router-dom';
+import { exportToExcel } from '../../utils/exportUtils'; // Import
+
+// Hàm định dạng tiền tệ
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
+};
+
+const ORDER_STATUSES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
 const OrderPage = () => {
-  // State để lưu danh sách, loading và lỗi
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  // (có thể thêm state cho phân trang ở đây)
 
-  // Hàm tải danh sách đơn hàng
-  const fetchOrders = async () => {
-    setLoading(true);
-    setError(null);
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+
+  // Search & Filter
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // Hàm gọi API
+  const fetchOrders = useCallback(async (page, search = '', status = '') => {
     try {
-      // Thay thế URL API nếu cần
-      const response = await getApi('/order/getAll');
-      if (response.data && Array.isArray(response.data.data)) {
-        setOrders(response.data.data);
-      } else {
-        setOrders([]);
-      }
-    } catch (err) {
-      setError('Không thể tải danh sách đơn hàng.');
-      console.error(err);
+      setLoading(true);
+      const params = {
+        page: page,
+        limit: limit,
+        search: search, // API cần hỗ trợ search (e.g., by user name or phone)
+        status: status,
+      };
+      const response = await apiService.get('/orders', { params });
+      
+      setOrders(response.data.orders || []);
+      setTotalPages(response.data.totalPages || 1);
+      setCurrentPage(response.data.currentPage || 1);
+      
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      toast.error('Không thể tải đơn hàng.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
-  // useEffect để gọi hàm fetchOrders khi trang tải
+  // Lấy dữ liệu
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(currentPage, searchTerm, statusFilter);
+  }, [fetchOrders, currentPage, searchTerm, statusFilter]);
 
-  // --- Helper Functions  ---
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('vi-VN');
+  // Xử lý Pagination và Search/Filter
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+  const handleStatusChange = (e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1);
   };
 
-  const formatPrice = (price) => {
-    return parseInt(price || 0).toLocaleString('vi-VN') + 'đ';
-  };
-
-  // Hàm hiển thị trạng thái
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 0: return <span className="badge badge-warning">Chờ xác nhận</span>;
-      case 1: return <span className="badge badge-info">Đã xác nhận</span>;
-      case 2: return <span className="badge badge-primary">Đang giao</span>;
-      case 3: return <span className="badge badge-success">Đã giao</span>;
-      case 4: return <span className="badge badge-danger">Đã hủy</span>;
-      default: return <span className="badge badge-secondary">Không rõ</span>;
+  // --- Xử lý Actions ---
+  
+  // Cập nhật trạng thái
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    const toastId = toast.loading('Đang cập nhật...');
+    try {
+      await apiService.put(`/orders/status/${orderId}`, { status: newStatus });
+      toast.success('Cập nhật trạng thái thành công!', { id: toastId });
+      
+      // Cập nhật UI
+      setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      toast.error('Cập nhật thất bại.', { id: toastId });
     }
   };
 
-  if (loading) return <div>Đang tải...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
+  // Xử lý Export
+  const handleExportExcel = async () => {
+    try {
+      // Tải tất cả đơn hàng (hoặc chỉ các đơn hàng đã lọc)
+      const params = {
+        limit: 1000, // Tăng giới hạn để export
+        search: searchTerm,
+        status: statusFilter,
+      };
+      const response = await apiService.get('/orders', { params });
+      exportToExcel(response.data.orders || []);
+    } catch (error) {
+      toast.error('Không thể tải dữ liệu để export.');
+    }
+  };
 
   return (
-    <div>
+    <>
       <div className="page-header">
-        <div className="row">
+        <div className="row align-items-center">
           <div className="col">
-            <h3 className="page-title">Quản lý Đơn hàng</h3>
+            <h3 className="page-title">Orders</h3>
+          </div>
+          <div className="col-auto text-end">
+            <button className="btn btn-success" onClick={handleExportExcel}>
+              <i className="fas fa-file-excel"></i> Export Excel
+            </button>
           </div>
         </div>
       </div>
 
+      {/* Thanh Search & Filter */}
+      <div className="row mb-3">
+        <div className="col-md-5">
+          <input 
+            type="text"
+            className="form-control"
+            placeholder="Tìm kiếm (Tên, SĐT khách hàng)..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+        <div className="col-md-4">
+          <select className="form-select" value={statusFilter} onChange={handleStatusChange}>
+            <option value="">All Statuses</option>
+            {ORDER_STATUSES.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Bảng Order */}
       <div className="row">
-        <div className="col-md-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="card-title">Tất cả đơn hàng</h5>
-            </div>
+        <div className="col-sm-12">
+          <div className="card card-table">
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-hover">
+                <table className="table table-hover table-center mb-0">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Khách hàng</th>
-                      <th>Ngày đặt</th>
-                      <th>Tổng tiền</th>
-                      <th>Trạng thái</th>
-                      <th className="text-right">Hành động</th>
+                      <th>Customer</th>
+                      <th>Phone</th>
+                      <th>Date</th>
+                      <th>Total</th>
+                      <th>Payment</th>
+                      <th>Status</th>
+                      <th className="text-end">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* GHI CHÚ: ng-repeat -> .map() */}
-                    {orders.map((order) => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.user?.name || 'N/A'}</td>
-                        <td>{formatDate(order.created_at)}</td>
-                        <td>{formatPrice(order.total_amount)}</td>
-                        <td>{getStatusLabel(order.status)}</td>
-                        <td className="text-right">
-                          {/* GHI CHÚ: ng-click="viewDetail(o.id)" 
-                            -> <Link to=... >
-                          */}
-                          <Link
-                            to={`/admin/order/detail/${order.id}`}
-                            className="btn btn-sm btn-info"
-                          >
-                            Xem
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
+                    {loading ? (
+                      <tr><td colSpan="7" className="text-center"><div className="spinner-border text-primary"></div></td></tr>
+                    ) : orders.length > 0 ? (
+                      orders.map((order) => (
+                        <tr key={order._id}>
+                          <td>{order.shippingAddress?.fullname || 'N/A'}</td>
+                          <td>{order.shippingAddress?.phone || 'N/A'}</td>
+                          <td>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
+                          <td>{formatCurrency(order.totalAmount)}</td>
+                          <td>
+                            <span className={`badge ${order.isPaid ? 'bg-success' : 'bg-warning'}`}>
+                              {order.paymentMethod} {order.isPaid ? '(Paid)' : '(Not Paid)'}
+                            </span>
+                          </td>
+                          <td>
+                            {/* Dropdown cập nhật trạng thái */}
+                            <select 
+                              className={`form-select form-select-sm 
+                                ${order.status === 'Delivered' ? 'border-success' : 
+                                  order.status === 'Cancelled' ? 'border-danger' : 
+                                  order.status === 'Pending' ? 'border-warning' : 'border-primary'}`}
+                              value={order.status}
+                              onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
+                            >
+                              {ORDER_STATUSES.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="text-end">
+                            <Link to={`/order/detail/${order._id}`} className="btn btn-sm btn-info">
+                              <i className="fas fa-eye"></i>
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan="7" className="text-center">No orders found.</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
-          
-          {/* (Thêm code phân trang) */}
-          
         </div>
       </div>
-    </div>
+      
+      {/* Phân trang */}
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+    </>
   );
 };
 

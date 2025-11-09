@@ -1,130 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // Dùng useParams để lấy ID từ URL
-import { getApi, putApi } from '../../services/apiService'; // Dùng putApi để cập nhật
+import { Link, useParams } from 'react-router-dom';
+import apiService from '../../services/apiService';
+import { toast } from 'react-hot-toast';
+import { exportToPDF } from '../../utils/exportUtils'; // Import
+
+// Hàm định dạng tiền tệ
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
+};
 
 const OrderDetailPage = () => {
-  // Lấy ID từ URL
   const { id } = useParams();
-
-  // State để lưu chi tiết đơn hàng, loading, lỗi
-  const [order, setOrder] = useState(null); // Bắt đầu là null
+  const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // State để quản lý việc cập nhật trạng thái
-  const [newStatus, setNewStatus] = useState('');
-  const [updateLoading, setUpdateLoading] = useState(false);
-  const [updateError, setUpdateError] = useState(null);
-
-  // Hàm tải chi tiết đơn hàng
-  const fetchOrderDetail = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Thay thế URL API nếu cần
-      const response = await getApi(`/order/detail/${id}`);
-      if (response.data) {
-        setOrder(response.data);
-        setNewStatus(response.data.status); // Gán trạng thái hiện tại cho <select>
-      } else {
-        setError('Không tìm thấy đơn hàng.');
-      }
-    } catch (err) {
-      setError('Không thể tải chi tiết đơn hàng.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // useEffect để gọi hàm fetchOrderDetail khi trang tải
   useEffect(() => {
-    fetchOrderDetail();
-  }, [id]); // Phụ thuộc vào 'id'
+    const fetchOrder = async () => {
+      try {
+        setLoading(true);
+        const response = await apiService.get(`/orders/${id}`);
+        setOrder(response.data);
+      } catch (error) {
+        console.error('Failed to fetch order detail:', error);
+        toast.error('Không thể tải chi tiết đơn hàng.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrder();
+  }, [id]);
 
-  // Hàm cập nhật trạng thái
-  const handleUpdateStatus = async () => {
-    setUpdateLoading(true);
-    setUpdateError(null);
-    try {
-      // Thay thế URL API nếu cần
-      await putApi(`/order/updateStatus/${id}`, { status: newStatus });
-      
-      alert('Cập nhật trạng thái thành công!');
-      // Tải lại dữ liệu để thấy thay đổi
-      fetchOrderDetail(); 
-
-    } catch (err) {
-      setUpdateError('Cập nhật thất bại: ' + (err.response?.data?.message || err.message));
-      console.error(err);
-    } finally {
-      setUpdateLoading(false);
+  const handleExportPDF = () => {
+    if (order) {
+      exportToPDF(order);
     }
   };
-  
-  // --- Helper Functions ---
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('vi-VN');
-  };
 
-  const formatPrice = (price) => {
-    return parseInt(price || 0).toLocaleString('vi-VN') + 'đ';
-  };
-  
-  if (loading) return <div>Đang tải...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
-  if (!order) return <div className="alert alert-warning">Không có dữ liệu đơn hàng.</div>;
+  if (loading) {
+    return <div className="spinner-border text-primary" role="status"></div>;
+  }
+
+  if (!order) {
+    return <div>Order not found.</div>;
+  }
+
+  const { shippingAddress: address } = order;
 
   return (
-    <div>
+    <>
       <div className="page-header">
-        <div className="row">
+        <div className="row align-items-center">
           <div className="col">
-            <h3 className="page-title">Chi tiết Đơn hàng #{order.id}</h3>
+            <h3 className="page-title">Order Detail</h3>
+            <ul className="breadcrumb">
+              <li className="breadcrumb-item"><Link to="/orders">Orders</Link></li>
+              <li className="breadcrumb-item active">Order Detail</li>
+            </ul>
           </div>
-          <div className="col-auto text-right">
-            <Link to="/admin/order" className="btn btn-secondary">
-              <i className="fas fa-arrow-left"></i> Quay lại
-            </Link>
+          <div className="col-auto text-end">
+            <button className="btn btn-danger" onClick={handleExportPDF}>
+              <i className="fas fa-file-pdf"></i> Export PDF
+            </button>
           </div>
         </div>
       </div>
 
       <div className="row">
-        {/* --- Thông tin đơn hàng --- */}
-        <div className="col-md-8">
+        {/* Cột Chi tiết Đơn hàng */}
+        <div className="col-lg-8">
           <div className="card">
             <div className="card-header">
-              <h5 className="card-title">Chi tiết sản phẩm</h5>
+              <h5 className="card-title">Order Details (ID: {order._id})</h5>
             </div>
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-hover">
+                <table className="table table-hover table-center mb-0">
                   <thead>
                     <tr>
-                      <th>Sản phẩm</th>
-                      <th>Hình ảnh</th>
-                      <th>Số lượng</th>
-                      <th>Giá</th>
-                      <th>Tổng phụ</th>
+                      <th>Product</th>
+                      <th>Variant (Color, Size)</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* GHI CHÚ: ng-repeat -> .map() */}
-                    {order.order_details && order.order_details.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.product?.name || 'N/A'}</td>
+                    {order.orderItems.map(item => (
+                      <tr key={item._id}>
                         <td>
-                          <img 
-                            src={item.product?.image || '/assets/img/logo2.png'} 
-                            alt={item.product?.name} 
-                            width="50"
-                          />
+                          <h2 className="table-avatar">
+                            <a href="#" className="avatar avatar-sm me-2">
+                              <img className="avatar-img rounded" src={item.image} alt="Product" />
+                            </a>
+                            {item.name}
+                          </h2>
                         </td>
+                        <td>{item.variant.color}, {item.variant.size}</td>
                         <td>{item.quantity}</td>
-                        <td>{formatPrice(item.price)}</td>
-                        <td>{formatPrice(item.quantity * item.price)}</td>
+                        <td>{formatCurrency(item.price)}</td>
+                        <td>{formatCurrency(item.price * item.quantity)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -134,66 +108,48 @@ const OrderDetailPage = () => {
           </div>
         </div>
 
-        {/* --- Thông tin khách hàng & Trạng thái --- */}
-        <div className="col-md-4">
+        {/* Cột Thông tin Khách hàng & Thanh toán */}
+        <div className="col-lg-4">
           <div className="card">
-            <div className="card-header">
-              <h5 className="card-title">Thông tin chung</h5>
-            </div>
+            <div className="card-header"><h5 className="card-title">Customer & Shipping</h5></div>
             <div className="card-body">
-              <h5>Khách hàng</h5>
-              <p className="text-muted">
-                {order.user?.name || 'N/A'}<br />
-                {order.user?.email || 'N/A'}<br />
-                {order.user?.phone_number || 'N/A'}
-              </p>
-              
-              <h5>Địa chỉ giao hàng</h5>
-              <p className="text-muted">
-                {order.shipping_address || 'N/A'}<br />
-                {/* (Thêm phường/xã, quận/huyện hoặc API gg map) */}
-              </p>
-              
+              <p><strong>Customer:</strong> {address.fullname}</p>
+              <p><strong>Phone:</strong> {address.phone}</p>
+              <p><strong>Address:</strong> {`${address.street}, ${address.ward}, ${address.district}, ${address.province}`}</p>
               <hr />
-
-              <h5>Tổng cộng</h5>
-              <p><strong>Tổng tiền hàng:</strong> {formatPrice(order.total_amount - (order.shipping_fee || 0))}</p>
-              <p><strong>Phí vận chuyển:</strong> {formatPrice(order.shipping_fee)}</p>
-              <h4 className="text-danger">Tổng thanh toán: {formatPrice(order.total_amount)}</h4>
-              
+              <p><strong>Note:</strong> {order.note || '(No note)'}</p>
+            </div>
+          </div>
+          
+          <div className="card">
+            <div className="card-header"><h5 className="card-title">Summary & Status</h5></div>
+            <div className="card-body">
+              <p><strong>Status:</strong> <span className={`badge bg-${order.status === 'Delivered' ? 'success' : 'primary'}`}>{order.status}</span></p>
+              <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
+              <p><strong>Paid:</strong> <span className={`badge ${order.isPaid ? 'bg-success' : 'bg-warning'}`}>{order.isPaid ? 'Yes' : 'No'}</span></p>
               <hr />
-              
-              {/* Cập nhật trạng thái */}
-              <h5>Cập nhật Trạng thái</h5>
-              <div className="form-group">
-                <select 
-                  className="form-control" 
-                  value={newStatus} 
-                  onChange={(e) => setNewStatus(e.target.value)}
-                >
-                  <option value="0">Chờ xác nhận</option>
-                  <option value="1">Đã xác nhận</option>
-                  <option value="2">Đang giao</option>
-                  <option value="3">Đã giao</option>
-                  <option value="4">Đã hủy</option>
-                </select>
+              <div className="d-flex justify-content-between">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(order.subtotal)}</span>
               </div>
-              
-              {updateError && <div className="alert alert-danger">{updateError}</div>}
-              
-              <button 
-                className="btn btn-primary w-100" 
-                onClick={handleUpdateStatus}
-                disabled={updateLoading}
-              >
-                {updateLoading ? 'Đang cập nhật...' : 'Cập nhật'}
-              </button>
-
+              <div className="d-flex justify-content-between">
+                <span>Shipping Fee:</span>
+                <span>{formatCurrency(order.shippingFee)}</span>
+              </div>
+              <div className="d-flex justify-content-between text-danger">
+                <span>Discount:</span>
+                <span>-{formatCurrency(order.discount)}</span>
+              </div>
+              <hr />
+              <div className="d-flex justify-content-between fw-bold fs-5">
+                <span>Total:</span>
+                <span>{formatCurrency(order.totalAmount)}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

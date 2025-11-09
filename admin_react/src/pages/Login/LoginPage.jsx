@@ -1,65 +1,55 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginAdmin } from '../../services/apiService';
-import Cookies from 'js-cookie';
-import '../../../public/assets/css/style.css';
-import '../../../public/assets/css/bootstrap.min.css';
+import useAuth from '../../hooks/useAuth';
+import logo from '../../assets/img/logo2.png';
+import { toast } from 'react-hot-toast';
 
 const LoginPage = () => {
-  // Dùng để lưu trữ giá trị của các ô input
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Ngăn form reload lại trang
-    setError(null);
-
+    e.preventDefault();
+    if (!username || !password) {
+      toast.error('Vui lòng nhập tên đăng nhập và mật khẩu');
+      return;
+    }
+    setLoading(true);
     try {
-      // Gọi API service
-      const response = await loginAdmin({ email: email, password: password });
-
-      // Kiểm tra API trả về thành công
-      if (response.data && response.data.token) {
-        
-        // Lưu token vào cookie
-        Cookies.set('admin_token', response.data.token, { expires: 0.01 }); // ~15p 
-
-        // Chuyển hướng đến trang dashboard
-        navigate('/admin/dashboard');
-      } else {
-        setError('Thông tin đăng nhập không hợp lệ.');
-      }
-    } catch (err) {
-      // Bắt lỗi từ API
-      setError('Email hoặc mật khẩu không chính xác.');
-      console.error("Lỗi đăng nhập:", err);
+      // Gọi hàm login từ AuthContext
+      await login(username, password);
+      // AuthContext sẽ tự động xử lý chuyển hướng khi thành công
+    } catch (error) {
+      // Lỗi đã được xử lý bởi interceptor trong apiService
+      console.error('Login failed in component:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Render giao diện 
   return (
     <div className="main-wrapper login-body">
       <div className="login-wrapper">
         <div className="container">
           <div className="loginbox">
             <div className="login-left">
-              <img className="img-fluid" src={"../../assets/img/logo.svg"} alt="Logo" />
+              <img className="img-fluid" src={logo} alt="Logo" />
             </div>
             <div className="login-right">
               <div className="login-right-wrap">
-                <h1>Đăng nhập Admin</h1>
-                <p className="account-subtitle">Truy cập vào trang quản trị</p>
-
+                <h1>Login</h1>
+                <p className="account-subtitle">Access to our dashboard</p>
+                
+                {/* Form đăng nhập */}
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <input
                       className="form-control"
                       type="text"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                     />
                   </div>
@@ -67,27 +57,22 @@ const LoginPage = () => {
                     <input
                       className="form-control"
                       type="password"
-                      placeholder="Mật khẩu"
+                      placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                   </div>
-                  
-                  {/* Hiển thị thông báo lỗi nếu có */}
-                  {error && (
-                    <div className="alert alert-danger" role="alert">
-                      {error}
-                    </div>
-                  )}
-
                   <div className="form-group">
-                    <button className="btn btn-primary btn-block" type="submit">
-                      Đăng nhập
+                    <button
+                      className="btn btn-primary btn-block"
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? 'Đang đăng nhập...' : 'Login'}
                     </button>
                   </div>
                 </form>
-                
               </div>
             </div>
           </div>

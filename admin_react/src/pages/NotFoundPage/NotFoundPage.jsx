@@ -6,7 +6,7 @@ const NotFoundPage = () => {
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
       <h1>404 - Trang không tồn tại</h1>
       <p>Trang bạn đang tìm kiếm không tồn tại.</p>
-      <Link to="/admin/dashboard">Quay về Trang chủ</Link>
+      <Link to="/">Quay về Trang chủ</Link>
     </div>
   );
 };

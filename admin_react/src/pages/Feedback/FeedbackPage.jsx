@@ -1,199 +1,199 @@
-import React, { useState, useEffect } from 'react';
-import { getApi, postApi, deleteApi } from '../../services/apiService';
+import React, { useState, useEffect, useCallback } from 'react';
+import apiService from '../../services/apiService';
+import { toast } from 'react-hot-toast';
+import Pagination from '../../components/Pagination/Pagination';
+import Modal from '../../components/Modal/Modal';
+import defaultAvatar from '../../assets/img/avatar.jpg';
+
+// Component hiển thị sao
+const StarRating = ({ rating }) => {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    stars.push(
+      <i 
+        key={i} 
+        className={`fas fa-star ${i <= rating ? 'text-warning' : 'text-muted'}`}
+      ></i>
+    );
+  }
+  return <>{stars}</>;
+};
 
 const FeedbackPage = () => {
-  // --- State cho Danh sách Phản hồi ---
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // --- State cho Modal Trả lời ---
-  const [selectedFeedback, setSelectedFeedback] = useState(null); // Feedback đang được chọn
-  const [replyText, setReplyText] = useState(''); // Nội dung trả lời
-  const [modalLoading, setModalLoading] = useState(false);
-  const [modalError, setModalError] = useState(null);
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
 
-  // 1. Hàm tải danh sách phản hồi
-  const fetchFeedbacks = async () => {
-    setLoading(true);
-    setError(null);
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+
+  // Hàm gọi API
+  const fetchFeedbacks = useCallback(async (page) => {
     try {
-      // Thay thế URL API nếu cần
-      const response = await getApi('/feedback/getAll');
-      if (response.data && Array.isArray(response.data.data)) {
-        setFeedbacks(response.data.data);
-      } else {
-        setFeedbacks([]);
-      }
-    } catch (err) {
-      setError('Không thể tải danh sách phản hồi.');
-      console.error(err);
+      setLoading(true);
+      const params = {
+        page: page,
+        limit: limit,
+      };
+      const response = await apiService.get('/feedbacks', { params });
+      
+      setFeedbacks(response.data.feedbacks || []);
+      setTotalPages(response.data.totalPages || 1);
+      setCurrentPage(response.data.currentPage || 1);
+      
+    } catch (error) {
+      console.error('Failed to fetch feedbacks:', error);
+      toast.error('Không thể tải đánh giá.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
-  // useEffect để tải danh sách khi vào trang
+  // Lấy dữ liệu
   useEffect(() => {
-    fetchFeedbacks();
-  }, []); // [] rỗng nghĩa là chỉ chạy 1 lần
+    fetchFeedbacks(currentPage);
+  }, [fetchFeedbacks, currentPage]);
 
-  // Hàm xóa phản hồi
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
-      try {
-        // Thay thế URL API nếu cần
-        await deleteApi(`/feedback/delete/${id}`);
-        alert('Xóa thành công!');
-        fetchFeedbacks(); // Tải lại danh sách
-      } catch (err) {
-        alert('Xóa thất bại!');
-        console.error(err);
-      }
-    }
+  // Xử lý Pagination
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
-  // Các hàm xử lý Modal
-  const handleOpenModal = (feedback) => {
+  // --- Xử lý Modal ---
+  const openDetailModal = (feedback) => {
     setSelectedFeedback(feedback);
-    setReplyText(''); // Xóa text trả lời cũ
-    setModalError(null);
+    setShowModal(true);
   };
 
-  const handleCloseModal = () => {
+  const closeModal = () => {
+    setShowModal(false);
+  };
+  
+  const onModalClose = () => {
     setSelectedFeedback(null);
   };
 
-  const handleSubmitReply = async (e) => {
-    e.preventDefault();
-    setModalLoading(true);
-    setModalError(null);
+  // --- Xử lý Actions ---
+
+  // Xử lý Xóa (Delete)
+  const handleDelete = (feedback) => {
+    toast((t) => (
+      <span>
+        Bạn có chắc muốn xóa đánh giá này?
+        <button
+          className="btn btn-danger btn-sm ms-2"
+          onClick={() => {
+            confirmDelete(feedback._id);
+            toast.dismiss(t.id);
+          }}
+        >
+          Xóa
+        </button>
+        <button
+          className="btn btn-secondary btn-sm ms-1"
+          onClick={() => toast.dismiss(t.id)}
+        >
+          Hủy
+        </button>
+      </span>
+    ));
+  };
+
+  const confirmDelete = async (id) => {
+    const toastId = toast.loading('Đang xóa...');
     try {
-      // Thay thế URL API nếu cần
-      const replyData = {
-        feedback_id: selectedFeedback.id,
-        content: replyText,
-        // (Thêm admin_id nếu API yêu cầu)
-      };
-      await postApi('/feedback/reply', replyData); // Giả sử URL API là vầy
-
-      alert('Trả lời thành công!');
-      handleCloseModal();
-      fetchFeedbacks(); // Tải lại list (có thể để cập nhật trạng thái "Đã trả lời")
-
-    } catch (err) {
-      setModalError('Gửi trả lời thất bại: ' + (err.response?.data?.message || err.message));
-      console.error(err);
-    } finally {
-      setModalLoading(false);
+      await apiService.delete(`/feedbacks/${id}`);
+      toast.success('Xóa đánh giá thành công!', { id: toastId });
+      fetchFeedbacks(currentPage); // Tải lại
+    } catch (error) {
+      console.error('Failed to delete feedback:', error);
+      toast.error('Xóa thất bại.', { id: toastId });
     }
   };
-
-
-  // --- Helper Functions (Hàm hỗ trợ) ---
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('vi-VN');
-  };
-
-  // Hàm render sao đánh giá
-  const renderRating = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <i
-          key={i}
-          className="fas fa-star"
-          style={{ color: i <= rating ? '#ffc107' : '#e0e0e0' }}
-        ></i>
-      );
-    }
-    return stars;
-  };
-  
 
   return (
-    <div>
+    <>
       <div className="page-header">
-        <div className="row">
+        <div className="row align-items-center">
           <div className="col">
-            <h3 className="page-title">Quản lý Phản hồi</h3>
+            <h3 className="page-title">Feedbacks</h3>
           </div>
         </div>
       </div>
 
-      {/* ===== DANH SÁCH PHẢN HỒI ===== */}
+      {/* Bảng Feedback */}
       <div className="row">
-        <div className="col-md-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="card-title">Tất cả phản hồi</h5>
-            </div>
+        <div className="col-sm-12">
+          <div className="card card-table">
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-hover">
+                <table className="table table-hover table-center mb-0">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Người dùng</th>
-                      <th>Sản phẩm</th>
-                      <th>Đánh giá</th>
-                      <th>Bình luận</th>
-                      <th>Ngày</th>
-                      <th>Trạng thái</th>
-                      <th className="text-right">Hành động</th>
+                      <th>User</th>
+                      <th>Product</th>
+                      <th>Rating</th>
+                      <th>Comment</th>
+                      <th>Date</th>
+                      <th className="text-end">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Hiển thị loading */}
-                    {loading && (
+                    {loading ? (
                       <tr>
-                        <td colSpan="8" className="text-center">Đang tải...</td>
-                      </tr>
-                    )}
-                    
-                    {/* Hiển thị lỗi */}
-                    {error && (
-                      <tr>
-                        <td colSpan="8" className="text-center text-danger">{error}</td>
-                      </tr>
-                    )}
-
-                    {/* Hiển thị dữ liệu */}
-                    {!loading && !error && feedbacks.map((fb) => (
-                      <tr key={fb.id}>
-                        <td>{fb.id}</td>
-                        <td>{fb.user?.name || 'N/A'}</td>
-                        <td>{fb.product?.name || 'N/A'}</td>
-                        <td>{renderRating(fb.rating)}</td>
-                        <td style={{ maxWidth: '300px' }}>{fb.comment}</td>
-                        <td>{formatDate(fb.created_at)}</td>
-                        <td>
-                          {/* (Logic hiển thị trạng thái) */}
-                          {fb.is_replied ? (
-                            <span className="badge badge-success">Đã trả lời</span>
-                          ) : (
-                            <span className="badge badge-warning">Chưa trả lời</span>
-                          )}
-                        </td>
-                        <td className="text-right">
-                          <button
-                            onClick={() => handleOpenModal(fb)}
-                            className="btn btn-sm btn-info me-2"
-                            data-bs-toggle="modal" // Thêm thuộc tính Bootstrap
-                            data-bs-target="#feedbackModal" // Thêm thuộc tính Bootstrap
-                          >
-                            Trả lời
-                          </button>
-                          <button
-                            onClick={() => handleDelete(fb.id)}
-                            className="btn btn-sm btn-danger"
-                          >
-                            Xóa
-                          </button>
+                        <td colSpan="6" className="text-center">
+                          <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : feedbacks.length > 0 ? (
+                      feedbacks.map((fb) => (
+                        <tr key={fb._id}>
+                          <td>
+                            <h2 className="table-avatar">
+                              <a href="#" className="avatar avatar-sm me-2">
+                                <img
+                                  className="avatar-img rounded-circle"
+                                  src={fb.user?.avatar || defaultAvatar}
+                                  alt="User"
+                                />
+                              </a>
+                              {fb.user?.fullname || 'N/A'}
+                            </h2>
+                          </td>
+                          <td>{fb.product?.name || 'Sản phẩm đã bị xóa'}</td>
+                          <td><StarRating rating={fb.rating} /></td>
+                          <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {fb.comment}
+                          </td>
+                          <td>{new Date(fb.createdAt).toLocaleDateString('vi-VN')}</td>
+                          <td className="text-end">
+                            <button
+                              className="btn btn-sm btn-info me-2"
+                              onClick={() => openDetailModal(fb)}
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => handleDelete(fb)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center">No feedbacks found.</td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -201,91 +201,57 @@ const FeedbackPage = () => {
           </div>
         </div>
       </div>
-
-      {/* ===== MODAL TRẢ LỜI ===== */}
-      <div 
-        className={`modal fade ${selectedFeedback ? 'show' : ''}`} 
-        id="feedbackModal" 
-        tabIndex="-1" 
-        style={{ display: selectedFeedback ? 'block' : 'none', backgroundColor: 'rgba(0,0,0,0.5)' }}
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            
-            {/* Kiểm tra nếu có feedback được chọn mới render nội dung */}
-            {selectedFeedback && (
-              <form onSubmit={handleSubmitReply}>
-                <div className="modal-header">
-                  <h5 className="modal-title">
-                    Trả lời phản hồi của: {selectedFeedback.user?.name || 'N/A'}
-                  </h5>
-                  <button 
-                    type="button" 
-                    className="btn-close" 
-                    onClick={handleCloseModal}
-                  ></button>
-                </div>
-                
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <strong>Sản phẩm:</strong> {selectedFeedback.product?.name || 'N/A'}
-                  </div>
-                  <div className="mb-3">
-                    <strong>Đánh giá:</strong> {renderRating(selectedFeedback.rating)}
-                  </div>
-                  <div className="mb-3">
-                    <strong>Bình luận của khách:</strong>
-                    <p className="text-muted border p-2 rounded">{selectedFeedback.comment}</p>
-                  </div>
-                  
-                  <hr />
-                  
-                  {/*form trả lời*/}
-                  <div className="form-group">
-                    <label htmlFor="replyText" className="form-label">Nội dung trả lời của bạn:</label>
-                    <textarea 
-                      id="replyText"
-                      className="form-control" 
-                      rows="4"
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Nhập nội dung trả lời..."
-                      required
-                    ></textarea>
-                  </div>
-                  
-                  {/* Hiển thị lỗi nếu có */}
-                  {modalError && <div className="alert alert-danger">{modalError}</div>}
-
-                </div>
-                
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={handleCloseModal}
-                  >
-                    Đóng
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary" 
-                    disabled={modalLoading}
-                  >
-                    {modalLoading ? 'Đang gửi...' : 'Gửi trả lời'}
-                  </button>
-                </div>
-              </form>
-            )}
-            
-          </div>
-        </div>
-      </div>
       
-      {/* Lớp mờ (Backdrop) cho modal */}
-      {selectedFeedback && <div className="modal-backdrop fade show"></div>}
+      {/* Phân trang */}
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
 
-    </div>
+      {/* Modal Chi tiết */}
+      <Modal
+        id="feedbackModal"
+        title="Feedback Detail"
+        show={showModal}
+        onClose={closeModal}
+        onModalClose={onModalClose}
+        footer={
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={closeModal}
+          >
+            Close
+          </button>
+        }
+      >
+        {selectedFeedback && (
+          <div>
+            <p><strong>User:</strong> {selectedFeedback.user?.fullname}</p>
+            <p><strong>Product:</strong> {selectedFeedback.product?.name}</p>
+            <p><strong>Rating:</strong> <StarRating rating={selectedFeedback.rating} /></p>
+            <p><strong>Date:</strong> {new Date(selectedFeedback.createdAt).toLocaleString('vi-VN')}</p>
+            <hr />
+            <p><strong>Comment:</strong></p>
+            <p>{selectedFeedback.comment}</p>
+            
+            {selectedFeedback.images && selectedFeedback.images.length > 0 && (
+              <>
+                <p><strong>Images:</strong></p>
+                <div className="row">
+                  {selectedFeedback.images.map((img, index) => (
+                    <div className="col-4" key={index}>
+                      <img src={img} alt="feedback" className="img-fluid img-thumbnail" />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </Modal>
+    </>
   );
 };
 

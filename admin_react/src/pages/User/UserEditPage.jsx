@@ -1,179 +1,232 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getApi, putApi } from '../../services/apiService';
+import apiService from '../../services/apiService';
+import useAddressData from '../../hooks/useAddressData';
+import { toast } from 'react-hot-toast';
 
 const UserEditPage = () => {
-  // Lấy ID từ URL
   const { id } = useParams();
   const navigate = useNavigate();
-
-  // State
   const [formData, setFormData] = useState({
-    name: '',
+    fullname: '',
     email: '',
-    phone_number: '',
-    address: '',
-    role_id: '0',
+    phone: '',
+    role: 'user',
+    address: {
+      province: '',
+      district: '',
+      ward: '',
+      street: '',
+    },
   });
   const [loading, setLoading] = useState(true);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [error, setError] = useState(null);
+  
+  // Dùng hook địa chỉ
+  const { provinces, districts, wards, handleProvinceChange, handleDistrictChange, setInitialDistricts, setInitialWards } = useAddressData();
+  
+  // State để lưu ID địa chỉ (vì form lưu tên)
+  const [addressIds, setAddressIds] = useState({ provinceId: '', districtId: '' });
 
-  // useEffect để tải dữ liệu user
+  // Tải dữ liệu user
   useEffect(() => {
     const fetchUser = async () => {
-      setLoading(true);
       try {
-        // Thay thế URL API nếu cần
-        const response = await getApi(`/user/detail/${id}`);
-        if (response.data) {
-          // Gán dữ liệu vào form
-          setFormData({
-            name: response.data.name,
-            email: response.data.email,
-            phone_number: response.data.phone_number || '',
-            address: response.data.address || '',
-            role_id: response.data.role_id.toString(), // Chuyển sang string
-          });
-        } else {
-          setError('Không tìm thấy người dùng.');
-        }
-      } catch (err) {
-        setError('Tải dữ liệu thất bại.');
-        console.error(err);
+        setLoading(true);
+        const response = await apiService.get(`/users/${id}`);
+        const user = response.data;
+        
+        // Populate form
+        setFormData({
+          fullname: user.fullname,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          address: user.address ? { // Xử lý nếu user không có địa chỉ
+            province: user.address.province || '',
+            district: user.address.district || '',
+            ward: user.address.ward || '',
+            street: user.address.street || '',
+          } : { province: '', district: '', ward: '', street: '' }
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+        toast.error('Không thể tải thông tin user.');
+        navigate('/users');
       } finally {
         setLoading(false);
       }
     };
     fetchUser();
-  }, [id]); // Chạy lại nếu id thay đổi
+  }, [id, navigate]);
+  
+  // Xử lý khi provinces (dữ liệu địa chỉ) đã tải xong
+  useEffect(() => {
+    if (provinces.length > 0 && formData.address.province) {
+      const province = provinces.find(p => p.Name === formData.address.province);
+      if (province) {
+        setAddressIds(prev => ({ ...prev, provinceId: province.Id }));
+        setInitialDistricts(province.Id); // Tải danh sách Huyện
+        
+        const district = province.Districts.find(d => d.Name === formData.address.district);
+        if (district) {
+          setAddressIds(prev => ({ ...prev, districtId: district.Id }));
+          setInitialWards(province.Id, district.Id); // Tải danh sách Xã
+        }
+      }
+    }
+  }, [provinces, formData.address, setInitialDistricts, setInitialWards]);
 
-  // Hàm cập nhật state khi gõ
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Hàm submit form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaveLoading(true);
-    setError(null);
-    try {
-      // Thay thế URL API nếu cần
-      await putApi(`/user/update/${id}`, formData);
-      alert('Cập nhật người dùng thành công!');
-      navigate('/admin/user'); // Quay về trang danh sách
-    } catch (err) {
-      setError('Cập nhật thất bại: ' + (err.response?.data?.message || err.message));
-      console.error(err);
-    } finally {
-      setSaveLoading(false);
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    const selectedText = e.target.options[e.target.selectedIndex].text;
+    
+    setFormData(prev => ({
+      ...prev,
+      address: {
+        ...prev.address,
+        [name]: selectedText
+      }
+    }));
+    
+    if (name === 'province') {
+      setAddressIds({ provinceId: value, districtId: '' });
+      handleProvinceChange(value);
+      // Reset district/ward trong form data
+      setFormData(prev => ({ ...prev, address: { ...prev.address, district: '', ward: '' }}));
+    } else if (name === 'district') {
+      setAddressIds(prev => ({ ...prev, districtId: value }));
+      handleDistrictChange(value);
+      // Reset ward trong form data
+      setFormData(prev => ({ ...prev, address: { ...prev.address, ward: '' }}));
     }
   };
-  
-  if (loading) return <div>Đang tải dữ liệu...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // API Sửa User không cần password
+    const { password, ...payload } = formData; 
+    
+    try {
+      await apiService.put(`/users/${id}`, payload);
+      toast.success('Cập nhật người dùng thành công!');
+      navigate('/users');
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !provinces.length) {
+    return <div className="spinner-border text-primary" role="status"></div>;
+  }
 
   return (
-    <div>
+    <>
       <div className="page-header">
         <div className="row">
-          <div className="col">
-            <h3 className="page-title">Cập nhật Người dùng</h3>
-          </div>
-          <div className="col-auto text-right">
-            <Link to="/admin/user" className="btn btn-secondary">
-              <i className="fas fa-arrow-left"></i> Quay lại
-            </Link>
+          <div className="col-sm-12">
+            <h3 className="page-title">Edit User</h3>
+            <ul className="breadcrumb">
+              <li className="breadcrumb-item"><Link to="/users">Users</Link></li>
+              <li className="breadcrumb-item active">Edit User</li>
+            </ul>
           </div>
         </div>
       </div>
 
       <div className="row">
-        <div className="col-md-12">
+        <div className="col-sm-12">
           <div className="card">
             <div className="card-body">
               <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label>Họ Tên</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                      />
+                      <label>Full Name</label>
+                      <input type="text" name="fullname" className="form-control" value={formData.fullname} onChange={handleChange} required />
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
                       <label>Email</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label>Số điện thoại</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="phone_number"
-                        value={formData.phone_number}
-                        onChange={handleChange}
-                      />
+                      <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label>Địa chỉ</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
+                      <label>Phone</label>
+                      <input type="text" name="phone" className="form-control" value={formData.phone} onChange={handleChange} required />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label>Role</label>
+                      <select name="role" className="form-select" value={formData.role} onChange={handleChange}>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col-md-12">
+                    <div className="form-group">
+                      <label>Street</label>
+                      <input 
+                        type="text" 
+                        name="street" 
+                        className="form-control" 
+                        value={formData.address.street} 
+                        onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, street: e.target.value } }))} 
                       />
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="form-group">
+                      <label>Province</label>
+                      <select name="province" className="form-select" value={addressIds.provinceId} onChange={handleAddressChange}>
+                        <option value="">Select Province</option>
+                        {provinces.map(p => <option key={p.Id} value={p.Id}>{p.Name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="form-group">
+                      <label>District</label>
+                      <select name="district" className="form-select" value={addressIds.districtId} onChange={handleAddressChange}>
+                        <option value="">Select District</option>
+                        {districts.map(d => <option key={d.Id} value={d.Id}>{d.Name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="form-group">
+                      <label>Ward</label>
+                      {/* Cần tìm Id của Phường/Xã từ tên đã lưu */}
+                      <select 
+                        name="ward" 
+                        className="form-select" 
+                        value={wards.find(w => w.Name === formData.address.ward)?.Id || ''} 
+                        onChange={handleAddressChange}
+                      >
+                        <option value="">Select Ward</option>
+                        {wards.map(w => <option key={w.Id} value={w.Id}>{w.Name}</option>)}
+                      </select>
                     </div>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Vai trò</label>
-                  <select
-                    className="form-control"
-                    name="role_id"
-                    value={formData.role_id}
-                    onChange={handleChange}
-                  >
-                    <option value="0">Khách hàng</option>
-                    <option value="1">Admin</option>
-                  </select>
-                </div>
-
-                {/* sửa mật khẩu ở đây hoặc sẽ là một form riêng.*/}
-
-                {error && <div className="alert alert-danger">{error}</div>}
-
-                <div className="text-right">
-                  <button type="submit" className="btn btn-primary" disabled={saveLoading}>
-                    {saveLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                <div className="text-end">
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </form>
@@ -181,7 +234,7 @@ const UserEditPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

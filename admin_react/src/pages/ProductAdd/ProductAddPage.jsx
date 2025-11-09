@@ -1,192 +1,278 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { postApi, getApi } from '../../services/apiService';
+import { Link, useNavigate } from 'react-router-dom';
+import apiService from '../../services/apiService';
+import { toast } from 'react-hot-toast';
 
+// Component con để quản lý Variants
+const VariantManager = ({ variants, setVariants }) => {
+  const addVariant = () => {
+    setVariants([...variants, { color: '', size: '', quantity: 0, price: 0 }]);
+  };
+
+  const removeVariant = (index) => {
+    setVariants(variants.filter((_, i) => i !== index));
+  };
+
+  const handleChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedVariants = [...variants];
+    updatedVariants[index] = { ...updatedVariants[index], [name]: value };
+    setVariants(updatedVariants);
+  };
+
+  return (
+    <div className="card">
+      <div className="card-header">
+        <h5 className="card-title">Product Variants (Color, Size, Quantity, Price)</h5>
+      </div>
+      <div className="card-body">
+        {variants.map((variant, index) => (
+          <div className="row align-items-center mb-2" key={index}>
+            <div className="col-md-3">
+              <input type="text" name="color" className="form-control" placeholder="Color (e.g., Red)" value={variant.color} onChange={(e) => handleChange(index, e)} required />
+            </div>
+            <div className="col-md-3">
+              <input type="text" name="size" className="form-control" placeholder="Size (e.g., L)" value={variant.size} onChange={(e) => handleChange(index, e)} required />
+            </div>
+            <div className="col-md-3">
+              <input type="number" name="quantity" className="form-control" placeholder="Quantity" value={variant.quantity} onChange={(e) => handleChange(index, e)} required min="0" />
+            </div>
+            <div className="col-md-2">
+              <input type="number" name="price" className="form-control" placeholder="Price (nếu khác)" value={variant.price} onChange={(e) => handleChange(index, e)} min="0" />
+            </div>
+            <div className="col-md-1">
+              <button type="button" className="btn btn-danger btn-sm" onClick={() => removeVariant(index)}>
+                <i className="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        ))}
+        <button type="button" className="btn btn-success btn-sm" onClick={addVariant}>
+          <i className="fas fa-plus"></i> Add Variant
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Component chính
 const ProductAddPage = () => {
-  // Dùng 1 state object để lưu tất cả dữ liệu form
-  const [product, setProduct] = useState({
-    name: '',
-    price: 0,
-    quantity: 0,
-    description: '',
-    categoryId: '',
-  });
-  
-  const [categories, setCategories] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  // (Thêm state cho upload ảnh)
-  const [selectedImage, setSelectedImage] = useState(null); 
-  
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+    isFlashSale: false,
+    flashSalePrice: 0,
+  });
+  const [variants, setVariants] = useState([]);
+  const [images, setImages] = useState([]); // File objects
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Tải danh mục cho thẻ <select>
+  // Tải Categories cho dropdown
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await getApi('/category/getAll'); // Thay URL API
-        if (response.data && Array.isArray(response.data.data)) {
-          setCategories(response.data.data);
+        const response = await apiService.get('/categories?status=true&limit=100');
+        setCategories(response.data.categories || []);
+        if (response.data.categories.length > 0) {
+          // Set category mặc định
+          setFormData(prev => ({ ...prev, category: response.data.categories[0]._id }));
         }
-      } catch (err) {
-        console.error("Không thể tải danh mục", err);
+      } catch (error) {
+        toast.error('Không thể tải danh mục.');
       }
     };
     fetchCategories();
   }, []);
 
-  // Hàm cập nhật state khi gõ vào input
+  // Xử lý thay đổi form
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct(prevProduct => ({
-      ...prevProduct,
-      [name]: value
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
-  
-  // (Hàm xử lý khi chọn ảnh)
+
+  // Xử lý upload ảnh
   const handleImageChange = (e) => {
-    setSelectedImage(e.target.files[0]);
+    const files = Array.from(e.target.files);
+    setImages(prev => [...prev, ...files]);
+    
+    const previews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...previews]);
+  };
+  
+  // Xóa ảnh (preview)
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+    setImagePreviews(previews => {
+      // Thu hồi URL
+      URL.revokeObjectURL(previews[index]);
+      return previews.filter((_, i) => i !== index);
+    });
   };
 
-  // Hàm submit form
+  // Thu hồi object URLs khi component unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
+
+  // Xử lý Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    
-    // GHI CHÚ: Xử lý upload ảnh phức tạp hơn cần dùng FormData để có upload ảnh Tạm thời, chúng ta chỉ gửi dữ liệu text
-    
-    try {
-      // Thay thế URL API
-      await postApi('/product/add', product);
-      
-      alert('Thêm sản phẩm thành công!');
-      navigate('/admin/product'); // Quay về trang danh sách
+    if (images.length === 0) {
+      toast.error('Vui lòng tải lên ít nhất một hình ảnh.');
+      return;
+    }
+    if (variants.length === 0) {
+      toast.error('Vui lòng thêm ít nhất một biến thể.');
+      return;
+    }
 
-    } catch (err) {
-      setError('Thêm sản phẩm thất bại. Vui lòng thử lại.');
-      console.error(err);
+    setLoading(true);
+
+    // Sử dụng FormData để upload file
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('description', formData.description);
+    data.append('price', formData.price);
+    data.append('category', formData.category);
+    data.append('isFlashSale', formData.isFlashSale);
+    data.append('flashSalePrice', formData.flashSalePrice);
+    
+    // Append variants (JSON string)
+    data.append('variants', JSON.stringify(variants));
+
+    // Append images (File objects)
+    images.forEach(imageFile => {
+      data.append('images', imageFile);
+    });
+
+    try {
+      await apiService.post('/products', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Rất quan trọng
+        },
+      });
+      toast.success('Thêm sản phẩm thành công!');
+      navigate('/products');
+    } catch (error) {
+      console.error('Failed to add product:', error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <>
       <div className="page-header">
         <div className="row">
-          <div className="col">
-            <h3 className="page-title">Thêm Sản phẩm mới</h3>
+          <div className="col-sm-12">
+            <h3 className="page-title">Add Product</h3>
+            <ul className="breadcrumb">
+              <li className="breadcrumb-item"><Link to="/products">Products</Link></li>
+              <li className="breadcrumb-item active">Add Product</li>
+            </ul>
           </div>
         </div>
       </div>
 
       <div className="row">
-        <div className="col-md-12">
-          <div className="card">
-            <div className="card-body">
-              {/* Chuyển đổi form */}
-              <form onSubmit={handleSubmit}>
+        <div className="col-sm-12">
+          <form onSubmit={handleSubmit}>
+            {/* Basic Info */}
+            <div className="card">
+              <div className="card-body">
                 <div className="row">
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label>Tên sản phẩm</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="name" // name phải khớp với key trong state
-                        value={product.name}
-                        onChange={handleChange}
-                        required
-                      />
+                      <label>Product Name</label>
+                      <input type="text" name="name" className="form-control" value={formData.name} onChange={handleChange} required />
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label>Danh mục</label>
-                      <select
-                        className="form-control"
-                        name="categoryId"
-                        value={product.categoryId}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">-- Chọn danh mục --</option>
+                      <label>Category</label>
+                      <select name="category" className="form-select" value={formData.category} onChange={handleChange} required>
                         {categories.map(cat => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
+                          <option key={cat._id} value={cat._id}>{cat.name}</option>
                         ))}
                       </select>
                     </div>
                   </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-12">
                     <div className="form-group">
-                      <label>Giá</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        name="price"
-                        value={product.price}
-                        onChange={handleChange}
-                        required
-                      />
+                      <label>Description</label>
+                      <textarea name="description" className="form-control" rows="4" value={formData.description} onChange={handleChange}></textarea>
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label>Số lượng</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        name="quantity"
-                        value={product.quantity}
-                        onChange={handleChange}
-                        required
-                      />
+                      <label>Default Price (khi chưa chọn biến thể)</label>
+                      <input type="number" name="price" className="form-control" value={formData.price} onChange={handleChange} required min="0" />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label>Flash Sale Price (nếu có)</label>
+                      <input type="number" name="flashSalePrice" className="form-control" value={formData.flashSalePrice} onChange={handleChange} min="0" />
+                    </div>
+                    <div className="form-check">
+                      <input type="checkbox" name="isFlashSale" className="form-check-input" checked={formData.isFlashSale} onChange={handleChange} />
+                      <label className="form-check-label">Is Flash Sale?</label>
                     </div>
                   </div>
                 </div>
-
-                <div className="form-group">
-                  <label>Mô tả</label>
-                  <textarea
-                    className="form-control"
-                    rows="5"
-                    name="description"
-                    value={product.description}
-                    onChange={handleChange}
-                  ></textarea>
-                </div>
-                
-                {/* (Thêm input upload ảnh ở đây) */}
-                {/* <div className="form-group">
-                  <label>Hình ảnh</label>
-                  <input 
-                    type="file" 
-                    className="form-control" 
-                    onChange={handleImageChange} 
-                  />
-                </div>
-                */}
-
-                {error && <div className="alert alert-danger">{error}</div>}
-
-                <div className="text-right">
-                  <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? 'Đang lưu...' : 'Lưu sản phẩm'}
-                  </button>
-                </div>
-              </form>
+              </div>
             </div>
-          </div>
+            
+            {/* Variants */}
+            <VariantManager variants={variants} setVariants={setVariants} />
+
+            {/* Image Upload */}
+            <div className="card">
+              <div className="card-header"><h5 className="card-title">Product Images</h5></div>
+              <div className="card-body">
+                <input type="file" className="form-control" onChange={handleImageChange} multiple accept="image/*" />
+                <div className="mt-3 d-flex flex-wrap">
+                  {imagePreviews.map((previewUrl, index) => (
+                    <div key={index} className="position-relative me-2 mb-2" style={{ width: '100px', height: '100px' }}>
+                      <img src={previewUrl} alt="preview" className="img-thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button 
+                        type="button" 
+                        className="btn btn-danger btn-sm position-absolute" 
+                        style={{ top: 0, right: 0 }}
+                        onClick={() => removeImage(index)}
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <div className="text-end mb-4">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                ) : (
+                  'Add Product'
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

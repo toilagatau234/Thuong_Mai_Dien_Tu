@@ -1,135 +1,233 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import apiService from '../../services/apiService';
+import { toast } from 'react-hot-toast';
+import Switch from 'react-switch';
+import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
-import { getApi, deleteApi } from '../../services/apiService';
+import defaultAvatar from '../../assets/img/avatar.jpg';
 
 const UserPage = () => {
-  // State
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Hàm tải danh sách
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError(null);
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+
+  // Search
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Hàm gọi API
+  const fetchUsers = useCallback(async (page, search = '') => {
     try {
-      // Thay thế URL API nếu cần
-      const response = await getApi('/user/getAll');
-      if (response.data && Array.isArray(response.data.data)) {
-        setUsers(response.data.data);
-      } else {
-        setUsers([]);
-      }
-    } catch (err) {
-      setError('Không thể tải danh sách người dùng.');
-      console.error(err);
+      setLoading(true);
+      const params = {
+        page: page,
+        limit: limit,
+        search: search,
+      };
+      const response = await apiService.get('/users', { params });
+      
+      setUsers(response.data.users || []);
+      setTotalPages(response.data.totalPages || 1);
+      setCurrentPage(response.data.currentPage || 1);
+      
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      toast.error('Không thể tải danh sách người dùng.');
     } finally {
       setLoading(false);
     }
+  }, [limit]);
+
+  // Lấy dữ liệu
+  useEffect(() => {
+    fetchUsers(currentPage, searchTerm);
+  }, [fetchUsers, currentPage, searchTerm]);
+
+  // Xử lý Pagination và Search
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
-  // useEffect để tải dữ liệu khi vào trang
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
-  // Hàm xóa (thay thế $scope.deleteUser)
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      try {
-        // GHI CHÚ: Thay thế URL API nếu cần
-        await deleteApi(`/user/delete/${id}`);
-        alert('Xóa thành công!');
-        fetchUsers(); // Tải lại danh sách
-      } catch (err) {
-        alert('Xóa thất bại!');
-        console.error(err);
-      }
+  // --- Xử lý Actions ---
+
+  // Toggle Block/Unblock
+  const handleToggleStatus = async (user) => {
+    const newBlockedStatus = !user.isBlocked;
+    const toastId = toast.loading('Đang cập nhật...');
+    
+    try {
+      // Giả sử API endpoint là 'toggle-block'
+      await apiService.put(`/users/toggle-block/${user._id}`, { isBlocked: newBlockedStatus });
+      toast.success('Cập nhật trạng thái thành công!', { id: toastId });
+      
+      setUsers(users.map(u =>
+        u._id === user._id ? { ...u, isBlocked: newBlockedStatus } : u
+      ));
+    } catch (error) {
+      console.error('Failed to toggle status:', error);
+      toast.error('Cập nhật thất bại.', { id: toastId });
     }
   };
-  
-  // --- Helper Functions ---
-  const getRoleLabel = (roleId) => {
-    // 0 = Khách hàng, 1 = Admin/Nhân viên
-    return roleId === 1 ? 
-      <span className="badge badge-success">Admin</span> : 
-      <span className="badge badge-info">Khách hàng</span>;
+
+  // Xử lý Xóa (Delete)
+  const handleDelete = (user) => {
+    toast((t) => (
+      <span>
+        Bạn có chắc muốn xóa <b>{user.fullname}</b>?
+        <button
+          className="btn btn-danger btn-sm ms-2"
+          onClick={() => {
+            confirmDelete(user._id);
+            toast.dismiss(t.id);
+          }}
+        >
+          Xóa
+        </button>
+        <button
+          className="btn btn-secondary btn-sm ms-1"
+          onClick={() => toast.dismiss(t.id)}
+        >
+          Hủy
+        </button>
+      </span>
+    ));
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('vi-VN');
+  const confirmDelete = async (id) => {
+    const toastId = toast.loading('Đang xóa...');
+    try {
+      await apiService.delete(`/users/${id}`);
+      toast.success('Xóa người dùng thành công!', { id: toastId });
+      fetchUsers(currentPage, searchTerm); // Tải lại
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast.error('Xóa thất bại. (Không thể xóa admin?)', { id: toastId });
+    }
   };
-
-  if (loading) return <div>Đang tải...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div>
+    <>
       <div className="page-header">
-        <div className="row">
+        <div className="row align-items-center">
           <div className="col">
-            <h3 className="page-title">Quản lý Người dùng</h3>
+            <h3 className="page-title">Users</h3>
           </div>
-          <div className="col-auto text-right">
-            {/* Link đến trang thêm mới */}
-            <Link to="/admin/user/add" className="btn btn-primary">
-              <i className="fas fa-plus"></i> Thêm người dùng
+          <div className="col-auto text-end">
+            {/* Link đến trang Add User (sẽ được tạo ở bước sau) */}
+            <Link to="/user/add" className="btn btn-primary">
+              <i className="fas fa-plus"></i> Add User
             </Link>
           </div>
         </div>
       </div>
 
+      {/* Thanh Search */}
+      <div className="row mb-3">
+        <div className="col-md-4">
+          <input 
+            type="text"
+            className="form-control"
+            placeholder="Tìm kiếm user (tên, email, sđt)..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+      </div>
+
+      {/* Bảng User */}
       <div className="row">
-        <div className="col-md-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="card-title">Tất cả người dùng</h5>
-            </div>
+        <div className="col-sm-12">
+          <div className="card card-table">
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-hover">
+                <table className="table table-hover table-center mb-0">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Tên</th>
+                      <th>User</th>
                       <th>Email</th>
-                      <th>SĐT</th>
-                      <th>Địa chỉ</th>
-                      <th>Vai trò</th>
-                      <th>Ngày tạo</th>
-                      <th className="text-right">Hành động</th>
+                      <th>Phone</th>
+                      <th>Role</th>
+                      <th>Blocked</th>
+                      <th className="text-end">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* GHI CHÚ: ng-repeat -> .map() */}
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td>{user.id}</td>
-                        <td>{user.name}</td>
-                        <td>{user.email}</td>
-                        <td>{user.phone_number || 'N/A'}</td>
-                        <td>{user.address || 'N/A'}</td>
-                        <td>{getRoleLabel(user.role_id)}</td>
-                        <td>{formatDate(user.created_at)}</td>
-                        <td className="text-right">
-                          {/* Link đến trang Sửa */}
-                          <Link
-                            to={`/admin/user/edit/${user.id}`}
-                            className="btn btn-sm btn-warning me-2"
-                          >
-                            Sửa
-                          </Link>
-                          {/* Nút Xóa */}
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="btn btn-sm btn-danger"
-                          >
-                            Xóa
-                          </button>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="6" className="text-center">
+                          <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : users.length > 0 ? (
+                      users.map((user) => (
+                        <tr key={user._id}>
+                          <td>
+                            <h2 className="table-avatar">
+                              <a href="#" className="avatar avatar-sm me-2">
+                                <img
+                                  className="avatar-img rounded-circle"
+                                  src={user.avatar || defaultAvatar}
+                                  alt="User Avatar"
+                                />
+                              </a>
+                              {user.fullname}
+                            </h2>
+                          </td>
+                          <td>{user.email}</td>
+                          <td>{user.phone}</td>
+                          <td>
+                            {user.role === 'admin' ? (
+                              <span className="badge badge-pill bg-primary">Admin</span>
+                            ) : (
+                              <span className="badge badge-pill bg-light text-dark">User</span>
+                            )}
+                          </td>
+                          <td>
+                            {/* Switch để Block/Unblock */}
+                            <Switch
+                              onChange={() => handleToggleStatus(user)}
+                              checked={user.isBlocked}
+                              onColor="#E63946" // Màu đỏ cho trạng thái Block
+                              onHandleColor="#ffffff"
+                              handleDiameter={20}
+                              uncheckedIcon={false}
+                              checkedIcon={false}
+                              height={15}
+                              width={35}
+                            />
+                          </td>
+                          <td className="text-end">
+                            {/* Link đến trang Edit User (sẽ được tạo ở bước sau) */}
+                            <Link to={`/user/edit/${user._id}`} className="btn btn-sm btn-warning me-2">
+                              <i className="fas fa-edit"></i>
+                            </Link>
+                            {/* Admin (role) không nên bị xóa */}
+                            {user.role !== 'admin' && (
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => handleDelete(user)}
+                              >
+                                <i className="fas fa-trash"></i>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center">No users found.</td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -137,7 +235,14 @@ const UserPage = () => {
           </div>
         </div>
       </div>
-    </div>
+      
+      {/* Phân trang */}
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+    </>
   );
 };
 

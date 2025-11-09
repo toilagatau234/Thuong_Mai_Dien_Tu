@@ -1,35 +1,34 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import useAuth from '../../hooks/useAuth';
+import { Link } from 'react-router-dom';
+import logo from '../../assets/img/logo2.png';
+import logoSmall from '../../assets/img/logo.svg';
+import defaultAvatar from '../../assets/img/avatar.jpg';
 
+const Header = () => {
+  const { user, logout } = useAuth();
 
-import logo from '../../assets/img/logo.png'; 
-import avatar from '../../assets/img/avatar.jpg';
-
-const HeaderComponent = () => {
-  const navigate = useNavigate();
-
-  // Hàm đăng xuất
-  const handleLogout = () => {
-    Cookies.remove('admin_token');
-    navigate('/login');
+  // Hàm toggle sidebar (giống script.js)
+  const toggleSidebar = (e) => {
+    e.preventDefault();
+    document.body.classList.toggle('mini-sidebar');
   };
 
   return (
     <div className="header">
       {/* Logo */}
       <div className="header-left">
-        <Link to="/admin/dashboard" className="logo">
-          <img src={"../assets/img/logo.png"} alt="Logo" />
+        <Link to="/" className="logo">
+          <img src={logo} alt="Logo" />
         </Link>
-        <Link to="/admin/dashboard" className="logo logo-small">
-          <img src={"../assets/img/logo2.png"} alt="Logo" width="30" height="30" />
+        <Link to="/" className="logo logo-small">
+          <img src={logoSmall} alt="Logo" width="30" height="30" />
         </Link>
       </div>
 
-      {/* Nút thu gọn Sidebar */}
-      <a href="javascript:void(0);" id="toggle_btn">
-        <i className="fas fa-align-left"></i>
+      {/* Nút Toggle Sidebar */}
+      <a id="toggle_btn" href="#" onClick={toggleSidebar}>
+        <i className="fas fa-bars"></i>
       </a>
 
       {/* Menu User */}
@@ -39,30 +38,19 @@ const HeaderComponent = () => {
             <span className="user-img">
               <img
                 className="rounded-circle"
-                src={"/assets/img/avatar.jpg"}
+                src={user?.avatar || defaultAvatar}
                 width="31"
-                alt="Admin"
+                alt={user?.fullname || 'Admin'}
               />
             </span>
           </a>
           <div className="dropdown-menu">
             <div className="user-header">
-              <div className="avatar avatar-sm">
-                <img
-                  src={"/assets/img/avatar.jpg"}
-                  alt="User Image"
-                  className="avatar-img rounded-circle"
-                />
-              </div>
-              <div className="user-text">
-                <h6>Admin</h6>
-                <p className="text-muted mb-0">Quản trị viên</p>
-              </div>
+              <h6>{user?.fullname || 'Admin User'}</h6>
+              <p className="text-muted mb-0">{user?.role || 'admin'}</p>
             </div>
-            <a className="dropdown-item" href="#">Hồ sơ của tôi</a>
-            <button className="dropdown-item" onClick={handleLogout}>
-              Đăng xuất
-            </button>
+            {/* <a className="dropdown-item" href="#">My Profile</a> */}
+            <a className="dropdown-item" href="#" onClick={logout}>Logout</a>
           </div>
         </li>
       </ul>
@@ -70,4 +58,4 @@ const HeaderComponent = () => {
   );
 };
 
-export default HeaderComponent;
+export default Header;
