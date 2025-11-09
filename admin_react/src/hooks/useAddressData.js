@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// Giả sử tệp data-location.json nằm trong /public
-const DATA_URL = '/assets/js/data-location.json';
+import DATA_JSON from '../assets/js/data-location.json';
 
 let cache = null; // Cache dữ liệu để tránh gọi lại
 
@@ -15,16 +14,15 @@ const useAddressData = () => {
 
   // 1. Tải dữ liệu chính
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = () => {
       if (cache) {
         setProvinces(cache);
         return;
       }
       try {
         setLoading(true);
-        const response = await axios.get(DATA_URL);
-        cache = response.data; // Lưu vào cache
-        setProvinces(response.data);
+        cache = DATA_JSON; 
+        setProvinces(DATA_JSON);
       } catch (error) {
         console.error('Failed to load address data', error);
         toast.error('Không thể tải dữ liệu địa chỉ.');
