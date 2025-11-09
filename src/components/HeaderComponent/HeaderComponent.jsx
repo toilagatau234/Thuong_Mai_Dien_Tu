@@ -1,76 +1,68 @@
-import React from 'react'
-import { Col } from 'antd'
+import React, { useState } from 'react';
+import useAuth from '../../hooks/useAuth';
+import { Link } from 'react-router-dom';
+import logo from '../../assets/img/logo.png';
+import logoSmall from '../../assets/img/logo.png';
+import defaultAvatar from '../../assets/img/avatar.jpg';
 import {
-    WrapperHeader,
-    WrapperHeaderAccount,
-    WrapperTextHeader,
-    WrapperTextHeaderSmall,
-    ButtonSearch
-} from './style'
-import { CaretDownOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+  HeaderContainer,
+  HeaderLeft,
+  ToggleButton,
+  UserMenu,
+  UserDropdown
+} from './style';
 
-const HeaderComponent = () => {
-    const navigate = useNavigate()
+const Header = ({ onToggleSidebar, className }) => {
+  const { user, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    const handleSearch = (value) => {
-        console.log('Tìm kiếm:', value)
-        // Xử lý logic tìm kiếm ở đây
+  const handleToggleDropdown = (e) => {
+    e.preventDefault();
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleToggleSidebar = (e) => {
+    e.preventDefault();
+    if (onToggleSidebar) {
+      onToggleSidebar();
     }
+  };
 
-    const handleNavigateLogin = () => {
-        navigate('/sign-in')
-    }
+  return (
+    <HeaderContainer className={className || ''}>
+      <HeaderLeft>
+        <Link to="/" className="logo">
+          <img src={logo} alt="Logo" />
+        </Link>
+        <Link to="/" className="logo logo-small">
+          <img src={logoSmall} alt="Logo" width="30" height="30" />
+        </Link>
+        <ToggleButton onClick={handleToggleSidebar}>
+          <i className="fas fa-bars"></i>
+        </ToggleButton>
+      </HeaderLeft>
 
-    const handleNavigateHome = () => {
-        navigate('/')
-    }
+      <UserMenu>
+        <UserDropdown>
+          <button className="dropdown-toggle" type="button" onClick={handleToggleDropdown} aria-expanded={isDropdownOpen}>
+            <span className="user-img">
+              <img
+                src={user?.avatar || defaultAvatar}
+                alt={user?.fullname || 'Admin'}
+              />
+            </span>
+          </button>
+          <div className={`dropdown-menu${isDropdownOpen ? ' show' : ''}`}>
+            <div className="user-header">
+              <h6>{user?.fullname || 'Admin User'}</h6>
+              <p>{user?.role || 'admin'}</p>
+            </div>
+            <button className="dropdown-item" type="button" onClick={logout}>Logout</button>
+          </div>
+        </UserDropdown>
+      </UserMenu>
+    </HeaderContainer>
+  );
+};
 
-    const handleNavigateOrder = () => {
-        navigate('/order')
-    }
-
-    return (
-        <div>
-            <WrapperHeader>
-                <Col span={6}>
-                    <WrapperTextHeader onClick={handleNavigateHome}>
-                        BEAUTYCOSMETIC
-                    </WrapperTextHeader>
-                </Col>
-                <Col span={12}>
-                    <ButtonSearch
-                        placeholder="Nhập thứ bạn cần tìm"
-                        allowClear
-                        enterButton="Tìm kiếm"
-                        size="large"
-                        onSearch={handleSearch}
-                    />
-                </Col>
-                <Col span={6} style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <WrapperHeaderAccount onClick={handleNavigateLogin}>
-                        <UserOutlined style={{ fontSize: '30px', color: '#333' }} />
-                        <div>
-                            <WrapperTextHeaderSmall>Đăng nhập/Đăng ký</WrapperTextHeaderSmall>
-                            <div>
-                                <WrapperTextHeaderSmall>Tài khoản </WrapperTextHeaderSmall>
-                                <CaretDownOutlined />
-                            </div>
-                        </div>
-                    </WrapperHeaderAccount>
-                    <div
-                        style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
-                        onClick={handleNavigateOrder}
-                    >
-                        <ShoppingCartOutlined style={{ fontSize: '30px', color: '#333' }} />
-                        <WrapperTextHeaderSmall>
-                            Giỏ Hàng
-                        </WrapperTextHeaderSmall>
-                    </div>
-                </Col>
-            </WrapperHeader>
-        </div>
-    )
-}
-
-export default HeaderComponent
+export default Header;

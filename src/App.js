@@ -1,31 +1,18 @@
-import React, { Fragment } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { routes } from './routes'
-import DefaultComponent from './components/DefaultComponent/DefaultComponent'
-import 'antd/dist/reset.css'
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import AppRoutes from './routes';
+import GlobalStyle from './GlobalStyle';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {routes.map((route) => {
-          const Page = route.page
-          const Layout = route.isShowHeader ? DefaultComponent : Fragment
-          return (
-            <Route 
-              key={route.path} 
-              path={route.path} 
-              element={
-                <Layout>
-                  <Page />
-                </Layout>
-              } 
-            />
-          )
-        })}
-      </Routes>
-    </Router>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <GlobalStyle />
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

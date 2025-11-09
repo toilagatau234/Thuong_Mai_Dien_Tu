@@ -1,21 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import 'antd/dist/reset.css'; // ✅ (antd v5 trở lên)
-import { store } from './redux/store'
-import { Provider } from 'react-redux'
-import 'slick-carousel/slick/slick.css'
-import 'slick-carousel/slick/slick-theme.css'
+import { Toaster } from 'react-hot-toast';
 
+// Import CSS chính
+// All global CSS removed — using styled-components GlobalStyle instead
+import './assets/css/bootstrap.min.css';
+import GlobalStyle from './styles/GlobalStyle';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <App />
+    <GlobalStyle />
+    <Toaster
+      position="top-right"
+      reverseOrder={false}
+    />
   </React.StrictMode>
 );
 
