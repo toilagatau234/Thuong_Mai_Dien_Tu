@@ -1,6 +1,7 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar/Sidebar';
-import Header from '../components/Header/Header';
+// Sửa đường dẫn import
+import Sidebar from '../components/SidebarComponent/SidebarComponent';
+import Header from '../components/HeaderComponent/HeaderComponent';
 import { Outlet } from 'react-router-dom';
 
 const AdminLayout = () => {
@@ -10,7 +11,7 @@ const AdminLayout = () => {
       <Sidebar />
       <div className="page-wrapper">
         <div className="content container-fluid">
-          {/* Outlet nơi render nội dung của các route con */}
+          {/* Outlet là nơi render nội dung của các route con */}
           <Outlet />
         </div>
       </div>

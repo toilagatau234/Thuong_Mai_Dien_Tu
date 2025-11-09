@@ -1,17 +1,17 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
+import { toast } from 'react-hot-toast';
 
-// Thay thế URL này bằng URL API backend
-const API_BASE_URL = 'http://localhost:8081/api/';
+// API URL từ kế hoạch
+const API_URL = 'http://127.0.0.1:8081/api/';
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+const apiService = axios.create({
+  baseURL: API_URL,
 });
 
-// "interceptor" - tự động đính kèm token vào mỗi request
-apiClient.interceptors.request.use(
+// Request interceptor để đính kèm JWT token
+apiService.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('admin_token');
+    const token = localStorage.getItem('adminToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -44,139 +44,4 @@ apiService.interceptors.response.use(
   }
 );
 
-// --- Định nghĩa các hàm gọi API ---
-
-// --- Các API gọi chung ---
-
-// Hàm đăng nhập
-export const loginAdmin = (credentials) => {
-  return apiClient.post('/admin/login', credentials);
-};
-
-// Hàm lấy dữ liệu
-export const getApi = (url) => {
-  return apiClient.get(url);
-};
-
-// Hàm đăng dữ liệu
-export const postApi = (url, data) => {
-  return apiClient.post(url, data);
-};
-
-// Hàm cập nhật dữ liệu
-export const putApi = (url, data) => {
-  return apiClient.put(url, data);
-};
-
-// Hàm xóa dữ liệu
-export const deleteApi = (url) => {
-  return apiClient.delete(url);
-};
-
-// --- API cụ thể từng trang ---
-
-// Product
-export const getAllProducts = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  return apiClient.get(`/product/getAll${query ? '?' + query : ''}`);
-};
-
-export const getProductDetail = (id) => {
-  return apiClient.get(`/product/${id}`);
-};
-
-export const addProduct = (productData) => {
-  // productData là FormData chứa { name, price, image, ... }
-  return apiClient.post('/product/add', productData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
-};
-
-export const updateProduct = (id, productData) => {
-  return apiClient.put(`/product/update/${id}`, productData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
-};
-
-export const deleteProduct = (id) => {
-  return apiClient.delete(`/product/delete/${id}`);
-};
-
-// Category
-export const getAllCategories = () => {
-  return apiClient.get('/category/getAll');
-};
-
-export const addCategory = (categoryData) => {
-  return apiClient.post('/category/add', categoryData);
-};
-
-export const deleteCategory = (id) => {
-  return apiClient.delete(`/category/delete/${id}`);
-};
-
-// Order (using 'bill' to match AngularJS)
-export const getAllOrders = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  return apiClient.get(`/bill/getAll${query ? '?' + query : ''}`);
-};
-
-export const getOrderDetail = (id) => {
-  return apiClient.get(`/bill/detail/${id}`);
-};
-
-export const updateOrderStatus = (id, statusData) => {
-  return apiClient.put(`/bill/status/${id}`, statusData);
-};
-
-// User
-export const getAllUsers = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  return apiClient.get(`/user/getAll${query ? '?' + query : ''}`);
-};
-
-export const getUserDetail = (id) => {
-  return apiClient.get(`/user/detail/${id}`);
-};
-
-export const addUser = (userData) => {
-  return apiClient.post('/user/add', userData);
-};
-
-export const updateUser = (id, userData) => {
-  return apiClient.put(`/user/update/${id}`, userData);
-};
-
-export const deleteUser = (id) => {
-  return apiClient.delete(`/user/delete/${id}`);
-};
-
-export const blockUser = (id) => {
-  return apiClient.put(`/user/block/${id}`);
-};
-
-export const unblockUser = (id) => {
-  return apiClient.put(`/user/unblock/${id}`);
-};
-
-// Coupon
-export const getAllCoupons = () => {
-  return apiClient.get('/coupon/getAll');
-};
-
-export const addCoupon = (couponData) => {
-  return apiClient.post('/coupon/add', couponData);
-};
-
-export const deleteCoupon = (id) => {
-  return apiClient.delete(`/coupon/delete/${id}`);
-};
-
-// Feedback
-export const getAllFeedbacks = () => {
-  return apiClient.get('/feedback/getAll');
-};
-
-export const getFeedbackDetail = (id) => {
-  return apiClient.get(`/feedback/detail/${id}`);
-};
+export default apiService;

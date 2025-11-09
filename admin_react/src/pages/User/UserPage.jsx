@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import Switch from 'react-switch';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
+// Sửa đường dẫn import
 import defaultAvatar from '../../assets/img/avatar.jpg';
 
 const UserPage = () => {

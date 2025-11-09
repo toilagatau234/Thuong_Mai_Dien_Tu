@@ -1,6 +1,7 @@
 import React from 'react';
 import useAuth from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
+// Sửa đường dẫn import ảnh
 import logo from '../../assets/img/logo2.png';
 import logoSmall from '../../assets/img/logo.svg';
 import defaultAvatar from '../../assets/img/avatar.jpg';
