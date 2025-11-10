@@ -163,7 +163,6 @@ const StatisticalPage = () => {
             </div>
             <div className="card-body">
               <canvas id="revenueChart" width="400" height="200"></canvas>
-              {/* Note: Chart.js integration would need to be added */}
               <div className="mt-3">
                 <p>Tổng doanh thu: {Object.values(calculateRevenueByMonth(filterOrdersByMonth(orders, selectedMonth))).reduce((a, b) => a + b, 0).toLocaleString('vi-VN')}đ</p>
               </div>

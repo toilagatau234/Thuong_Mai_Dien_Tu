@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        // Kiểm tra xem token có hợp lệ và là admin không
+        // Kiểm tra xem token có hợp lệ và là admin
         if (decodedToken.exp * 1000 > Date.now() && decodedToken.role === 'admin') {
           setUser(JSON.parse(localStorage.getItem('adminUser')));
         } else {
@@ -52,10 +52,9 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
 
       toast.success('Đăng nhập thành công!');
-      navigate('/'); // Chuyển hướng đến Dashboard
+      navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
-      // Lỗi đã được xử lý bởi interceptor, nhưng ta có thể log thêm
     }
   };
 

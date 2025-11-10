@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * Component Modal tái sử dụng, tích hợp với Bootstrap 5 JS
+ * Component Modal tái sử dụng, tích hợp Bootstrap 5 JS
  * @param {object} props
  * @param {string} props.id - ID duy nhất cho modal
  * @param {string} props.title - Tiêu đề của modal
  * @param {React.ReactNode} props.children - Nội dung (body) của modal
- * @param {React.ReactNode} props.footer - Nội dung (footer) của modal (thường là các nút)
- * @param {function} props.onClose - Hàm được gọi khi modal đóng (để reset state)
+ * @param {React.ReactNode} props.footer - Nội dung (footer) của modal
+ * @param {function} props.onClose - Hàm được gọi khi modal đóng
  * @param {boolean} props.show - State (true/false) để điều khiển đóng/mở modal
  */
 const Modal = ({ id, title, children, footer, show, onClose }) => {
@@ -15,13 +15,13 @@ const Modal = ({ id, title, children, footer, show, onClose }) => {
 
   useEffect(() => {
     if (!modalRef.current) {
-      // Lấy phần tử DOM
+
       modalRef.current = document.getElementById(id);
       
       // Thêm listener 'hidden.bs.modal' (khi modal đã đóng hoàn toàn)
       modalRef.current.addEventListener('hidden.bs.modal', () => {
         if (onClose) {
-          onClose(); // Gọi hàm reset state (nếu có)
+          onClose();
         }
       });
     }
@@ -30,14 +30,12 @@ const Modal = ({ id, title, children, footer, show, onClose }) => {
     // eslint-disable-next-line no-undef
     const bsModal = bootstrap.Modal.getOrCreateInstance(modalRef.current);
 
-    // Đồng bộ state 'show' của React với Bootstrap
     if (show) {
       bsModal.show();
     } else {
       bsModal.hide();
     }
 
-    // Không cần cleanup listener ở đây vì chúng ta muốn nó tồn tại
   }, [id, show, onClose]);
 
   return (

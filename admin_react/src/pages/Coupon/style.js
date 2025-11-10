@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const CouponWrapper = styled.div`
+export const CouponWrapper = styled(AdminPageWrapper)`
     padding: 20px;
     background: #f8f9fc;
 `;
@@ -26,7 +27,7 @@ export const CouponHeader = styled.div`
     }
 
     .btn-primary {
-        background: #4e73df;
+        background: #00d165;
         border: none;
         padding: 8px 20px;
         border-radius: 5px;
@@ -38,7 +39,7 @@ export const CouponHeader = styled.div`
         cursor: pointer;
 
         &:hover {
-            background: #2e59d9;
+            background: #00b95a;
             transform: translateY(-1px);
         }
     }
@@ -55,10 +56,10 @@ export const CouponFilters = styled.div`
         border-radius: 5px;
         transition: all 0.3s;
 
-        &:focus {
+            &:focus {
             outline: none;
-            border-color: #4e73df;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+            border-color: #00d165;
+            box-shadow: 0 0 0 0.2rem rgba(0,209,101,0.12);
         }
     }
 `;
@@ -87,7 +88,7 @@ export const TableResponsive = styled.div`
 
         th {
             background: #f8f9fc;
-            color: #4e73df;
+            color: #00d165;
             font-weight: 600;
             white-space: nowrap;
         }
@@ -98,7 +99,7 @@ export const TableResponsive = styled.div`
             &:hover { background: #f8f9fc; }
         }
 
-        .discount { font-weight: 600; color: #4e73df; }
+    .discount { font-weight: 600; color: #00d165; }
         .status-cell { vertical-align: middle; }
     }
 `;
@@ -109,7 +110,7 @@ export const LoadingWrapper = styled.div`
     align-items: center;
     min-height: 140px;
 
-    .spinner-border { color: #4e73df; }
+    .spinner-border { color: #00d165; }
 `;
 
 export const NoDataMessage = styled.div`
@@ -144,10 +145,10 @@ export const ModalContent = styled.div`
             border-radius: 4px;
             transition: all 0.2s;
 
-            &:focus {
+                &:focus {
                 outline: none;
-                border-color: #4e73df;
-                box-shadow: 0 0 0 0.15rem rgba(78,115,223,0.12);
+                border-color: #00d165;
+                box-shadow: 0 0 0 0.15rem rgba(0,209,101,0.12);
             }
         }
 

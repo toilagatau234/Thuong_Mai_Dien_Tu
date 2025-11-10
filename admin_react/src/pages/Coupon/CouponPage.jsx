@@ -187,7 +187,7 @@ const CouponPage = () => {
     const toastId = toast.loading('Đang cập nhật...');
     try {
       // API có thể yêu cầu endpoint riêng hoặc chỉ cần PUT
-      // Chúng ta cần gửi đủ các trường dữ liệu nếu API không hỗ trợ PATCH
+      // cần gửi đủ các trường dữ liệu nếu API không hỗ trợ PATCH
       const payload = {
         code: coupon.code,
         discount: coupon.discount,

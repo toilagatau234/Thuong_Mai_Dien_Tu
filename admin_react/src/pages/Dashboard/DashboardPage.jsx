@@ -38,14 +38,13 @@ const DashboardPage = () => {
           apiService.get('/statistical/revenue-chart')
         ]);
 
-        // 1. Set Stats
+        // Set Stats
         setStats(statsRes.data);
 
-        // 2. Set Pending Orders
-        // API có thể trả về { orders: [] } hoặc chỉ []
+        // Set Pending Orders
         setPendingOrders(ordersRes.data.orders || ordersRes.data || []);
 
-        // 3. Set Chart Data
+        // Set Chart Data
         // Chuyển đổi dữ liệu cho recharts
         const chartData = chartRes.data.map(item => ({
           name: `Tháng ${item.month}`,

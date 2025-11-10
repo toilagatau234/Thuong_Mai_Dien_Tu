@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const FeedbackWrapper = styled.div`
+export const FeedbackWrapper = styled(AdminPageWrapper)`
     padding: 20px;
 `;
 
@@ -129,7 +130,7 @@ export const ActionButtons = styled.div`
         cursor: pointer;
         
         &.reply {
-            background: #4e73df;
+            background: #00d165;
             color: white;
         }
         

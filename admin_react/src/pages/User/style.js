@@ -1,22 +1,20 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const UserWrapper = styled.div`
+export const UserWrapper = styled(AdminPageWrapper)`
     padding: 20px;
 `;
 
-export const UserHeader = styled.div`
+export const UserPageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 
-    h2 {
-        font-size: 24px;
-        color: #333;
-    }
+    h2 { font-size: 24px; color: #333; }
 
     .add-button {
-        background: #4e73df;
+        background: #00d165;
         color: white;
         padding: 10px 20px;
         border-radius: 5px;
@@ -24,9 +22,7 @@ export const UserHeader = styled.div`
         cursor: pointer;
         transition: background 0.3s;
 
-        &:hover {
-            background: #2e59d9;
-        }
+        &:hover { background: #00b95a; }
     }
 `;
 
@@ -48,28 +44,17 @@ export const UserTable = styled.div`
 
         th {
             background: #f8f9fc;
-            color: #4e73df;
+            color: #00d165;
             font-weight: bold;
         }
 
-        tr:hover {
-            background: #f8f9fc;
-        }
+        tr:hover { background: #f8f9fc; }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 
         .status {
-            &.active {
-                color: #1cc88a;
-            }
-            &.inactive {
-                color: #e74a3b;
-            }
+            &.active { color: #1cc88a; }
+            &.inactive { color: #e74a3b; }
         }
     }
 `;
@@ -91,12 +76,7 @@ export const UserFilter = styled.div`
 
     .filter-select {
         width: 200px;
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #e3e6f0;
-            border-radius: 5px;
-        }
+        select { width: 100%; padding: 10px; border: 1px solid #e3e6f0; border-radius: 5px; }
     }
 `;
 
@@ -109,15 +89,8 @@ export const ActionButtons = styled.div`
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        
-        &.edit {
-            background: #4e73df;
-            color: white;
-        }
-        
-        &.delete {
-            background: #e74a3b;
-            color: white;
-        }
+
+    &.edit { background: #00d165; color: white; }
+        &.delete { background: #e74a3b; color: white; }
     }
 `;

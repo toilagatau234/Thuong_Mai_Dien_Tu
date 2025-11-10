@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
-import { OrderWrapper, OrderHeader, OrderFilters, OrderTable, OrderDetails } from './style'
+import { OrderWrapper, OrderHeader } from './style'
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -42,18 +42,15 @@ const OrderDetailPage = () => {
   const { shippingAddress: address } = order;
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row align-items-center">
-          <div className="col">
-            <h3 className="page-title">Order Detail</h3>
-            <ul className="breadcrumb">
-              <li className="breadcrumb-item"><Link to="/orders">Orders</Link></li>
-              <li className="breadcrumb-item active">Order Detail</li>
-            </ul>
-          </div>
+    <OrderWrapper>
+      <OrderHeader>
+        <div>
+          <h2>Order Detail</h2>
         </div>
-      </div>
+        <div>
+          <Link to="/orders" className="btn btn-secondary">Back to Orders</Link>
+        </div>
+      </OrderHeader>
 
       <div className="row">
         {/* Cột Chi tiết Đơn hàng */}
@@ -139,7 +136,7 @@ const OrderDetailPage = () => {
           </div>
         </div>
       </div>
-    </>
+    </OrderWrapper>
   );
 };
 

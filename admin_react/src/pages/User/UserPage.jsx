@@ -5,7 +5,7 @@ import Switch from 'react-switch';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
 import defaultAvatar from '../../assets/img/avatar.jpg';
-import { UserWrapper, UserHeader, UserTable, UserFilter, ActionButtons } from './style'
+import { UserWrapper, UserPageHeader, UserFilter } from './style'
 
 const UserPage = () => {
   const [users, setUsers] = useState([]);
@@ -115,24 +115,19 @@ const UserPage = () => {
   };
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row align-items-center">
-          <div className="col">
-            <h3 className="page-title">Users</h3>
-          </div>
-          <div className="col-auto text-end">
-            {/* Link đến trang Add User (sẽ được tạo ở bước sau) */}
-            <Link to="/user/add" className="btn btn-primary">
-              <i className="fas fa-plus"></i> Add User
-            </Link>
-          </div>
+    <UserWrapper>
+      <UserPageHeader>
+        <div>
+          <h2>Users</h2>
         </div>
-      </div>
+        <div>
+          <Link to="/user/add" className="btn btn-primary"><i className="fas fa-plus"></i> Add User</Link>
+        </div>
+      </UserPageHeader>
 
       {/* Thanh Search */}
-      <div className="row mb-3">
-        <div className="col-md-4">
+      <UserFilter>
+        <div className="search-box">
           <input 
             type="text"
             className="form-control"
@@ -141,7 +136,7 @@ const UserPage = () => {
             onChange={handleSearchChange}
           />
         </div>
-      </div>
+      </UserFilter>
 
       {/* Bảng User */}
       <div className="row">
@@ -174,13 +169,13 @@ const UserPage = () => {
                         <tr key={user._id}>
                           <td>
                             <h2 className="table-avatar">
-                              <a href="#" className="avatar avatar-sm me-2">
+                              <span className="avatar avatar-sm me-2">
                                 <img
                                   className="avatar-img rounded-circle"
                                   src={user.avatar || defaultAvatar}
                                   alt="User Avatar"
                                 />
-                              </a>
+                              </span>
                               {user.fullname}
                             </h2>
                           </td>
@@ -198,7 +193,7 @@ const UserPage = () => {
                             <Switch
                               onChange={() => handleToggleStatus(user)}
                               checked={user.isBlocked}
-                              onColor="#E63946" // Màu đỏ cho trạng thái Block
+                              onColor="#E63946"
                               onHandleColor="#ffffff"
                               handleDiameter={20}
                               uncheckedIcon={false}
@@ -208,7 +203,7 @@ const UserPage = () => {
                             />
                           </td>
                           <td className="text-end">
-                            {/* Link đến trang Edit User (sẽ được tạo ở bước sau) */}
+                            {/* Link đến trang Edit User */}
                             <Link to={`/user/edit/${user._id}`} className="btn btn-sm btn-warning me-2">
                               <i className="fas fa-edit"></i>
                             </Link>
@@ -243,7 +238,7 @@ const UserPage = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-    </>
+    </UserWrapper>
   );
 };
 

@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const StatisticalWrapper = styled.div`
+export const StatisticalWrapper = styled(AdminPageWrapper)`
     padding: 20px;
 `;
 
@@ -32,7 +33,7 @@ export const DateRangePicker = styled.div`
     }
 
     .apply-button {
-        background: #4e73df;
+        background: #00d165;
         color: white;
         padding: 10px 20px;
         border-radius: 5px;
@@ -41,7 +42,7 @@ export const DateRangePicker = styled.div`
         transition: background 0.3s;
 
         &:hover {
-            background: #2e59d9;
+            background: #00b95a;
         }
     }
 `;
@@ -145,7 +146,7 @@ export const TopProducts = styled.div`
 
         .sales-value {
             font-weight: bold;
-            color: #4e73df;
+            color: #00d165;
         }
     }
 `;

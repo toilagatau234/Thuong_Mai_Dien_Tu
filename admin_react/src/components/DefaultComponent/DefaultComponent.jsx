@@ -4,7 +4,6 @@ import SidebarComponent from '../SidebarComponent/SidebarComponent';
 
 const DefaultComponent = ({ children }) => {
   return (
-    // 'main-wrapper' là class gốc từ template HTML của bạn
     <div className="main-wrapper"> 
       
       <HeaderComponent />

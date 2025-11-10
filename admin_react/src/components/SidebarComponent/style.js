@@ -1,59 +1,8 @@
 import { styled } from 'styled-components';
 
-// Định nghĩa màu theme của bạn
-const themeColor = '#00ff77da';
-const themeColorSolid = '#00d165'; // Màu xanh lá solid đậm hơn cho chữ
-const themeColorBgHover = 'rgba(0, 255, 119, 0.1)'; // Màu nền hover (10% alpha)
-const themeColorBgActive = 'rgba(0, 255, 119, 0.15)'; // Màu nền active (15% alpha)
-
-export const SidebarContainer = styled.div`
-    width: 260px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    background: #fff; /* === Giữ nền trắng === */
-    box-shadow: 0 3px 20px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    transition: width 0.3s;
-    padding-top: 0; /* === THAY ĐỔI: Bỏ padding-top === */
-    display: flex;
-    flex-direction: column;
-
-    &.condensed {
-        width: 80px;
-        
-        .menu-title {
-            visibility: hidden;
-            padding: 10px 0;
-            span { display: none; }
-        }
-
-        /* Ẩn text khi thu gọn */
-        .sidebar-menu ul li a span,
-        .sidebar-footer span,
-        .logo-text {
-            display: none;
-        }
-
-        .sidebar-menu ul li a i {
-            margin-right: 0;
-        }
-    }
-`;
-
-export const SidebarTop = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* === THAY ĐỔI: Căn trái logo === */
-    padding: 0 20px; /* Thêm padding */
-    height: 64px; /* Bằng chiều cao header */
-    border-bottom: 1px solid #f0f0f0;
-    flex-shrink: 0; /* Ngăn co lại */
-    transition: justify-content 0.3s;
-`;
-
-// Xóa ToggleBtn
+const themeColorSolid = '#00d165';
+const themeColorBgHover = 'rgba(0, 255, 119, 0.1)'; 
+const themeColorBgActive = 'rgba(0, 255, 119, 0.15)';
 
 export const SidebarLogo = styled.div`
     width: 100%;
@@ -77,8 +26,72 @@ export const SidebarLogo = styled.div`
     }
 `;
 
+export const SidebarContainer = styled.div`
+    width: 260px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: #fff; 
+    box-shadow: 0 3px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: width 0.3s;
+    display: flex;
+    flex-direction: column;
+    padding-top: 0; 
+
+    &.condensed {
+        width: 80px;
+        
+        .menu-title {
+            visibility: hidden;
+            padding: 10px 0;
+            span { display: none; }
+        }
+        .sidebar-menu ul li a span,
+        .sidebar-footer span,
+        .logo-text {
+            display: none;
+        }
+
+        .sidebar-menu ul li a {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .sidebar-menu ul li a i {
+            margin-right: 0;
+            font-size: 18px;
+            width: 100%;
+            text-align: center;
+            color: #666;
+        }
+
+        .sidebar-footer .sidebar-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        ${SidebarLogo} a {
+            justify-content: center;
+        }
+    }
+`;
+
+export const SidebarTop = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 20px;
+    height: 64px; /* Bằng chiều cao header */
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+`;
+
 export const SidebarFooter = styled.div`
-    flex-shrink: 0; /* Ngăn co lại */
+    flex-shrink: 0;
     border-top: 1px solid #f0f0f0;
     padding: 20px 0;
     text-align: center;
@@ -98,7 +111,7 @@ export const SidebarFooter = styled.div`
 
         &:hover { 
             background: #f8f9fc; 
-            color: ${themeColorSolid}; /* === THAY ĐỔI: Màu xanh lá === */
+            color: ${themeColorSolid};
         }
         
         i { font-size: 16px; }
@@ -108,9 +121,9 @@ export const SidebarFooter = styled.div`
 
 export const SidebarInner = styled.div`
     height: 100%;
-    overflow-y: auto; /* Cho phép cuộn nội dung menu */
+    overflow-y: auto;
     overflow-x: hidden;
-    flex: 1 1 auto; /* Quan trọng: cho phép co giãn */
+    flex: 1 1 auto; 
 
     &::-webkit-scrollbar { width: 5px; }
     &::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -141,7 +154,7 @@ export const MenuItem = styled.li`
         display: flex;
         align-items: center;
         padding: 12px 25px;
-        color: #666; /* === THAY ĐỔI: Màu chữ xám === */
+        color: #666; 
         transition: all 0.3s;
         text-decoration: none;
         white-space: nowrap;
@@ -151,7 +164,7 @@ export const MenuItem = styled.li`
             margin-right: 12px;
             width: 20px;
             text-align: center;
-            color: #999; /* === THAY ĐỔI: Màu icon xám nhạt === */
+            color: #999; 
             transition: all 0.3s;
         }
 
@@ -159,22 +172,18 @@ export const MenuItem = styled.li`
             font-size: 14px;
         }
 
-        /* === THAY ĐỔI: Style cho hover === */
         &:hover {
             color: ${themeColorSolid};
             background: ${themeColorBgHover};
-
             i {
                 color: ${themeColorSolid};
             }
         }
         
-        /* === THAY ĐỔI: Style cho active === */
         &.active {
             color: ${themeColorSolid};
             background: ${themeColorBgActive};
             font-weight: 600;
-
             i {
                 color: ${themeColorSolid};
             }
@@ -186,4 +195,17 @@ export const MenuList = styled.ul`
     list-style: none;
     margin: 0;
     padding: 0;
+`;
+
+export const ToggleBtn = styled.button`
+    background: transparent;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 8px;
+    border-radius: 6px;
+    margin-right: 8px;
+
+    &:hover { background: #f4f6f8; }
 `;

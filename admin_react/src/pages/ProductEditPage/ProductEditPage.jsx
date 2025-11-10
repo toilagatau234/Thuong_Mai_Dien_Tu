@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
-import { ProductWrapper, ProductHeader, ProductFilters, ProductGrid, ProductCard } from '../Product/style'
+import { ProductWrapper, ProductHeader } from '../Product/style'
 
-// (VariantManager component - Tái sử dụng từ ProductAddPage)
+// (VariantManager component - sử dụng từ ProductAddPage)
 const VariantManager = ({ variants, setVariants }) => {
   const addVariant = () => {
     setVariants([...variants, { color: '', size: '', quantity: 0, price: 0 }]);
@@ -192,22 +192,17 @@ const ProductEditPage = () => {
   }
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row">
-          <div className="col-sm-12">
-            <h3 className="page-title">Edit Product</h3>
-            <ul className="breadcrumb">
-              <li className="breadcrumb-item"><Link to="/products">Products</Link></li>
-              <li className="breadcrumb-item active">Edit Product</li>
-            </ul>
-          </div>
+    <ProductWrapper>
+      <ProductHeader>
+        <div>
+          <h2>Edit Product</h2>
         </div>
-      </div>
+        <div>
+          <Link to="/products" className="btn btn-primary">Back to Products</Link>
+        </div>
+      </ProductHeader>
 
-      <div className="row">
-        <div className="col-sm-12">
-          <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
             {/* Basic Info */}
             <div className="card">
               <div className="card-body">
@@ -257,10 +252,8 @@ const ProductEditPage = () => {
                 {loading ? <span className="spinner-border spinner-border-sm"></span> : 'Save Changes'}
               </button>
             </div>
-          </form>
-        </div>
-      </div>
-    </>
+      </form>
+    </ProductWrapper>
   );
 };
 

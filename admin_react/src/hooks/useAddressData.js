@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import DATA_JSON from '../assets/js/data-location.json';
 
-let cache = null; // Cache dữ liệu để tránh gọi lại
+let cache = null;
 
 const useAddressData = () => {
   const [provinces, setProvinces] = useState([]);
@@ -12,7 +12,7 @@ const useAddressData = () => {
   const [wards, setWards] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 1. Tải dữ liệu chính
+  // Tải dữ liệu chính
   useEffect(() => {
     const fetchData = () => {
       if (cache) {
@@ -33,7 +33,7 @@ const useAddressData = () => {
     fetchData();
   }, []);
 
-  // 2. Cập nhật Huyện khi Tỉnh thay đổi
+  // Cập nhật Huyện khi Tỉnh thay đổi
   const handleProvinceChange = (provinceCode) => {
     if (!provinceCode) {
       setDistricts([]);
@@ -45,7 +45,7 @@ const useAddressData = () => {
     setWards([]); // Reset Phường/Xã
   };
 
-  // 3. Cập nhật Phường/Xã khi Huyện thay đổi
+  // Cập nhật Phường/Xã khi Huyện thay đổi
   const handleDistrictChange = (districtCode) => {
     if (!districtCode) {
       setWards([]);

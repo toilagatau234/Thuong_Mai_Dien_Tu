@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const ProductWrapper = styled.div`
+export const ProductWrapper = styled(AdminPageWrapper)`
     padding: 20px;
 `;
 
@@ -16,7 +17,7 @@ export const ProductHeader = styled.div`
     }
 
     .add-button {
-        background: #4e73df;
+        background: #00d165;
         color: white;
         padding: 10px 20px;
         border-radius: 5px;
@@ -25,7 +26,8 @@ export const ProductHeader = styled.div`
         transition: background 0.3s;
 
         &:hover {
-            background: #2e59d9;
+            background: #00b95a;
+            transform: translateY(-1px);
         }
     }
 `;
@@ -58,8 +60,8 @@ export const ProductFilters = styled.div`
 
 export const ProductGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
 `;
 
 export const ProductCard = styled.div`
@@ -83,7 +85,7 @@ export const ProductCard = styled.div`
         }
 
         .price {
-            color: #4e73df;
+            color: #00d165;
             font-weight: bold;
             margin-bottom: 10px;
         }
@@ -107,7 +109,7 @@ export const ProductCard = styled.div`
             cursor: pointer;
 
             &.edit {
-                background: #4e73df;
+                background: #00d165;
                 color: white;
             }
 

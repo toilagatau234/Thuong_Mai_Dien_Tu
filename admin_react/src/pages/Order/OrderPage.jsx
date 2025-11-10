@@ -3,7 +3,7 @@ import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
-import { OrderWrapper, OrderHeader, OrderFilters, OrderTable, OrderDetails } from './style'
+import { OrderWrapper, OrderHeader, OrderFilters } from './style'
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -86,18 +86,16 @@ const OrderPage = () => {
 
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row align-items-center">
-          <div className="col">
-            <h3 className="page-title">Orders</h3>
-          </div>
+    <OrderWrapper>
+      <OrderHeader>
+        <div>
+          <h2>Orders</h2>
         </div>
-      </div>
+      </OrderHeader>
 
       {/* Thanh Search & Filter */}
-      <div className="row mb-3">
-        <div className="col-md-5">
+      <OrderFilters>
+        <div className="search-box">
           <input 
             type="text"
             className="form-control"
@@ -106,7 +104,7 @@ const OrderPage = () => {
             onChange={handleSearchChange}
           />
         </div>
-        <div className="col-md-4">
+        <div className="filter-select">
           <select className="form-select" value={statusFilter} onChange={handleStatusChange}>
             <option value="">All Statuses</option>
             {ORDER_STATUSES.map(status => (
@@ -114,7 +112,7 @@ const OrderPage = () => {
             ))}
           </select>
         </div>
-      </div>
+      </OrderFilters>
 
       {/* Bảng Order */}
       <div className="row">
@@ -188,7 +186,7 @@ const OrderPage = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-    </>
+    </OrderWrapper>
   );
 };
 

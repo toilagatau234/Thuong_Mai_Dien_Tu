@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import Switch from 'react-switch';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
-import { ProductWrapper, ProductHeader, ProductFilters, ProductGrid, ProductCard } from './style'
+import { ProductWrapper, ProductHeader, ProductFilters } from './style'
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -138,24 +138,22 @@ const ProductPage = () => {
   };
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row align-items-center">
-          <div className="col">
-            <h3 className="page-title">Products</h3>
-          </div>
-          <div className="col-auto text-end">
-            <Link to="/product/add" className="btn btn-primary">
-              <i className="fas fa-plus"></i> Add Product
-            </Link>
-          </div>
+    <ProductWrapper>
+      <ProductHeader>
+        <div>
+          <h2>Products</h2>
         </div>
-      </div>
+        <div>
+          <Link to="/product/add" className="btn btn-primary">
+            <i className="fas fa-plus"></i> Add Product
+          </Link>
+        </div>
+      </ProductHeader>
 
       {/* Thanh Search & Filter */}
-      <div className="row mb-3">
-        <div className="col-md-5">
-          <input 
+      <ProductFilters>
+        <div className="search-box">
+          <input
             type="text"
             className="form-control"
             placeholder="Tìm kiếm tên sản phẩm..."
@@ -163,7 +161,7 @@ const ProductPage = () => {
             onChange={handleSearchChange}
           />
         </div>
-        <div className="col-md-4">
+        <div className="filter-select">
           <select className="form-select" value={categoryFilter} onChange={handleCategoryChange}>
             <option value="">All Categories</option>
             {categories.map(cat => (
@@ -171,7 +169,7 @@ const ProductPage = () => {
             ))}
           </select>
         </div>
-      </div>
+      </ProductFilters>
 
       {/* Bảng Product */}
       <div className="row">
@@ -261,7 +259,7 @@ const ProductPage = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-    </>
+    </ProductWrapper>
   );
 };
 

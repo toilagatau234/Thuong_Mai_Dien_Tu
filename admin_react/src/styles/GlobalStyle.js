@@ -27,7 +27,7 @@ const GlobalStyle = createGlobalStyle`
 
   /* Buttons (lightweight replacements for bootstrap) */
   .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .45rem .85rem; border-radius: .375rem; border: none; cursor: pointer; background: #e9ecef; color: #212529; }
-  .btn-primary { background: #4e73df; color: #fff; }
+  .btn-primary { background: #00d165; color: #fff; }
   .btn-secondary { background: #6c757d; color: #fff; }
   .btn-warning { background: #f6c23e; color: #fff; }
   .btn-danger { background: #e74a3b; color: #fff; }
@@ -49,7 +49,7 @@ const GlobalStyle = createGlobalStyle`
   input[type="date"] { padding: .45rem .65rem; }
 
   /* Spinner */
-  .spinner-border { display: inline-block; width: 1.2rem; height: 1.2rem; border: 2px solid rgba(0,0,0,0.1); border-top-color: #4e73df; border-radius: 50%; animation: spin .75s linear infinite; }
+  .spinner-border { display: inline-block; width: 1.2rem; height: 1.2rem; border: 2px solid rgba(0,0,0,0.1); border-top-color: #00d165; border-radius: 50%; animation: spin .75s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Dropdown / badges / small helpers */

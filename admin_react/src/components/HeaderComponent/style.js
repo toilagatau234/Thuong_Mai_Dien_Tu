@@ -1,23 +1,22 @@
 import { styled } from 'styled-components';
 
-const themeColor = '#00ff77da';
 const themeColorSolid = '#00e66b';
 
 export const HeaderContainer = styled.div`
     position: fixed;
     top: 0;
-    left: 260px; // Chiều rộng của sidebar
+    left: 260px; // Chiều rộng sidebar
     right: 0;
     height: 64px;
     background: #fff;
-    color: #333;
+    color: #333; 
     z-index: 1001;
     padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     transition: left 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     
     &.condensed {
         left: 80px;
@@ -31,36 +30,13 @@ export const HeaderContainer = styled.div`
 export const HeaderLeft = styled.div`
     display: flex;
     align-items: center;
-
-    // .logo {
-    //     margin-right: 20px;
-    //     img {
-    //         height: 40px;
-    //     }
-    // }
-
-    // .logo-small {
-    //     display: none;
-    //     @media (max-width: 991.98px) {
-    //         display: block;
-    //     }
-    //     img {
-    //         height: 30px;
-    //     }
-    // }
-
-    // @media (max-width: 991.98px) {
-    //     .logo:not(.logo-small) {
-    //         display: none;
-    //     }
-    // }
 `;
 
 export const ToggleButton = styled.button`
     background: none;
     border: none;
     padding: 0 15px;
-    color: #666;
+    color: #666; 
     font-size: 20px;
     cursor: pointer;
     
@@ -78,10 +54,6 @@ export const UserDropdown = styled.div`
     position: relative;
     
     .user-img {
-        display: inline-block;
-        margin-right: 10px;
-        position: relative;
-        
         img {
             width: 35px;
             height: 35px;
@@ -127,18 +99,8 @@ export const UserDropdown = styled.div`
         padding-bottom: 10px;
         border-bottom: 1px solid #e3e6f0;
         margin-bottom: 10px;
-
-        h6 {
-            margin: 0;
-            font-size: 15px;
-            color: #333;
-        }
-
-        p {
-            margin: 5px 0 0;
-            font-size: 12px;
-            color: #666;
-        }
+        h6 { margin: 0; font-size: 15px; color: #333; }
+        p { margin: 5px 0 0; font-size: 12px; color: #666; }
     }
 
     .dropdown-item {

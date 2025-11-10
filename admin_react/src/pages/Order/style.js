@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const OrderWrapper = styled.div`
+export const OrderWrapper = styled(AdminPageWrapper)`
     padding: 20px;
 `;
 
@@ -70,7 +71,7 @@ export const OrderTable = styled.div`
 
         th {
             background: #f8f9fc;
-            color: #4e73df;
+            color: #00d165;
             font-weight: bold;
         }
 
@@ -90,7 +91,7 @@ export const OrderTable = styled.div`
             }
 
             &.processing {
-                background: #4e73df;
+                background: #00d165;
                 color: #fff;
             }
 

@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const CategoryWrapper = styled.div`
+export const CategoryWrapper = styled(AdminPageWrapper)`
     padding: 20px;
     background: #f8f9fc;
 `;
@@ -18,8 +19,8 @@ export const SearchSection = styled.div`
 
         &:focus {
             outline: none;
-            border-color: #4e73df;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            border-color: #00d165;
+            box-shadow: 0 0 0 0.2rem rgba(0, 209, 101, 0.12);
         }
     }
 `;
@@ -44,7 +45,7 @@ export const PageHeader = styled.div`
     }
 
     .btn-primary {
-        background: #4e73df;
+        background: #00d165;
         border: none;
         padding: 8px 20px;
         border-radius: 5px;
@@ -56,7 +57,7 @@ export const PageHeader = styled.div`
         cursor: pointer;
 
         &:hover {
-            background: #2e59d9;
+            background: #00b95a;
             transform: translateY(-1px);
         }
 
@@ -90,7 +91,7 @@ export const TableResponsive = styled.div`
 
         th {
             background: #f8f9fc;
-            color: #4e73df;
+            color: #00d165;
             font-weight: 600;
             white-space: nowrap;
         }
@@ -168,7 +169,7 @@ export const LoadingWrapper = styled.div`
     min-height: 200px;
 
     .spinner-border {
-        color: #4e73df;
+        color: #00d165;
     }
 `;
 
@@ -199,8 +200,8 @@ export const ModalContent = styled.div`
 
             &:focus {
                 outline: none;
-                border-color: #4e73df;
-                box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+                border-color: #00d165;
+                box-shadow: 0 0 0 0.2rem rgba(0, 209, 101, 0.25);
             }
         }
     }
@@ -217,7 +218,7 @@ export const ActionButtons = styled.div`
         cursor: pointer;
         
         &.edit {
-            background: #4e73df;
+            background: #00d165;
             color: white;
         }
         

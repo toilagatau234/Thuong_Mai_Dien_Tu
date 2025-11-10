@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoutes from '../utils/ProtectedRoutes';
 import PublicRoutes from '../utils/PublicRoutes';
+import AdminLayout from '../layouts/AdminLayout';
 
 // Import Pages
 import LoginPage from '../pages/Login/LoginPage';
@@ -22,28 +23,30 @@ import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Routes cho public (Login) */}
+      {/* Public (Login) */}
       <Route element={<PublicRoutes />}>
         <Route path="/login" element={<LoginPage />} />
       </Route>
 
-      {/* Routes được bảo vệ (Admin Panel) ProtectedRoutes*/}
-      <Route element={<PublicRoutes />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/categories" element={<CategoryPage />} />
-        <Route path="/products" element={<ProductPage />} />
-        <Route path="/product/add" element={<ProductAddPage />} />
-        <Route path="/product/edit/:id" element={<ProductEditPage />} />
-        <Route path="/orders" element={<OrderPage />} />
-        <Route path="/order/detail/:id" element={<OrderDetailPage />} />
-        <Route path="/users" element={<UserPage />} />
-        <Route path="/user/add" element={<UserAddPage />} />
-        <Route path="/user/edit/:id" element={<UserEditPage />} />
-        <Route path="/coupons" element={<CouponPage />} />
-        <Route path="/feedback" element={<FeedbackPage />} />
+  {/*  admin routes: require auth, then wrap pages with AdminLayout so Sidebar/Header appear on every page */}
+  <Route element={<ProtectedRoutes />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/categories" element={<CategoryPage />} />
+          <Route path="/products" element={<ProductPage />} />
+          <Route path="/product/add" element={<ProductAddPage />} />
+          <Route path="/product/edit/:id" element={<ProductEditPage />} />
+          <Route path="/orders" element={<OrderPage />} />
+          <Route path="/order/detail/:id" element={<OrderDetailPage />} />
+          <Route path="/users" element={<UserPage />} />
+          <Route path="/user/add" element={<UserAddPage />} />
+          <Route path="/user/edit/:id" element={<UserEditPage />} />
+          <Route path="/coupons" element={<CouponPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
+        </Route>
       </Route>
 
-      {/* Route cho 404 */}
+      {/* Not found */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

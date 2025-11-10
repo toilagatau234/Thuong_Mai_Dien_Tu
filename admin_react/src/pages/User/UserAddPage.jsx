@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import useAddressData from '../../hooks/useAddressData';
 import { toast } from 'react-hot-toast';
-import { UserWrapper, UserHeader, UserTable, UserFilter, ActionButtons } from './style'
+import { UserWrapper, UserPageHeader } from './style'
 
 const UserAddPage = () => {
   const navigate = useNavigate();
@@ -65,18 +65,15 @@ const UserAddPage = () => {
   };
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row">
-          <div className="col-sm-12">
-            <h3 className="page-title">Add User</h3>
-            <ul className="breadcrumb">
-              <li className="breadcrumb-item"><Link to="/users">Users</Link></li>
-              <li className="breadcrumb-item active">Add User</li>
-            </ul>
-          </div>
+    <UserWrapper>
+      <UserPageHeader>
+        <div>
+          <h2>Add User</h2>
         </div>
-      </div>
+        <div>
+          <Link to="/users" className="btn btn-primary">Back to Users</Link>
+        </div>
+      </UserPageHeader>
 
       <div className="row">
         <div className="col-sm-12">
@@ -169,7 +166,7 @@ const UserAddPage = () => {
           </div>
         </div>
       </div>
-    </>
+    </UserWrapper>
   );
 };
 

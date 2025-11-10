@@ -1,6 +1,7 @@
 import { styled } from 'styled-components';
+import AdminPageWrapper from '../../components/PageLayout.style';
 
-export const DashboardWrapper = styled.div`
+export const DashboardWrapper = styled(AdminPageWrapper)`
     padding: 20px;
 `;
 
@@ -51,8 +52,8 @@ export const StatCard = styled.div`
         margin-right: 15px;
 
         &.text-primary {
-            background: rgba(78, 115, 223, 0.1);
-            color: #4e73df;
+            background: rgba(0, 209, 101, 0.08);
+            color: #00d165;
         }
         
         &.text-success {
@@ -150,8 +151,8 @@ export const TableResponsive = styled.div`
         }
 
         th {
-            background: #f8f9fc;
-            color: #4e73df;
+            background: #f1f3f6;
+            color: #334155;
             font-weight: bold;
         }
 
@@ -160,7 +161,7 @@ export const TableResponsive = styled.div`
         }
 
         .btn-primary {
-            background: #4e73df;
+            background: #00d165;
             color: white;
             padding: 5px 10px;
             border-radius: 4px;
@@ -168,7 +169,7 @@ export const TableResponsive = styled.div`
             font-size: 12px;
             
             &:hover {
-                background: #2e59d9;
+                background: #00b95a;
             }
         }
     }

@@ -4,14 +4,13 @@ export const MainWrapper = styled.div`
     display: flex;
     min-height: 100vh;
     position: relative;
-    background: #f8f9fc;
 `;
 
 export const PageWrapper = styled.div`
     flex: 1;
-    margin-left: 260px; // Khớp với chiều rộng Sidebar
+    margin-left: 260px;
     min-height: 100vh;
-    background: #f8f9fc;
+    background: #eef1f5;
     position: relative;
     transition: margin-left 0.3s;
 
@@ -20,12 +19,12 @@ export const PageWrapper = styled.div`
     }
 
     &.condensed {
-        margin-left: 80px; // Khớp với chiều rộng Sidebar thu gọn
+        margin-left: 80px;
     }
 `;
 
 export const ContentContainer = styled.div`
-    padding: 84px 20px 20px 20px; 
+    padding: 72px 20px 20px 20px; 
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;

@@ -66,7 +66,7 @@ export const LoginRightWrap = styled.div`
         transition: border-color 0.3s;
 
         &:focus {
-            border-color: #4e73df;
+            border-color: #00d165;
             outline: none;
         }
     }
@@ -74,7 +74,7 @@ export const LoginRightWrap = styled.div`
     .btn-primary {
         width: 100%;
         padding: 12px;
-        background: #4e73df;
+        background: #00d165;
         color: white;
         border: none;
         border-radius: 5px;
@@ -84,11 +84,11 @@ export const LoginRightWrap = styled.div`
         transition: background 0.3s;
 
         &:hover {
-            background: #2e59d9;
+            background: #00b95a;
         }
 
         &:disabled {
-            background: #95aae9;
+            background: #bdeccf;
             cursor: not-allowed;
         }
     }

@@ -10,17 +10,18 @@ import {
   MenuItem,
   SidebarTop,
   SidebarFooter,
-  // ToggleBtn,
+  ToggleBtn,
   SidebarLogo
 } from './style';
 
+// onToggle
 const Sidebar = ({ isCondensed, onToggle }) => {
   return (
     <SidebarContainer className={isCondensed ? 'condensed' : ''}>
       <SidebarTop>
-        {/* <ToggleBtn type="button" aria-label="Toggle sidebar" onClick={onToggle}>
+        <ToggleBtn type="button" aria-label="Toggle sidebar" onClick={() => onToggle && onToggle()}>
           <i className="fa-solid fa-bars"></i>
-        </ToggleBtn> */}
+        </ToggleBtn>
         <SidebarLogo>
           <NavLink to="/">
             <img src={logo} alt="logo" />

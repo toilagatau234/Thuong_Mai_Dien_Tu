@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { toast } from 'react-hot-toast';
-import { ProductWrapper, ProductHeader, ProductFilters, ProductGrid, ProductCard } from '../Product/style'
+import { ProductWrapper, ProductHeader } from '../Product/style'
 
 // Component con để quản lý Variants
 const VariantManager = ({ variants, setVariants }) => {
@@ -159,7 +159,7 @@ const ProductAddPage = () => {
     try {
       await apiService.post('/products', data, {
         headers: {
-          'Content-Type': 'multipart/form-data', // Rất quan trọng
+          'Content-Type': 'multipart/form-data',
         },
       });
       toast.success('Thêm sản phẩm thành công!');
@@ -172,22 +172,19 @@ const ProductAddPage = () => {
   };
 
   return (
-    <>
-      <div className="page-header">
-        <div className="row">
-          <div className="col-sm-12">
-            <h3 className="page-title">Add Product</h3>
-            <ul className="breadcrumb">
-              <li className="breadcrumb-item"><Link to="/products">Products</Link></li>
-              <li className="breadcrumb-item active">Add Product</li>
-            </ul>
-          </div>
+    <ProductWrapper>
+      <ProductHeader>
+        <div>
+          <h2>Add Product</h2>
         </div>
-      </div>
+        <div>
+          <Link to="/products" className="btn btn-primary">
+            Back to Products
+          </Link>
+        </div>
+      </ProductHeader>
 
-      <div className="row">
-        <div className="col-sm-12">
-          <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
             {/* Basic Info */}
             <div className="card">
               <div className="card-body">
@@ -271,9 +268,7 @@ const ProductAddPage = () => {
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </>
+    </ProductWrapper>
   );
 };
 
