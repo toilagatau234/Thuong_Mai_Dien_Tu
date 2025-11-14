@@ -1,231 +1,347 @@
-import React, { useState } from 'react'
-import { Row, Col, Image, Rate, InputNumber, Button } from 'antd'
-import { PlusOutlined, MinusOutlined, ShoppingCartOutlined } from '@ant-design/icons'
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Button, message, Popover, Image } from 'antd';
+import { 
+    PlusOutlined, MinusOutlined, SafetyOutlined,
+    CheckCircleOutlined, CarOutlined, DownOutlined,
+    ShoppingCartOutlined, SolutionOutlined
+} from '@ant-design/icons';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/cartSlice';
+
 import {
-  WrapperStyleImageSmall,
-  WrapperStyleColImage,
-  WrapperStyleNameProduct,
-  WrapperStyleTextSell,
-  WrapperPriceProduct,
-  WrapperPriceTextProduct,
-  WrapperAddressProduct,
-  WrapperQualityProduct,
-  WrapperInputNumber,
-  WrapperBtnQualityProduct,
-  WrapperProductInfo,
-  WrapperDescription
-} from './style'
+    WrapperContainer, WrapperLayout,
+    WrapperStyleImageSmall, WrapperThumbnailGroup, WrapperStyleColImage,
+    WrapperStyleColInfo, WrapperStyleNameProduct,
+    WrapperStyleTextSell, WrapperPriceProduct, WrapperPriceTextProduct,
+    WrapperOriginalPrice, WrapperDiscount,
+    WrapperQualityProduct, WrapperBtnQualityProduct, WrapperInputNumber, 
+    WrapperStockText, WrapperQualityLabel,
+    WrapperDescription, WrapperInfoRow, WrapperInfoLabel, WrapperInfoContent,
+    WrapperVariationGroup, WrapperVariationButton,
+    WrapperShipping, WrapperGuarantee,
+    WrapperButtonRow, AddToCartButton, BuyNowButton
+} from './style';
 
 const ProductDetailPage = () => {
-  const [numProduct, setNumProduct] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
+    // SỬA LỖI: Đọc { id } từ URL
+    const { id } = useParams(); 
+    const navigate = useNavigate();
+    const [product, setProduct] = useState(null);
+    const [mainImage, setMainImage] = useState('');
+    const [quantity, setQuantity] = useState(1);
+    const [selectedVariation, setSelectedVariation] = useState(null);
+    const dispatch = useDispatch();
 
-  // Data mẫu - sau này sẽ fetch từ API
-  const product = {
-    name: 'Serum Vitamin C Some By Mi Galactomyces Pure Vitamin C Glow Serum 30ml',
-    price: 320000,
-    originalPrice: 400000,
-    rating: 4.8,
-    sold: 2500,
-    discount: 20,
-    countInStock: 100,
-    images: [
-      'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png'
-    ],
-    description: `
-      <h3>Mô tả sản phẩm</h3>
-      <p>Serum Vitamin C Some By Mi Galactomyces Pure Vitamin C Glow Serum là sản phẩm serum dưỡng sáng da, mờ thâm nám hiệu quả.</p>
-      
-      <h4>Thành phần chính:</h4>
-      <ul>
-        <li>Pure Vitamin C 75%</li>
-        <li>Galactomyces Ferment Filtrate</li>
-        <li>Niacinamide</li>
-        <li>Adenosine</li>
-      </ul>
+    const formatDate = (date) => {
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        return `${day} Th${month}`;
+    };
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + 3);
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + 5);
+    const startDateString = formatDate(startDate);
+    const endDateString = formatDate(endDate);
 
-      <h4>Công dụng:</h4>
-      <ul>
-        <li>Dưỡng sáng da, mờ thâm nám</li>
-        <li>Cải thiện màu da không đều</li>
-        <li>Giảm nếp nhăn, chống lão hóa</li>
-        <li>Cấp ẩm, làm mịn da</li>
-      </ul>
+    const fetchProductDetails = async (productId) => {
+        try {
+            // SỬA LỖI: Gọi API bằng ID
+            const response = await axios.get(`http://localhost:8080/api/products/${productId}`);
+            if (response.data && response.data.data) {
+                const productData = response.data.data;
+                setProduct(productData);
+                
+                if (productData.variations && productData.variations.length > 0) {
+                    const firstVariation = productData.variations[0];
+                    setSelectedVariation(firstVariation);
+                    setMainImage(firstVariation.image);
+                } else if (productData.images && productData.images.length > 0) {
+                    setMainImage(productData.images[0].url);
+                }
+            }
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+            message.error('Không tìm thấy sản phẩm');
+        }
+    };
 
-      <h4>Hướng dẫn sử dụng:</h4>
-      <p>Sau bước toner, lấy 2-3 giọt serum thoa đều lên mặt. Vỗ nhẹ để serum thấm sâu vào da. Sử dụng 2 lần/ngày sáng và tối.</p>
+    useEffect(() => {
+        if (id) {
+            fetchProductDetails(id);
+        }
+    }, [id]);
 
-      <h4>Lưu ý:</h4>
-      <p>Nên sử dụng kem chống nắng khi dùng sản phẩm chứa Vitamin C vào ban ngày.</p>
-    `,
-    brand: 'Some By Mi',
-    origin: 'Hàn Quốc',
-    volume: '30ml'
-  }
+    const handleVariationClick = (variation) => {
+        setSelectedVariation(variation);
+        setMainImage(variation.image);
+        setQuantity(1);
+    };
 
-  const handleChangeCount = (type) => {
-    if (type === 'increase') {
-      setNumProduct(numProduct + 1)
-    } else if (type === 'decrease' && numProduct > 1) {
-      setNumProduct(numProduct - 1)
+    const maxStock = selectedVariation ? selectedVariation.stockQuantity : 0;
+
+    const handleQuantityChange = (value) => {
+        if (!selectedVariation) return;
+        if (value >= 1 && value <= maxStock) {
+            setQuantity(value);
+        }
+    };
+    const increaseQuantity = () => {
+        if (!selectedVariation) return;
+        if (quantity < maxStock) {
+            setQuantity(quantity + 1);
+        }
+    };
+    const decreaseQuantity = () => {
+        if (quantity > 1) {
+            setQuantity(quantity - 1);
+        }
+    };
+
+    const handleAddToCart = () => {
+        if (!product || !selectedVariation) return;
+
+        dispatch(addToCart({
+            product: product._id,
+            variationSku: selectedVariation.sku,
+            name: `${product.name} (${selectedVariation.name})`,
+            image: selectedVariation.image,
+            price: selectedVariation.price,
+            originalPrice: selectedVariation.originalPrice,
+            stockQuantity: selectedVariation.stockQuantity,
+            quantity: quantity,
+        }));
+    };
+
+    const handleBuyNow = () => {
+        if (!product || !selectedVariation) return;
+
+        const item = {
+            product: product._id,
+            variationSku: selectedVariation.sku,
+            name: `${product.name} (${selectedVariation.name})`,
+            image: selectedVariation.image,
+            price: selectedVariation.price,
+            originalPrice: selectedVariation.originalPrice,
+            stockQuantity: selectedVariation.stockQuantity,
+            quantity: quantity,
+        };
+
+        const subtotal = item.price * item.quantity;
+        const shippingFee = subtotal >= 500000 ? 0 : 30000;
+        const total = subtotal + shippingFee;
+
+        navigate('/payment', {
+            state: {
+                items: [item],
+                subtotal: subtotal,
+                total: total
+            }
+        });
+    };
+
+    if (!product || !selectedVariation) {
+        return <div style={{textAlign: 'center', padding: '50px'}}>Đang tải...</div>;
     }
-  }
 
-  const handleAddToCart = () => {
-    console.log('Thêm vào giỏ hàng:', numProduct, 'sản phẩm')
-  }
+    const price = selectedVariation.price;
+    const originalPrice = selectedVariation.originalPrice;
+    const discount = (originalPrice && price < originalPrice) 
+        ? Math.round(((originalPrice - price) / originalPrice) * 100) 
+        : 0;
 
-  const handleBuyNow = () => {
-    console.log('Mua ngay:', numProduct, 'sản phẩm')
-  }
-
-  return (
-    <div style={{ width: '100%', backgroundColor: '#efefef', padding: '20px 0' }}>
-      <div style={{ width: '1270px', margin: '0 auto', backgroundColor: '#fff', borderRadius: '8px' }}>
-        <Row style={{ padding: '16px' }}>
-          {/* Phần hình ảnh */}
-          <Col span={10} style={{ borderRight: '1px solid #e5e5e5', paddingRight: '20px' }}>
-            <Image 
-              src={product.images[selectedImage]} 
-              alt="product" 
-              preview={false}
-              style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-            />
-            <Row style={{ paddingTop: '10px', display: 'flex', gap: '10px', flexWrap: 'nowrap' }}>
-              {product.images.map((image, index) => (
-                <WrapperStyleColImage span={4} key={index}>
-                  <WrapperStyleImageSmall 
-                    src={image} 
-                    alt="small-image" 
-                    preview={false}
-                    onClick={() => setSelectedImage(index)}
-                    selected={selectedImage === index}
-                  />
-                </WrapperStyleColImage>
-              ))}
-            </Row>
-          </Col>
-
-          {/* Phần thông tin sản phẩm */}
-          <Col span={14} style={{ paddingLeft: '20px' }}>
-            <WrapperStyleNameProduct>{product.name}</WrapperStyleNameProduct>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              <Rate allowHalf disabled defaultValue={product.rating} style={{ fontSize: '14px' }} />
-              <WrapperStyleTextSell> | Đã bán {product.sold}+</WrapperStyleTextSell>
-            </div>
-
-            <WrapperPriceProduct>
-              <WrapperPriceTextProduct>
-                {product.price.toLocaleString('vi-VN')}đ
-              </WrapperPriceTextProduct>
-              <span style={{ 
-                fontSize: '14px', 
-                color: '#999', 
-                textDecoration: 'line-through',
-                marginLeft: '10px'
-              }}>
-                {product.originalPrice.toLocaleString('vi-VN')}đ
-              </span>
-              <span style={{
-                fontSize: '14px',
-                color: '#ff424e',
-                backgroundColor: '#fff0f1',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                marginLeft: '10px'
-              }}>
-                -{product.discount}%
-              </span>
-            </WrapperPriceProduct>
-
-            <WrapperProductInfo>
-              <div><strong>Thương hiệu:</strong> {product.brand}</div>
-              <div><strong>Xuất xứ:</strong> {product.origin}</div>
-              <div><strong>Dung tích:</strong> {product.volume}</div>
-            </WrapperProductInfo>
-
-            <WrapperAddressProduct>
-              <span>Giao đến: </span>
-              <span className='address'>Hồ Chí Minh</span> - 
-              <span className='change-address'> Đổi địa chỉ</span>
-            </WrapperAddressProduct>
-
-            <div style={{ margin: '20px 0', borderTop: '1px solid #e5e5e5', paddingTop: '20px' }}>
-              <div style={{ marginBottom: '10px', fontSize: '16px', fontWeight: '500' }}>
-                Số lượng
-              </div>
-              <WrapperQualityProduct>
-                <WrapperBtnQualityProduct onClick={() => handleChangeCount('decrease')}>
-                  <MinusOutlined style={{ color: '#000', fontSize: '16px' }} />
-                </WrapperBtnQualityProduct>
-                
-                <WrapperInputNumber 
-                  value={numProduct} 
-                  size="small"
-                  min={1}
-                  max={product.countInStock}
-                  onChange={(value) => setNumProduct(value)}
-                />
-                
-                <WrapperBtnQualityProduct onClick={() => handleChangeCount('increase')}>
-                  <PlusOutlined style={{ color: '#000', fontSize: '16px' }} />
-                </WrapperBtnQualityProduct>
-              </WrapperQualityProduct>
-              <div style={{ fontSize: '14px', color: '#787878', marginTop: '8px' }}>
-                {product.countInStock} sản phẩm có sẵn
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-              <Button 
-                size="large"
-                icon={<ShoppingCartOutlined />}
-                style={{
-                  flex: 1,
-                  height: '48px',
-                  border: '1px solid #326e51',
-                  color: '#326e51',
-                  fontWeight: '500',
-                  fontSize: '16px'
-                }}
-                onClick={handleAddToCart}
-              >
-                Thêm vào giỏ hàng
-              </Button>
-              
-              <Button 
-                type="primary"
-                size="large"
-                style={{
-                  flex: 1,
-                  height: '48px',
-                  backgroundColor: '#326e51',
-                  borderColor: '#326e51',
-                  fontWeight: '500',
-                  fontSize: '16px'
-                }}
-                onClick={handleBuyNow}
-              >
-                Mua ngay
-              </Button>
-            </div>
-          </Col>
-        </Row>
-
-        {/* Mô tả sản phẩm */}
-        <WrapperDescription>
-          <h2>Chi tiết sản phẩm</h2>
-          <div dangerouslySetInnerHTML={{ __html: product.description }} />
-        </WrapperDescription>
+    const guaranteeContent = (
+      <div style={{ maxWidth: '300px' }}>
+        <h4 style={{ margin: '0 0 10px 0' }}>An tâm mua sắm</h4>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '15px' }}>
+          <SafetyOutlined style={{ fontSize: '20px', color: '#d0011b', paddingTop: '3px' }} />
+          <div>
+            <strong>Trả hàng miễn phí 15 ngày</strong>
+            <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>Miễn phí trả hàng trong 15 ngày nếu không vừa ý.</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '15px' }}>
+          <CheckCircleOutlined style={{ fontSize: '20px', color: '#326e51', paddingTop: '3px' }} />
+          <div>
+            <strong>Chính hãng 100%</strong>
+            <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>Đền bù 111% nếu phát hiện hàng giả.</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+          <CarOutlined style={{ fontSize: '20px', paddingTop: '3px' }} />
+          <div>
+            <strong>Miễn phí vận chuyển</strong>
+            <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>Ưu đãi vận chuyển cho đơn hàng từ 150.000đ.</p>
+          </div>
+        </div>
       </div>
-    </div>
-  )
-}
+    );
 
-export default ProductDetailPage
+    return (
+        <WrapperContainer>
+            <WrapperLayout>
+                <Row>
+                    <WrapperStyleColImage span={10}>
+                        <Image 
+                            src={mainImage} 
+                            alt={product.name} 
+                            style={{ 
+                                width: '100%', 
+                                height: '450px', 
+                                objectFit: 'contain', 
+                                border: '1px solid #f0f0f0', 
+                                borderRadius: '8px' 
+                            }} 
+                        />
+                        
+                        <WrapperThumbnailGroup>
+                            {product.variations.map((variation, index) => {
+                                return (
+                                    <WrapperStyleImageSmall
+                                        key={variation.sku}
+                                        src={variation.image}
+                                        alt={variation.name}
+                                        onClick={() => {
+                                            if (variation.stockQuantity > 0) {
+                                                handleVariationClick(variation)
+                                            }
+                                        }}
+                                        className={selectedVariation.sku === variation.sku ? 'active' : ''}
+                                        disabled={variation.stockQuantity === 0}
+                                    />
+                                )
+                            })}
+                        </WrapperThumbnailGroup>
+                        
+                    </WrapperStyleColImage>
+
+                    <WrapperStyleColInfo span={14}>
+                        <WrapperStyleNameProduct>{product.name}</WrapperStyleNameProduct>
+                        
+                        <WrapperStyleTextSell>
+                            Đã bán {product.sold || 0}+ 
+                        </WrapperStyleTextSell>
+                        
+                        <WrapperPriceProduct>
+                            {discount > 0 && (
+                                <WrapperOriginalPrice>
+                                    {originalPrice.toLocaleString('vi-VN')}đ
+                                </WrapperOriginalPrice>
+                            )}
+                            <WrapperPriceTextProduct>
+                                {price.toLocaleString('vi-VN')}đ
+                            </WrapperPriceTextProduct>
+                            {discount > 0 && (
+                                <WrapperDiscount>
+                                    -{discount}%
+                                </WrapperDiscount>
+                            )}
+                        </WrapperPriceProduct>
+                        
+                        <WrapperInfoRow>
+                            <WrapperInfoLabel>Vận Chuyển</WrapperInfoLabel>
+                            <WrapperInfoContent>
+                                <WrapperShipping>
+                                    <CarOutlined style={{ fontSize: '20px', color: '#326e51' }}/>
+                                    <span>Nhận từ {startDateString} - {endDateString} (Phí ship 0đ)</span>
+                                </WrapperShipping>
+                            </WrapperInfoContent>
+                        </WrapperInfoRow>
+                        
+                        <WrapperInfoRow>
+                            <WrapperInfoLabel>Loại:</WrapperInfoLabel>
+                            <WrapperInfoContent>
+                                <WrapperVariationGroup>
+                                    {product.variations.map((variation) => (
+                                        <WrapperVariationButton
+                                            key={variation.sku}
+                                            className={selectedVariation.sku === variation.sku ? 'active' : ''}
+                                            onClick={() => {
+                                                if (variation.stockQuantity > 0) {
+                                                    handleVariationClick(variation)
+                                                }
+                                            }}
+                                            disabled={variation.stockQuantity === 0}
+                                        >
+                                            {variation.name}
+                                        </WrapperVariationButton>
+                                    ))}
+                                </WrapperVariationGroup>
+                            </WrapperInfoContent>
+                        </WrapperInfoRow>
+
+                        <WrapperInfoRow>
+                            <WrapperInfoLabel>An Tâm Mua Sắm</WrapperInfoLabel>
+                            <Popover 
+                                content={guaranteeContent} 
+                                trigger="hover" 
+                                placement="bottomLeft"
+                            >
+                                <WrapperGuarantee style={{ cursor: 'pointer' }}>
+                                    <SafetyOutlined style={{ color: '#d0011b', fontSize: '16px' }} />
+                                    <span>Trả hàng miễn phí 15 ngày · Chính hãng 100%</span>
+                                    <DownOutlined style={{ fontSize: '12px', color: '#888' }} />
+                                </WrapperGuarantee>
+                            </Popover>
+                        </WrapperInfoRow>
+
+                        <Row style={{ marginTop: '20px' }}>
+                            <WrapperQualityLabel>Số lượng:</WrapperQualityLabel>
+                            <WrapperQualityProduct>
+                                <WrapperBtnQualityProduct onClick={decreaseQuantity}>
+                                    <MinusOutlined />
+                                </WrapperBtnQualityProduct>
+                                <WrapperInputNumber 
+                                    min={1} 
+                                    max={maxStock}
+                                    value={quantity}
+                                    onChange={handleQuantityChange}
+                                    size="middle"
+                                />
+                                <WrapperBtnQualityProduct onClick={increaseQuantity}>
+                                    <PlusOutlined />
+                                </WrapperBtnQualityProduct>
+                                <WrapperStockText>
+                                    (Còn {maxStock} sản phẩm)
+                                </WrapperStockText>
+                            </WrapperQualityProduct>
+                        </Row>
+                        
+                        <WrapperButtonRow>
+                            <AddToCartButton 
+                                size="large"
+                                onClick={handleAddToCart}
+                                icon={<ShoppingCartOutlined />}
+                                disabled={maxStock === 0}
+                            >
+                                Thêm vào giỏ hàng
+                            </AddToCartButton>
+                            <BuyNowButton 
+                                size="large"
+                                icon={<SolutionOutlined />}
+                                onClick={handleBuyNow}
+                                disabled={maxStock === 0}
+                            >
+                                Mua Ngay
+                            </BuyNowButton>
+                        </WrapperButtonRow>
+                        
+                    </WrapperStyleColInfo>
+                </Row>
+            </WrapperLayout>
+            
+            <WrapperLayout style={{ marginTop: '20px' }}>
+                <WrapperDescription>
+                    <h2>Mô tả sản phẩm</h2>
+                    <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                </WrapperDescription>
+            </WrapperLayout>
+        </WrapperContainer>
+    );
+};
+
+export default ProductDetailPage;

@@ -6,6 +6,10 @@ import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage"
 import ProductsPage from "../pages/ProductsPage/ProductsPage"
 import SignInPage from "../pages/SignInPage/SignInPage"
 import SignUpPage from "../pages/SignUpPage/SignUpPage"
+import ProfilePage from "../pages/ProfilePage/ProfilePage"
+import MyOrdersPage from "../pages/MyOrdersPage/MyOrdersPage"
+import ChangePasswordPage from "../pages/ChangePasswordPage/ChangePasswordPage"
+import SearchPage from "../pages/SearchPage/SearchPage"
 
 export const routes = [
     {
@@ -29,8 +33,24 @@ export const routes = [
         isShowHeader: true
     },
     {
+        path: '/change-password', 
+        page: ChangePasswordPage,
+        isShowHeader: true
+    },
+    {
+        path: '/my-orders',
+        page: MyOrdersPage,
+        isShowHeader: true
+    },
+    {
         path: '/payment',
         page: PaymentPage,
+        isShowHeader: true
+    },
+    
+    {
+        path: '/profile',
+        page: ProfilePage,
         isShowHeader: true
     },
     {
@@ -42,6 +62,10 @@ export const routes = [
         path: '/sign-up',
         page: SignUpPage,
         isShowHeader: false
+    },
+    {   path: '/search', 
+        page: SearchPage, 
+        isShowHeader: true 
     },
     {
         path: '*',

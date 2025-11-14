@@ -8,6 +8,7 @@ import {
   WrapperButtonStyle
 } from './style'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 const SignInPage = () => {
   const navigate = useNavigate()
@@ -19,33 +20,67 @@ const SignInPage = () => {
     navigate('/sign-up')
   }
 
-  const handleSignIn = () => {
-    console.log('Đăng nhập:', { email, password })
-    // Xử lý logic đăng nhập
+  // === THÊM HÀM MỚI ===
+  const handleNavigateForgotPassword = () => {
+    navigate('/forgot-password')
+  }
+
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      alert('Vui lòng nhập email và mật khẩu')
+      return
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:8080/api/login',
+        {
+          email,
+          password
+        }
+      )
+
+      if (response.data && response.data.user) {
+        alert('Đăng nhập thành công!')
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.setItem('token', response.data.token) // Thêm dòng này
+        navigate('/')
+        window.location.reload() // Thêm dòng này
+      } else {
+        alert('Lỗi đăng nhập: Không nhận được dữ liệu người dùng.')
+      }
+    } catch (error) {
+      console.error('Lỗi đăng nhập:', error)
+      alert(error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.')
+    }
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      backgroundColor: '#ccc', 
-      height: '100vh' 
-    }}>
-      <div style={{ 
-        width: '800px', 
-        height: '445px', 
-        borderRadius: '6px', 
-        backgroundColor: '#fff',
+    <div
+      style={{
         display: 'flex',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' 
-      }}>
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ccc',
+        height: '100vh'
+      }}
+    >
+      <div
+        style={{
+          width: '800px',
+          height: '445px',
+          borderRadius: '6px',
+          backgroundColor: '#fff',
+          display: 'flex',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+        }}
+      >
         <WrapperContainerLeft>
           <h1>Xin chào</h1>
           <p>Đăng nhập hoặc Tạo tài khoản</p>
 
-          <WrapperInputStyle 
-            placeholder="abc@gmail.com" 
+          <WrapperInputStyle
+            placeholder="abc@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -65,7 +100,7 @@ const SignInPage = () => {
             </span>
             <WrapperInputStyle
               placeholder="Mật khẩu"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -78,35 +113,44 @@ const SignInPage = () => {
             Đăng nhập
           </WrapperButtonStyle>
 
-          <p style={{ fontSize: '13px', color: '#326e51', cursor: 'pointer' }}>
+          {/* === SỬA DÒNG NÀY (Thêm onClick) === */}
+          <p
+            style={{ fontSize: '13px', color: '#326e51', cursor: 'pointer' }}
+            onClick={handleNavigateForgotPassword}
+          >
             Quên mật khẩu?
           </p>
+          {/* ================================== */}
 
           <p style={{ fontSize: '13px' }}>
-            Chưa có tài khoản? 
-            <WrapperTextLight onClick={handleNavigateSignUp}> Tạo tài khoản</WrapperTextLight>
+            Chưa có tài khoản?
+            <WrapperTextLight onClick={handleNavigateSignUp}>
+              {' '}
+              Tạo tài khoản
+            </WrapperTextLight>
           </p>
         </WrapperContainerLeft>
 
         <WrapperContainerRight>
-          {/* Logo SVG */}
-          <div style={{
-            width: '203px',
-            height: '203px',
-            backgroundColor: '#fff',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-          }}>
-            <svg 
-              width="120" 
-              height="120" 
+          <div
+            style={{
+              width: '203px',
+              height: '203px',
+              backgroundColor: '#fff',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}
+          >
+            <svg
+              width="120"
+              height="120"
               viewBox="64 64 896 896"
               style={{ fill: '#326e51' }}
             >
-              <path d="M832 64H192c-17.7 0-32 14.3-32 32v832c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32zm-600 72h560v208H232V136zm560 480H232V408h560v208zm0 272H232V680h560v208zM304 240a40 40 0 1080 0 40 40 0 10-80 0zm0 272a40 40 0 1080 0 40 40 0 10-80 0zm0 272a40 40 0 1080 0 40 40 0 10-80 0z"/>
+              <path d="M832 64H192c-17.7 0-32 14.3-32 32v832c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32zm-600 72h560v208H232V136zm560 480H232V408h560v208zm0 272H232V680h560v208zM304 240a40 40 0 1080 0 40 40 0 10-80 0zm0 272a40 40 0 1080 0 40 40 0 10-80 0zm0 272a40 40 0 1080 0 40 40 0 10-80 0z" />
             </svg>
           </div>
           <h4>Mua sắm tại BeautyCosmetic</h4>

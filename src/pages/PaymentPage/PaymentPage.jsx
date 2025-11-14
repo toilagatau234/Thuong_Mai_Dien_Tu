@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Row, Col, Form, Input, Radio, Button, Divider, message } from 'antd'
 import { 
   EnvironmentOutlined, 
@@ -15,50 +15,42 @@ import {
   WrapperMethod,
   WrapperItemOrder
 } from './style'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const PaymentPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [form] = Form.useForm()
   const [paymentMethod, setPaymentMethod] = useState('cod')
 
-  // Data mẫu - sau này lấy từ Redux/Context (sản phẩm đã chọn từ OrderPage)
-  const orderItems = [
-    {
-      id: 1,
-      name: 'Serum Vitamin C Some By Mi Galactomyces Pure Vitamin C Glow Serum 30ml',
-      image: 'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      price: 320000,
-      amount: 1,
-      discount: 20
-    },
-    {
-      id: 2,
-      name: 'Kem Dưỡng Ẩm Neutrogena Hydro Boost Water Gel 50g',
-      image: 'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png',
-      price: 450000,
-      amount: 2,
-      discount: 15
+  // === DỮ LIỆU ĐỘNG TỪ GIỎ HÀNG ===
+  const { items: orderItems, subtotal: itemsPrice, total: totalPrice } = location.state || {}
+  const [shippingPrice, setShippingPrice] = useState(0)
+  const [discountPrice, setDiscountPrice] = useState(0)
+
+  useEffect(() => {
+    // Nếu không có sản phẩm (vào thẳng /payment), quay về giỏ hàng
+    if (!orderItems || orderItems.length === 0) {
+        message.warning('Vui lòng chọn sản phẩm để thanh toán.', 3);
+        navigate('/order');
+    } else {
+        // Tính toán lại dựa trên dữ liệu thật
+        const calculatedShipping = itemsPrice >= 500000 ? 0 : 30000
+        setShippingPrice(calculatedShipping)
+
+        const calculatedDiscount = orderItems.reduce((total, item) => {
+            const original = item.originalPrice || item.price;
+            const final = item.price;
+            if (original > final) {
+                return total + ((original - final) * item.quantity)
+            }
+            return total
+        }, 0)
+        setDiscountPrice(calculatedDiscount)
     }
-  ]
+  }, [orderItems, itemsPrice, navigate])
+  // === KẾT THÚC PHẦN DỮ LIỆU ĐỘNG ===
 
-  const calculatePrice = (price, discount) => {
-    return price - (price * discount / 100)
-  }
-
-  const itemsPrice = orderItems.reduce((total, item) => {
-    return total + (calculatePrice(item.price, item.discount) * item.amount)
-  }, 0)
-
-  const discountPrice = orderItems.reduce((total, item) => {
-    if (item.discount > 0) {
-      return total + ((item.price * item.discount / 100) * item.amount)
-    }
-    return total
-  }, 0)
-
-  const shippingPrice = itemsPrice >= 500000 ? 0 : 30000
-  const totalPrice = itemsPrice + shippingPrice
 
   const onFinish = (values) => {
     console.log('Order info:', {
@@ -70,10 +62,16 @@ const PaymentPage = () => {
     
     message.success('Đặt hàng thành công!')
     
-    // Navigate to success page or order history
+    // TODO: Sau khi đặt hàng thành công, cần xóa các item này khỏi Redux
+    
     setTimeout(() => {
       navigate('/')
     }, 2000)
+  }
+
+  // Guard: Chờ redirect nếu không có data
+  if (!orderItems || orderItems.length === 0) {
+    return null; 
   }
 
   return (
@@ -262,7 +260,7 @@ const PaymentPage = () => {
 
                 <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px' }}>
                   {orderItems.map((item) => (
-                    <WrapperItemOrder key={item.id}>
+                    <WrapperItemOrder key={item.product}>
                       <img 
                         src={item.image} 
                         alt="product"
@@ -286,7 +284,7 @@ const PaymentPage = () => {
                           {item.name}
                         </div>
                         <div style={{ fontSize: '12px', color: '#999' }}>
-                          SL: {item.amount}
+                          SL: {item.quantity}
                         </div>
                       </div>
                       <div style={{ 
@@ -295,7 +293,7 @@ const PaymentPage = () => {
                         color: '#ff424e',
                         textAlign: 'right'
                       }}>
-                        {(calculatePrice(item.price, item.discount) * item.amount).toLocaleString('vi-VN')}đ
+                        {(item.price * item.quantity).toLocaleString('vi-VN')}đ
                       </div>
                     </WrapperItemOrder>
                   ))}
