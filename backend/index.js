@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 
 const userRoutes = require('./routes/userRoutes.js'); 
 const productRoutes = require('./routes/productRoutes.js'); 
+const orderRoutes = require('./routes/orderRoutes.js'); 
+
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 app.use('/api', userRoutes);
 app.use('/api/products', productRoutes); 
+app.use('/api/orders', orderRoutes)
 
 app.listen(port, () => {
     console.log(`Server chắc chắn đang chạy trên 127.0.0.1:${port}`);

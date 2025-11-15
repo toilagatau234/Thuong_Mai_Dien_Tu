@@ -68,6 +68,11 @@ export const routes = [
         isShowHeader: true 
     },
     {
+        path: '/vnpay_return',
+        page: NotFoundPage,
+        isShowHeader: true
+    },
+    {
         path: '*',
         page: NotFoundPage,
         isShowHeader: false

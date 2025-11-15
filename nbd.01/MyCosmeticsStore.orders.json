@@ -1,0 +1,44 @@
+[{
+  "_id": {
+    "$oid": "690f3e7ff025e5d756a2a58e"
+  },
+  "user": {
+    "$oid": "690aaba0db9cd89184ef2797"
+  },
+  "orderItems": [
+    {
+      "product": {
+        "$oid": "690f3d6ef025e5d756a2a56d"
+      },
+      "variationSku": "INNI-SUN-NOSEBUM-60",
+      "name": "Kem Chống Nắng innisfree Nâng Tông Kiềm Dầu 60ml",
+      "image": "https://res.cloudinary.com/drkcugbqk/image/upload/v1731135001/innisfree_kcn_lq3xpr.png",
+      "price": 287000,
+      "quantity": 1
+    },
+    {
+      "product": {
+        "$oid": "690f3d6ef025e5d756a2a56f"
+      },
+      "variationSku": "EIG-BRUSH-F633",
+      "name": "Cọ Nền Eigshow Tán Kem Nền Mỏng Mịn F633",
+      "image": "https://res.cloudinary.com/drkcugbqk/image/upload/v1731135001/eigshow_co_f633_jllgq9.png",
+      "price": 115000,
+      "quantity": 2
+    }
+  ],
+  "shippingAddress": {
+    "street": "123 Đường Chính",
+    "city": "Hồ Chí Minh",
+    "district": "Quận 1",
+    "ward": "Phường Bến Nghé"
+  },
+  "paymentMethod": "COD",
+  "paymentStatus": "paid",
+  "shippingPrice": 15000,
+  "totalPrice": 532000,
+  "orderStatus": "delivered",
+  "createdAt": {
+    "$date": "2024-07-01T10:00:00.000Z"
+  }
+}]
