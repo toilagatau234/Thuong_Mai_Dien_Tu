@@ -12,14 +12,8 @@ const orderItemSchema = new mongoose.Schema({
     }
 });
 
-// Định nghĩa schema cho đơn hàng chính
 const orderSchema = new mongoose.Schema({
-    // Bạn có thể thêm user ID nếu hệ thống có đăng nhập
-    // user: { 
-    //     type: mongoose.Schema.Types.ObjectId, 
-    //     required: true, 
-    //     ref: 'User' 
-    // },
+    // user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Thêm khi bạn tích hợp đăng nhập
     shippingInfo: {
         fullName: { type: String, required: true },
         phone: { type: String, required: true },
@@ -33,7 +27,7 @@ const orderSchema = new mongoose.Schema({
         required: true,
         default: 'cod'
     },
-    paymentStatus: { // Trạng thái thanh toán: pending, success, failed
+    paymentStatus: { // Trạng thái: 'pending', 'success', 'failed'
         type: String,
         required: true,
         default: 'pending' 
@@ -43,15 +37,15 @@ const orderSchema = new mongoose.Schema({
         required: true,
         default: 0.0
     },
-    orderId_vnp: { // Dùng để lưu mã DDHHmmss khi tạo
-        type: String, 
-        required: true
-    },
-    vnp_TxnRef: { // Dùng để lưu mã _id của đơn hàng, gửi qua VNPAY
+    vnp_TxnRef: { // Lưu _id của đơn hàng để VNPAY tham chiếu
        type: String
+    },
+    vnp_TransactionNo: { // Mã giao dịch từ VNPAY (lưu lại khi IPN gọi về)
+        type: String,
+        default: '0'
     }
 }, {
-    timestamps: true // Tự động thêm createdAt và updatedAt
+    timestamps: true 
 });
 
 const Order = mongoose.model('Order', orderSchema);
