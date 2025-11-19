@@ -81,10 +81,6 @@ export const cartSlice = createSlice({
                 item.selected = isSelected;
             });
             saveStateToLocalStorage(state);
-        },
-        removeSelectedItems: (state) => {
-            state.items = state.items.filter(item => !item.selected);
-            state.totalQuantity = state.items.reduce((total, item) => total + item.quantity, 0);
         }
     },
 })
@@ -94,7 +90,6 @@ export const {
     updateQuantity, 
     removeFromCart, 
     toggleSelectItem, 
-    toggleSelectAll,
-    removeSelectedItems
+    toggleSelectAll 
 } = cartSlice.actions
 export default cartSlice.reducer

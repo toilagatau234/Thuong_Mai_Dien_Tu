@@ -17,7 +17,7 @@ const ForgotPasswordPage = () => {
         setLoading(true);
         try {
             // BẠN SẼ CẦN TẠO API NÀY Ở BACKEND
-            const response = await axios.post('http://localhost:8080/api/forgot-password', { email });
+            const response = await axios.post('http://localhost:8080/api/users/forgot-password', { email });
             alert(response.data.message || 'Nếu email tồn tại, một link khôi phục đã được gửi.');
         } catch (error) {
             alert(error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');

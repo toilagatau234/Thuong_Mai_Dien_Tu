@@ -11,11 +11,18 @@ import ProfilePage from './pages/ProfilePage/ProfilePage'
 import AccountInfoPage from './pages/AccountInfoPage/AccountInfoPage'
 import AddressPage from './pages/AddressPage/AddressPage'
 import ProductsPage from './pages/ProductsPage/ProductsPage'
+import WishlistPage from './pages/WishlistPage/WishlistPage'
 import ProductDetailPage from './pages/ProductDetailPage/ProductDetailPage'
 import SignUpPage from './pages/SignUpPage/SignUpPage'
 import SignInPage from './pages/SignInPage/SignInPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage'
+import OrderPage from './pages/OrderPage/OrderPage'
+import PaymentPage from './pages/PaymentPage/PaymentPage'
+import MyOrdersPage from './pages/MyOrdersPage/MyOrdersPage'
+import ChangePasswordPage from './pages/ChangePasswordPage/ChangePasswordPage'
+import SearchPage from './pages/SearchPage/SearchPage'
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
 
 // 2. Định nghĩa các routes
 const userRoutes = [
@@ -24,6 +31,7 @@ const userRoutes = [
     { path: '/account-info', page: AccountInfoPage, isShowHeader: true },
     { path: '/address', page: AddressPage, isShowHeader: true },
     { path: '/products', page: ProductsPage, isShowHeader: true },
+    { path: '/wishlist', page: WishlistPage, isShowHeader: true },
     { path: '/sign-up', page: SignUpPage, isShowHeader: false },
     { path: '/sign-in', page: SignInPage, isShowHeader: false },
     { path: '/forgot-password', page: ForgotPasswordPage, isShowHeader: false },
@@ -31,6 +39,12 @@ const userRoutes = [
 
     // SỬA LỖI Ở ĐÂY: Trả lại đường dẫn /product-detail/:id
     { path: '/product-detail/:id', page: ProductDetailPage, isShowHeader: true }, 
+    { path: '/order', page: OrderPage, isShowHeader: true },
+    { path: '/payment', page: PaymentPage, isShowHeader: true },
+    { path: '/my-orders', page: MyOrdersPage, isShowHeader: true },
+    { path: '/change-password', page: ChangePasswordPage, isShowHeader: true },
+    { path: '/search', page: SearchPage, isShowHeader: true },
+    { path: '*', page: NotFoundPage, isShowHeader: false },
 ];
 
 

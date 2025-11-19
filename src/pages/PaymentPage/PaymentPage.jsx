@@ -22,7 +22,6 @@ const PaymentPage = () => {
   const location = useLocation()
   const [form] = Form.useForm()
   const [paymentMethod, setPaymentMethod] = useState('cod')
-  const [loading, setLoading] = useState(false)
 
   // === DỮ LIỆU ĐỘNG TỪ GIỎ HÀNG ===
   const { items: orderItems, subtotal: itemsPrice, total: totalPrice } = location.state || {}
@@ -53,68 +52,21 @@ const PaymentPage = () => {
   // === KẾT THÚC PHẦN DỮ LIỆU ĐỘNG ===
 
 
-  const onFinish = async (values) => {
-    setLoading(true);
-
-    const shippingInfo = {
-        fullName: values.fullName,
-        phone: values.phone,
-        address: values.address,
-        city: values.city,
-        note: values.note,
-    };
-
-    // TRƯỜNG HỢP 1: THANH TOÁN VNPAY
-    if (paymentMethod === 'vnpay') {
-        try {
-            // Gọi API backend /create_payment_url
-            const response = await fetch('http://localhost:8080/api/orders/create_payment_url', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount: totalPrice, // Tổng số tiền (đã bao gồm ship)
-                    bankCode: '', // Để trống cho VNPAY hiển thị cổng chọn ngân hàng
-                    language: 'vn',
-                    orderItems: orderItems, // Danh sách sản phẩm [từ location.state]
-                    shippingInfo: shippingInfo, // Thông tin giao hàng [từ form]
-                })
-            });
-            
-            const result = await response.json();
-
-            if (response.ok && result.paymentUrl) {
-                // Chuyển hướng người dùng đến cổng VNPAY
-                window.location.href = result.paymentUrl;
-            } else {
-                message.error(result.message || 'Không thể tạo yêu cầu thanh toán VNPAY.');
-                setLoading(false);
-            }
-
-        } catch (error) {
-            console.error('Lỗi khi gọi API VNPAY:', error);
-            message.error('Lỗi kết nối máy chủ. Không thể tạo thanh toán.');
-            setLoading(false);
-        }
-    } 
-    // TRƯỜNG HỢP 2: THANH TOÁN COD (hoặc khác)
-    else {
-        // TODO: Gọi API lưu đơn hàng COD (tương tự VNPAY nhưng paymentMethod='cod')
-        console.log('Order info (COD):', {
-          shippingInfo,
-          paymentMethod,
-          orderItems,
-          totalPrice
-        });
-        
-        message.success('Đặt hàng (COD) thành công!');
-        // Tạm thời chỉ thông báo và quay về trang chủ
-        // Sau này bạn nên gọi API lưu đơn hàng COD ở đây
-        
-        setLoading(false);
-        setTimeout(() => {
-          navigate('/');
-        }, 2000);
-    }
+  const onFinish = (values) => {
+    console.log('Order info:', {
+      ...values,
+      paymentMethod,
+      orderItems,
+      totalPrice
+    })
+    
+    message.success('Đặt hàng thành công!')
+    
+    // TODO: Sau khi đặt hàng thành công, cần xóa các item này khỏi Redux
+    
+    setTimeout(() => {
+      navigate('/')
+    }, 2000)
   }
 
   // Guard: Chờ redirect nếu không có data
@@ -252,14 +204,13 @@ const PaymentPage = () => {
                     </WrapperMethod>
 
                     <WrapperMethod>
-                      <Radio value="vnpay">
+                      <Radio value="banking">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          {/* <BankOutlined style={{ fontSize: '24px', color: '#1890ff' }} /> */}
-                          <img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-VNPAY-QR.svg" alt="VNPAY" style={{ height: '32px' }}/>
+                          <BankOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
                           <div>
-                            <div style={{ fontWeight: '500' }}>Chuyển khoản VNPAY</div>
+                            <div style={{ fontWeight: '500' }}>Chuyển khoản ngân hàng</div>
                             <div style={{ fontSize: '12px', color: '#999' }}>
-                              Hỗ trợ Thẻ nội địa, Thẻ quốc tế, Ví VNPAY...
+                              Chuyển khoản qua Internet Banking
                             </div>
                           </div>
                         </div>
@@ -281,7 +232,7 @@ const PaymentPage = () => {
                     </WrapperMethod>
                   </Radio.Group>
 
-                  {paymentMethod === 'vnpay' && (
+                  {paymentMethod === 'banking' && (
                     <div style={{
                       marginTop: '16px',
                       padding: '16px',
@@ -383,7 +334,6 @@ const PaymentPage = () => {
                   type="primary"
                   htmlType="submit"
                   size="large"
-                  loading={loading}
                   style={{
                     width: '100%',
                     height: '48px',

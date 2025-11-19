@@ -33,7 +33,7 @@ const SignInPage = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8080/api/login',
+        'http://localhost:8080/api/users/login',
         {
           email,
           password

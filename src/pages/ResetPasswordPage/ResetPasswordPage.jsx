@@ -26,7 +26,7 @@ const ResetPasswordPage = () => {
         setLoading(true);
         try {
             // BẠN SẼ CẦN TẠO API NÀY Ở BACKEND
-            const response = await axios.post(`http://localhost:8080/api/reset-password/${token}`, { password });
+            const response = await axios.post(`http://localhost:8080/api/users/reset-password/${token}`, { password });
             alert(response.data.message || 'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
             navigate('/sign-in');
         } catch (error) {

@@ -39,7 +39,7 @@ const SignUpPage = () => {
             // Dựa trên structure.txt, API backend của bạn có /api/userRoutes
             // Hãy đảm bảo API backend của bạn có endpoint 'register'
             const response = await axios.post(
-                'http://localhost:8080/api/register', // <-- Link API backend
+                'http://localhost:8080/api/users/register', // <-- Link API backend
                 {
                     firstName,
                     lastName,

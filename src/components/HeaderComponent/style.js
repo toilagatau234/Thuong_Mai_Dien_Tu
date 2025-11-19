@@ -12,6 +12,42 @@ export const WrapperHeader = styled(Row)`
     }
 `
 
+export const AccountDropdown = styled.div`
+    min-width: 200px;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 8px 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    border: 1px solid #f0f0f0;
+`
+
+export const AccountDropdownItem = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: ${(props) => (props.danger ? '#d64545' : '#333')};
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    svg {
+        font-size: 18px;
+        color: ${(props) => (props.danger ? '#d64545' : '#6b6b6b')};
+        transition: inherit;
+    }
+
+    &:hover {
+        background-color: #f4f7f5;
+        color: ${(props) => (props.danger ? '#b83232' : '#326e51')};
+
+        svg {
+            color: ${(props) => (props.danger ? '#b83232' : '#326e51')};
+        }
+    }
+`
+
 export const WrapperTextHeader = styled.span`
     font-size: 18px;
     color: #fff;

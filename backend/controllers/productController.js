@@ -8,7 +8,7 @@ const getAllProducts = async (req, res) => {
         const { search, category, brand, rating, price_from, price_to, page, limit } = req.query;
         
         const currentPage = Number(page) || 1;
-        const pageSize = Number(limit) || 10;
+        const pageSize = Number(limit) || 8;
         const skipCount = (currentPage - 1) * pageSize;
 
         let pipeline = []; 

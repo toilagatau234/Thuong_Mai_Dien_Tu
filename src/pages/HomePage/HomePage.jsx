@@ -23,7 +23,7 @@ const HomePage = () => {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0); 
-    const pageSize = 10; 
+    const pageSize = 8; 
 
     const [searchParams] = useSearchParams();
     const searchParamsString = searchParams.toString(); 

@@ -33,7 +33,7 @@ const VnpayReturnPage = () => {
             try {
                 // This is a hypothetical endpoint. You must implement it on your backend.
                 // Example: router.get('/orders/status/:orderId', ...)
-                const response = await fetch(`http://localhost:8080/api/orders/status/${txnRef}`);
+                const response = await fetch(`http://localhost:8081/api/orders/status/${txnRef}`);
                 const orderDetails = await response.json();
 
                 if (response.ok) {

@@ -82,13 +82,20 @@ export const AddressActions = styled.div`
     gap: 10px;
     
     a {
-        color: #326e51;
         cursor: pointer;
-        font-weight: 500;
+        font-weight: 600;
         text-decoration: none;
-        
+        font-size: 14px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background-color: #f0f5f3;
+        text-align: center;
+        transition: all 0.2s ease;
+
         &:hover {
-            text-decoration: underline;
+            background-color: #326e51;
+            color: #fff;
         }
     }
 `;

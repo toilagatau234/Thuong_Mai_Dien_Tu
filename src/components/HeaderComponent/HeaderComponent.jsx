@@ -1,17 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Col, Row, Dropdown, Menu, Badge, Popover, Button, Spin } from 'antd';
+import { Col, Row, Dropdown, Badge, Popover, Button, Spin } from 'antd';
 import {
   WrapperHeader,
   WrapperHeaderAccount,
   WrapperTextHeader,
   WrapperTextHeaderSmall,
   ButtonSearch,
+  AccountDropdown,
+  AccountDropdownItem,
 } from './style';
 import {
   CaretDownOutlined,
   ShoppingCartOutlined,
   UserOutlined,
   SearchOutlined,
+  ProfileOutlined,
+  OrderedListOutlined,
+  HeartOutlined,
+  EnvironmentOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -53,6 +60,14 @@ const HeaderComponent = () => {
         localStorage.removeItem('user');
       }
     }
+
+    // Lắng nghe event userUpdated để cập nhật userData
+    const handleUserUpdated = (event) => {
+      setUserData(event.detail);
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdated);
+    return () => window.removeEventListener('userUpdated', handleUserUpdated);
   }, []);
 
   // API gợi ý tìm kiếm (luôn hoạt động)
@@ -95,6 +110,8 @@ const HeaderComponent = () => {
   const handleNavigateProfile = useCallback(() => navigate('/profile'), [navigate]);
   const handleNavigateLogin = useCallback(() => navigate('/sign-in'), [navigate]);
   const handleNavigateMyOrders = useCallback(() => navigate('/my-orders'), [navigate]);
+  const handleNavigateWishlist = useCallback(() => navigate('/wishlist'), [navigate]);
+  const handleNavigateAddresses = useCallback(() => navigate('/address'), [navigate]);
   const handleNavigateHome = useCallback(() => navigate('/'), [navigate]);
   const handleNavigateOrder = useCallback(() => navigate('/order'), [navigate]);
 
@@ -115,17 +132,28 @@ const HeaderComponent = () => {
 
   // Menu dropdown tài khoản
   const menu = (
-    <Menu>
-      <Menu.Item key="profile" onClick={handleNavigateProfile}>
-        Tài Khoản Của Tôi
-      </Menu.Item>
-      <Menu.Item key="orders" onClick={handleNavigateMyOrders}>
-        Đơn Mua
-      </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout} danger>
-        Đăng Xuất
-      </Menu.Item>
-    </Menu>
+    <AccountDropdown>
+      <AccountDropdownItem onClick={handleNavigateProfile}>
+        <ProfileOutlined />
+        <span>Tài khoản của bạn</span>
+      </AccountDropdownItem>
+      <AccountDropdownItem onClick={handleNavigateMyOrders}>
+        <OrderedListOutlined />
+        <span>Quản lý đơn hàng</span>
+      </AccountDropdownItem>
+      <AccountDropdownItem onClick={handleNavigateWishlist}>
+        <HeartOutlined />
+        <span>Sản phẩm yêu thích</span>
+      </AccountDropdownItem>
+      <AccountDropdownItem onClick={handleNavigateAddresses}>
+        <EnvironmentOutlined />
+        <span>Địa chỉ giao hàng</span>
+      </AccountDropdownItem>
+      <AccountDropdownItem danger onClick={handleLogout}>
+        <LogoutOutlined />
+        <span>Đăng xuất</span>
+      </AccountDropdownItem>
+    </AccountDropdown>
   );
 
   // Popover giỏ hàng mini (Giữ nguyên, chỉ cần đảm bảo item.price được định dạng)

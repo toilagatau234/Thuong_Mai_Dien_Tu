@@ -35,6 +35,8 @@ const ProfilePage = () => {
     }
 
     const defaultShippingAddress = "Chưa thiết lập địa chỉ giao hàng mặc định.";
+    const displayName = [userData.firstName, userData.lastName].filter(Boolean).join(' ').trim();
+    const shouldShowDisplayName = Boolean(displayName);
 
     return (
         <WrapperContainer>
@@ -54,9 +56,11 @@ const ProfilePage = () => {
                             </BoxAction>
                         </BoxHeader>
                         <BoxContent>
-                            <InfoRow>
-                                <InfoValue>{userData.firstName || userData.email}</InfoValue>
-                            </InfoRow>
+                            {shouldShowDisplayName && (
+                                <InfoRow>
+                                    <InfoValue>{displayName}</InfoValue>
+                                </InfoRow>
+                            )}
                             <InfoRow>
                                 <InfoValue>{userData.email}</InfoValue>
                             </InfoRow>
