@@ -13,6 +13,10 @@ const categorySchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    status: {
+        type: Boolean,
+        default: true // Mặc định là hiện
+    },
 }, { timestamps: true }); // Tạo createdAt, updatedAt tự động
 
 // --- TẠO VÀ EXPORT MODEL 'Category' ---

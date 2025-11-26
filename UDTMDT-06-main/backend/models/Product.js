@@ -5,14 +5,21 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
     name: {              // Tên sản phẩm
         type: String,
+        required: true,
+        trim: true
+    },
+    images: [
+        { type: String } 
+    ],
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true
     },
-    images: {            // Mảng ảnh sản phẩm
-        type: Array,
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
         required: true
-    },
-    category: {          // ID hoặc tên danh mục
-        type: String
     },
     brand: {             // ID hoặc tên thương hiệu
         type: String
@@ -44,7 +51,20 @@ const productSchema = new mongoose.Schema({
     isOnSale: {          // Có đang sale hay không
         type: Boolean,
         default: false
-    }
+    },
+    // Các trường bổ sung khác (giữ nguyên nếu muốn dùng sau này)
+    // rating: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // numReviews: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // sold: {             // Số lượng đã bán
+    //     type: Number,
+    //     default: 0
+    // }
 }, { timestamps: true }); // createdAt, updatedAt tự động
 
 // --- TẠO VÀ EXPORT MODEL 'Product' ---

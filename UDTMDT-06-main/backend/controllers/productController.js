@@ -1,6 +1,8 @@
 const Product = require('../models/Product.js');
 const Category = require('../models/Category.js');
 const Brand = require('../models/Brand.js');
+const fs = require('fs');
+const path = require('path');
 
 // --- LẤY TẤT CẢ SẢN PHẨM, CÓ FILTER & PAGINATION ---
 const getAllProducts = async (req, res) => {
@@ -24,9 +26,13 @@ const getAllProducts = async (req, res) => {
     const matchStage = {};
 
     // Filter theo từ khóa tên sản phẩm
-    if (search) {
-      matchStage.name = { $regex: search, $options: 'i' };
-    }
+    let query = {};
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+        if (category) {
+            query.category = category;
+        }
 
     // Filter theo đánh giá trung bình
     if (rating) {
@@ -106,7 +112,7 @@ const getAllProducts = async (req, res) => {
 };
 
 // --- LẤY CHI TIẾT SẢN PHẨM THEO ID ---
-const getProductDetails = async (req, res) => {
+const getProductById = async (req, res) => {
   try {
     const { id: productId } = req.params;
 
@@ -126,7 +132,88 @@ const getProductDetails = async (req, res) => {
   }
 };
 
+// TẠO SẢN PHẨM MỚI (Admin)
+const createProduct = async (req, res) => {
+    try {
+        const { name, price, originalPrice, description, category, brand, countInStock } = req.body;
+        
+        // Xử lý ảnh upload
+        let images = [];
+        if (req.files && req.files.length > 0) {
+            // Lưu đường dẫn tương đối: /uploads/ten-anh.jpg
+            images = req.files.map(file => `/uploads/${file.filename}`);
+        }
+
+        const product = new Product({
+            name,
+            price,
+            originalPrice,
+            description,
+            category,
+            brand,
+            countInStock,
+            images: images,
+            // Nếu schema của bạn dùng 'image' (số ít) thì sửa dòng trên thành: image: images[0]
+            user: req.user._id // Người tạo
+        });
+
+        const createdProduct = await product.save();
+        res.status(201).json({ message: 'Tạo sản phẩm thành công', product: createdProduct });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi tạo sản phẩm', error: error.message });
+    }
+};
+
+// CẬP NHẬT SẢN PHẨM (Admin)
+const updateProduct = async (req, res) => {
+    try {
+        const { name, price, originalPrice, description, category, brand, countInStock } = req.body;
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            product.name = name || product.name;
+            product.price = price || product.price;
+            product.originalPrice = originalPrice || product.originalPrice;
+            product.description = description || product.description;
+            product.category = category || product.category;
+            product.brand = brand || product.brand;
+            product.countInStock = countInStock || product.countInStock;
+
+            // Nếu có upload ảnh mới thì thay thế ảnh cũ
+            if (req.files && req.files.length > 0) {
+                const newImages = req.files.map(file => `/uploads/${file.filename}`);
+                product.images = newImages; 
+            }
+
+            const updatedProduct = await product.save();
+            res.status(200).json({ message: 'Cập nhật thành công', product: updatedProduct });
+        } else {
+            res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi cập nhật', error: error.message });
+    }
+};
+
+// XÓA SẢN PHẨM (Admin)
+const deleteProduct = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (product) {
+            await Product.deleteOne({ _id: product._id });
+            res.status(200).json({ message: 'Xóa sản phẩm thành công' });
+        } else {
+            res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi xóa sản phẩm', error: error.message });
+    }
+};
+
 module.exports = {
   getAllProducts,
-  getProductDetails
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 };

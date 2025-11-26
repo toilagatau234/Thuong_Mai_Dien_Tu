@@ -28,7 +28,7 @@ const UserPage = () => {
         limit: limit,
         search: search,
       };
-      const response = await apiService.get('/user/all-users', { params });
+      const response = await apiService.get('/user', { params });
       
       setUsers(response.data.users || []);
       setTotalPages(response.data.totalPages || 1);
@@ -66,7 +66,7 @@ const UserPage = () => {
     
     try {
       // Giả sử API endpoint là 'toggle-block'
-      await apiService.put(`/user/toggle-block/${user._id}`, { isBlocked: newBlockedStatus });
+      await apiService.put(`/users/toggle-block/${user._id}`, { isBlocked: newBlockedStatus });
       toast.success('Cập nhật trạng thái thành công!', { id: toastId });
       
       setUsers(users.map(u =>
@@ -105,7 +105,7 @@ const UserPage = () => {
   const confirmDelete = async (id) => {
     const toastId = toast.loading('Đang xóa...');
     try {
-      await apiService.delete(`/user/${id}`);
+      await apiService.delete(`/users/${id}`);
       toast.success('Xóa người dùng thành công!', { id: toastId });
       fetchUsers(currentPage, searchTerm); // Tải lại
     } catch (error) {

@@ -3,15 +3,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // --- IMPORT ROUTES CŨ ---
 const userRoutes = require('./routes/userRoutes.js');
 const productRoutes = require('./routes/productRoutes.js');
 const addressRoutes = require('./routes/addressRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 // --- IMPORT ROUTES MỚI (Từ Dự án A) ---
 const paymentRouter = require('./routes/PaymentRoutes'); // <--- MỚI THÊM
 const orderRoutes = require('./routes/OrderRoutes');     // <--- MỚI THÊM
+const statisticalRoutes = require('./routes/statisticalRoutes');
 
 dotenv.config();
 const app = express();
@@ -52,6 +55,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use('/api/user', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/statistical', statisticalRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // --- ĐĂNG KÝ ROUTES MỚI (Từ Dự án A) ---
 app.use('/api/payment', paymentRouter); // <--- MỚI THÊM
@@ -61,6 +66,9 @@ app.use('/api/order', orderRoutes);     // <--- MỚI THÊM
 app.get('/', (req, res) => {
     res.send('✅ Máy chủ đang hoạt động');
 });
+
+// --- uploads ảnh ---
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- XỬ LÝ 404 ---
 app.use((req, res) => {
