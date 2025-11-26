@@ -20,7 +20,10 @@ const {
     getCart,
     getAllUsers,
     deleteUser,
-    toggleBlockUser
+    toggleBlockUser,
+    createUser,
+    getDetailsUser, 
+    updateUser,
 } = require('../controllers/userController');
 
 // --- KHÔNG CẦN ĐĂNG NHẬP ---
@@ -57,5 +60,14 @@ router.put('/toggle-block/:id', auth, adminOnly, toggleBlockUser);
 
 // Xóa User
 router.delete('/:id', auth, adminOnly, deleteUser);
+
+// Tạo User mới
+router.post('/create', auth, adminOnly, createUser);
+
+// Lấy chi tiết User
+router.get('/get-details/:id', auth, adminOnly, getDetailsUser);
+
+// Cập nhật User (Admin sửa)
+router.put('/update/:id', auth, adminOnly, updateUser);
 
 module.exports = router;

@@ -1,72 +1,56 @@
-// models/Product.js
 const mongoose = require('mongoose');
 
-// --- SCHEMA SẢN PHẨM ---
 const productSchema = new mongoose.Schema({
-    name: {              // Tên sản phẩm
-        type: String,
-        required: true,
-        trim: true
-    },
-    images: [
-        { type: String } 
-    ],
-    user: {
+    user: { // Thêm trường này để biết Admin nào tạo (quan trọng cho Controller)
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: 'User',
+    },
+    name: {
+        type: String,
         required: true
     },
-    category: {
+    images: [ // Sửa thành mảng chuỗi để lưu đường dẫn ảnh
+        { type: String }
+    ],
+    brand: {
+        type: String
+    },
+    category: { // Giữ lại cái này (Ref), xóa cái String ở trên
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         required: true
     },
-    brand: {             // ID hoặc tên thương hiệu
+    description: {
         type: String
     },
-    price: {             // Giá gốc
+    price: { // Giá bán
         type: Number,
-        required: true
+        required: true,
+        default: 0
     },
-    salePrice: {         // Giá sale (nếu có)
-        type: Number
-    },
-    stockQuantity: {     // Số lượng trong kho
+    originalPrice: { // Giá gốc (nếu có)
         type: Number,
-        required: true
+        default: 0
     },
-    description: {       // Mô tả sản phẩm
-        type: String
+    countInStock: {
+        type: Number,
+        required: true,
+        default: 0
     },
-    slug: {              // Slug dùng URL
-        type: String
+    rating: {
+        type: Number,
+        default: 0
     },
-    sku: {               // Mã sản phẩm
-        type: String
+    numReviews: {
+        type: Number,
+        default: 0
     },
-    status: {            // Trạng thái: in_stock, out_of_stock
-        type: String,
-        default: 'in_stock'
-    },
-    isOnSale: {          // Có đang sale hay không
-        type: Boolean,
-        default: false
-    },
-    // Các trường bổ sung khác (giữ nguyên nếu muốn dùng sau này)
-    // rating: {
-    //     type: Number,
-    //     default: 0
-    // },
-    // numReviews: {
-    //     type: Number,
-    //     default: 0
-    // },
-    // sold: {             // Số lượng đã bán
-    //     type: Number,
-    //     default: 0
-    // }
-}, { timestamps: true }); // createdAt, updatedAt tự động
+    sold: {
+        type: Number,
+        default: 0
+    }
+}, { timestamps: true });
 
-// --- TẠO VÀ EXPORT MODEL 'Product' ---
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;

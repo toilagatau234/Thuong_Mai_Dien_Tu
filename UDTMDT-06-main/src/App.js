@@ -23,6 +23,8 @@ import MyOrdersPage from './pages/MyOrdersPage/MyOrdersPage'
 import ChangePasswordPage from './pages/ChangePasswordPage/ChangePasswordPage'
 import SearchPage from './pages/SearchPage/SearchPage'
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
+import AccountLockedPage from './pages/AccountLockedPage/AccountLockedPage'
+
 
 // === 👇 MỚI THÊM: Import trang OrderSuccess ===
 import OrderSuccessPage from './pages/OrderSuccessPage/OrderSuccessPage'
@@ -51,7 +53,7 @@ const userRoutes = [
     // === 👇 MỚI THÊM: Định nghĩa đường dẫn Order Success ===
     { path: '/order-success', page: OrderSuccessPage, isShowHeader: true },
     // ======================================================
-
+    { path: '/account-locked', page: AccountLockedPage, isShowHeader: false },
     { path: '*', page: NotFoundPage, isShowHeader: false },
 ];
 

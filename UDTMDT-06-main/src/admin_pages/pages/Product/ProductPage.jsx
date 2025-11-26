@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import Switch from 'react-switch';
 import Pagination from '../../components/Pagination/Pagination';
 import { Link } from 'react-router-dom';
-import { ProductWrapper, ProductHeader, ProductFilters } from './style'
+import { ProductWrapper, ProductHeader, ProductFilters } from './style';
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -20,10 +20,8 @@ const ProductPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
 
-  // Search
+  // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Filter by Category
   const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('');
 
@@ -32,15 +30,16 @@ const ProductPage = () => {
     const fetchCategories = async () => {
       try {
         const response = await apiService.get('/categories?status=true&limit=100');
+        // Kiểm tra kỹ cấu trúc response của category
         setCategories(response.data.categories || []);
       } catch (error) {
-        console.error('Failed to fetch categories for filter:', error);
+        console.error('Failed to fetch categories:', error);
       }
     };
     fetchCategories();
   }, []);
 
-  // Hàm gọi API
+  // --- HÀM GỌI API LẤY SẢN PHẨM (ĐÃ SỬA) ---
   const fetchProducts = useCallback(async (page, search = '', category = '') => {
     try {
       setLoading(true);
@@ -50,48 +49,65 @@ const ProductPage = () => {
         search: search,
         category: category,
       };
+
       const response = await apiService.get('/products', { params });
-      
-      setProducts(response.data.products || []);
-      setTotalPages(response.data.totalPages || 1);
-      setCurrentPage(response.data.currentPage || 1);
-      
+      const responseData = response.data;
+
+      // --- SỬA LOGIC LẤY DỮ LIỆU TẠI ĐÂY ---
+
+      // 1. Lấy danh sách sản phẩm từ trường 'data' thay vì 'products'
+      setProducts(responseData.data || []);
+
+      // 2. Tính tổng số trang dựa trên 'total' và 'pageSize'
+      // Backend trả về: total (131), pageSize (10) -> totalPages = 14
+      const totalItems = responseData.total || 0;
+      const pageSize = responseData.pageSize || limit;
+      setTotalPages(Math.ceil(totalItems / pageSize) || 1);
+
+      // 3. Cập nhật trang hiện tại
+      setCurrentPage(responseData.currentPage || 1);
+
     } catch (error) {
       console.error('Failed to fetch products:', error);
       toast.error('Không thể tải sản phẩm.');
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   }, [limit]);
 
-  // Lấy dữ liệu
+  // Lấy dữ liệu khi thay đổi trang, search hoặc filter
   useEffect(() => {
     fetchProducts(currentPage, searchTerm, categoryFilter);
   }, [fetchProducts, currentPage, searchTerm, categoryFilter]);
 
   // Xử lý Pagination và Search/Filter
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page) => setCurrentPage(page);
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset về trang 1 khi search
   };
+
   const handleCategoryChange = (e) => {
     setCategoryFilter(e.target.value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset về trang 1 khi filter
   };
 
   // --- Xử lý Actions ---
 
-  // Toggle Status
   const handleToggleStatus = async (product) => {
-    const newStatus = !product.status;
+    // Logic xác định trạng thái mới
+    // Nếu status hiện tại là 'in_stock' -> chuyển thành 'out_of_stock' và ngược lại
+    // Hoặc nếu backend dùng boolean, sửa logic tương ứng
+    const newStatus = product.status === 'in_stock' ? 'out_of_stock' : 'in_stock';
+
     const toastId = toast.loading('Đang cập nhật...');
     try {
-      await apiService.put(`/products/toggle-status/${product._id}`, { status: newStatus });
-      toast.success('Cập nhật trạng thái thành công!', { id: toastId });
-      
+      await apiService.put(`/products/${product._id}`, { status: newStatus });
+      toast.success('Cập nhật thành công!', { id: toastId });
+
+      // Cập nhật lại state local để UI đổi ngay lập tức
       setProducts(products.map(p =>
         p._id === product._id ? { ...p, status: newStatus } : p
       ));
@@ -101,7 +117,6 @@ const ProductPage = () => {
     }
   };
 
-  // Xử lý Xóa (Delete)
   const handleDelete = (product) => {
     toast((t) => (
       <span>
@@ -130,7 +145,7 @@ const ProductPage = () => {
     try {
       await apiService.delete(`/products/${id}`);
       toast.success('Xóa sản phẩm thành công!', { id: toastId });
-      fetchProducts(currentPage, searchTerm, categoryFilter); // Tải lại
+      fetchProducts(currentPage, searchTerm, categoryFilter); // Tải lại danh sách
     } catch (error) {
       console.error('Failed to delete product:', error);
       toast.error('Xóa thất bại.', { id: toastId });
@@ -140,9 +155,7 @@ const ProductPage = () => {
   return (
     <ProductWrapper>
       <ProductHeader>
-        <div>
-          <h2>Products</h2>
-        </div>
+        <div><h2>Products</h2></div>
         <div>
           <Link to="/admin/product/add" className="btn btn-primary">
             <i className="fas fa-plus"></i> Add Product
@@ -150,7 +163,6 @@ const ProductPage = () => {
         </div>
       </ProductHeader>
 
-      {/* Thanh Search & Filter */}
       <ProductFilters>
         <div className="search-box">
           <input
@@ -171,7 +183,6 @@ const ProductPage = () => {
         </div>
       </ProductFilters>
 
-      {/* Bảng Product */}
       <div className="row">
         <div className="col-sm-12">
           <div className="card card-table">
@@ -202,33 +213,38 @@ const ProductPage = () => {
                       products.map((product) => (
                         <tr key={product._id}>
                           <td>
-                            <img 
-                              src={product.images?.[0] || '/assets/img/logo.svg'} 
-                              alt={product.name} 
-                              className="avatar avatar-sm me-2" 
-                              style={{ objectFit: 'cover' }}
-                            />
+                            <div className="product-item">
+                              <img
+                                src={product.images && product.images.length > 0 ? product.images[0] : '/assets/img/product-placeholder.jpg'}
+                                alt={product.name}
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/assets/img/product-placeholder.jpg' }}
+                              />
+                              <span>{product.name}</span>
+                            </div>
                           </td>
-                          <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {product.name}
+                          <td>
+                            {/* Kiểm tra an toàn (Optional Chaining) để tránh lỗi nếu category null */}
+                            {product.category?.name || <span className="text-muted">N/A</span>}
                           </td>
-                          <td>{product.category?.name || 'N/A'}</td>
                           <td>{formatCurrency(product.price)}</td>
                           <td>
-                            {/* Tính tổng tồn kho từ variants */}
-                            {product.variants?.reduce((total, v) => total + (v.quantity || 0), 0)}
+                            {product.countInStock}
                           </td>
                           <td>
                             <Switch
                               onChange={() => handleToggleStatus(product)}
-                              checked={product.status}
+                              // Kiểm tra cả boolean và string để tương thích
+                              checked={product.status === true || product.status === 'in_stock'}
                               onColor="#00D285"
                               height={15}
                               width={35}
                             />
                           </td>
                           <td className="text-end">
-                            <Link to={`/admin/product/edit/${product._id}`} className="btn btn-sm btn-warning me-2">
+                            <Link
+                              to={`/admin/product/edit/${product._id}`} // Phải bắt đầu bằng /admin/
+                              className="btn btn-sm btn-warning me-2"
+                            >
                               <i className="fas fa-edit"></i>
                             </Link>
                             <button
@@ -251,15 +267,14 @@ const ProductPage = () => {
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Phân trang */}
-      <Pagination 
+      </div >
+
+      <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-    </ProductWrapper>
+    </ProductWrapper >
   );
 };
 

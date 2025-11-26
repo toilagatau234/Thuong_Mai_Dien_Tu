@@ -15,6 +15,9 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const paymentRouter = require('./routes/PaymentRoutes'); // <--- MỚI THÊM
 const orderRoutes = require('./routes/OrderRoutes');     // <--- MỚI THÊM
 const statisticalRoutes = require('./routes/statisticalRoutes');
+const couponRoutes = require('./routes/couponRoutes');
+// const feedbackRoutes = require('./routes/feedbackRoutes');
+
 
 dotenv.config();
 const app = express();
@@ -52,11 +55,14 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch((err) => console.error('❌ Lỗi kết nối MongoDB:', err));
 
 // --- ĐĂNG KÝ ROUTES ---
-app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/statistical', statisticalRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/coupons', couponRoutes);
+// app.use('/api/feedbacks', feedbackRoutes);
+
 
 // --- ĐĂNG KÝ ROUTES MỚI (Từ Dự án A) ---
 app.use('/api/payment', paymentRouter); // <--- MỚI THÊM

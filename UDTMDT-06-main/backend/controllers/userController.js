@@ -40,6 +40,14 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'Email không tồn tại' });
 
+        if (user.isBlocked) {
+            return res.status(403).json({ 
+                message: 'Tài khoản của bạn đã bị khóa!', 
+                status: 'ERR',
+                isBlocked: true // Cờ đánh dấu để Frontend nhận biết
+            });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Mật khẩu không chính xác' });
 
@@ -339,6 +347,82 @@ const deleteUser = async (req, res) => {
     }
 };
 
+// --- [ADMIN] TẠO USER MỚI ---
+const createUser = async (req, res) => {
+    try {
+        const { firstName, lastName, email, password, phone, role } = req.body;
+        
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email đã tồn tại' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = await User.create({
+            firstName, 
+            lastName, 
+            email, 
+            password: hashedPassword, 
+            phone, 
+            role: role || 'customer' // Admin có thể set role ngay lúc tạo
+        });
+
+        res.status(201).json({ 
+            status: 'OK', 
+            message: 'Tạo người dùng thành công', 
+            data: newUser 
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+};
+
+// --- [ADMIN] LẤY CHI TIẾT USER THEO ID ---
+const getDetailsUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId).select('-password'); // Không trả về password
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Người dùng không tồn tại' });
+        }
+        
+        res.status(200).json({ status: 'OK', data: user });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+};
+
+// --- [ADMIN] CẬP NHẬT USER ---
+const updateUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const data = req.body;
+
+        // Nếu admin muốn đổi password cho user
+        if (data.password) {
+             const salt = await bcrypt.genSalt(10);
+             data.password = await bcrypt.hash(data.password, salt);
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true }).select('-password');
+        
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Người dùng không tồn tại' });
+        }
+
+        res.status(200).json({ 
+            status: 'OK', 
+            message: 'Cập nhật thành công', 
+            data: updatedUser 
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+};
+
 const forgotPassword = async (req, res) => { res.status(501).json({ message: "Chức năng đang bảo trì" }); };
 const resetPassword = async (req, res) => { res.status(501).json({ message: "Chức năng đang bảo trì" }); };
 
@@ -351,5 +435,6 @@ module.exports = {
     getAllUsers,
     toggleBlockUser,
     deleteUser,
+    createUser, getDetailsUser, updateUser,
 
 };
