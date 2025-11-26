@@ -55,7 +55,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch((err) => console.error('❌ Lỗi kết nối MongoDB:', err));
 
 // --- ĐĂNG KÝ ROUTES ---
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/statistical', statisticalRoutes);
