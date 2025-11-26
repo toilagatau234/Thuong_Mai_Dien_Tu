@@ -4,16 +4,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-
 // --- IMPORT ROUTES CŨ ---
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/userRoutes.js');
 const productRoutes = require('./routes/productRoutes.js');
 const addressRoutes = require('./routes/addressRoutes');
 
 // --- IMPORT ROUTES MỚI (Từ Dự án A) ---
 const paymentRouter = require('./routes/PaymentRoutes'); // <--- MỚI THÊM
 const orderRoutes = require('./routes/OrderRoutes');     // <--- MỚI THÊM
-const dashboardRoutes = require('./routes/DashboardRoutes');
 
 dotenv.config();
 const app = express();
@@ -58,7 +56,6 @@ app.use('/api/addresses', addressRoutes);
 // --- ĐĂNG KÝ ROUTES MỚI (Từ Dự án A) ---
 app.use('/api/payment', paymentRouter); // <--- MỚI THÊM
 app.use('/api/order', orderRoutes);     // <--- MỚI THÊM
-app.use('/api/dashboard', dashboardRoutes);
 
 // --- ROUTE KIỂM TRA SERVER ---
 app.get('/', (req, res) => {

@@ -50,21 +50,16 @@ const protect = async (req, res, next) => {
         console.log("ERROR: Không tìm thấy header Authorization hoặc sai định dạng Bearer");
         console.log("Gía trị Authorization nhận được:", req.headers.authorization);
         return res.status(401).json({ message: 'Không có Token' });
-    };
-
-    // kiểm tra phân quyền admin
-    const authUserMiddleware = (req, res, next) => {
-        if (req.user && req.user.role === 'admin' || req.user.isAdmin === true) {
-        next();
-        } else {
-            return res.status(403).json({
-                status: "ERROR", 
-                message: 'Không có quyền truy cập' });
-        }
-    };
+    }
 };
 
-module.exports = { 
-    protect,
-    authUserMiddleware,
+// --- Middleware kiểm tra quyền Admin ---
+const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next(); // Là admin, cho đi tiếp
+    } else {
+        res.status(403).json({ message: 'Không có quyền truy cập Admin' }); // Chặn lại
+    }
 };
+
+module.exports = { protect, adminOnly };

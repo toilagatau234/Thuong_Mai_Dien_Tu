@@ -7,13 +7,6 @@ const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
-// taoj token
-const generateToken =(id, isAdmin) => {
-    return jwt.sign({ id, isAdmin}, process.env.JWT_SECRET, {
-        expiresIn: '30d',
-    });
-}
-
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -50,15 +43,50 @@ const loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Mật khẩu không chính xác' });
 
-        const isAdmin = user.role === "admin";
-
-        const token = generateToken(user._id, isAdmin);
+        const token = jwt.sign(
+            { id: user._id, role: user.role }, 
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
 
         const { password: userPassword, ...userData } = user.toObject();
-        
         res.status(200).json({ message: 'Đăng nhập thành công!', token, user: userData });
     } catch (error) {
-        res.status(500).json({ message: 'Lỗi server', error: error.message});
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+// --- ĐĂNG NHẬP ADMIN ---
+const loginAdmin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        
+        // Kiểm tra user tồn tại
+        if (!user) return res.status(404).json({ message: 'Email không tồn tại' });
+
+        // Kiểm tra quyền Admin (QUAN TRỌNG)
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'Bạn không có quyền truy cập vào trang quản trị!' });
+        }
+
+        // Kiểm tra mật khẩu
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: 'Mật khẩu không chính xác' });
+
+        // Tạo token chứa role admin
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        const { password: userPassword, ...userData } = user.toObject();
+        // Trả về token và thông tin admin
+        res.status(200).json({ message: 'Admin đăng nhập thành công!', token, user: userData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
     }
 };
 
@@ -80,7 +108,7 @@ const updateUserProfile = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
 
         user.firstName = req.body.firstName || user.firstName;
-        user.lastName = req.body.lastName || user.lastName;
+        user.lastName = '';
         user.phone = req.body.phone || user.phone;
         user.gender = req.body.gender || user.gender;
         if (req.body.phoneVerified !== undefined) user.phoneVerified = req.body.phoneVerified;
@@ -91,57 +119,6 @@ const updateUserProfile = async (req, res) => {
         res.status(200).json({ success: true, message: 'Cập nhật thành công!', data: userData });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
-    }
-};
-
-// __________________ controller Admin __________________
-
-// Admin lấy tất cả users
-const getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find().select('-password').sort({ createdAt: -1 });
-        res.status(200).json({ 
-            success: true,
-            data: users,
-            total: users.length,
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Lỗi server khi lấy danh sách user', error: error.message });
-    }
-};
-
-//Admin xoá user
-const deleteUser = async (req, res) => {
-    try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-        }
-        res.status(200).json({ message: 'Xóa người dùng thành công' });
-    } catch (error) {
-        res.status(500).json({ message: 'Lỗi server khi xóa người dùng', error: error.message });
-
-    }
-};
-
-// Admin cập nhật user
-const updateUserByAdmin = async (req, res) => {
-    try {
-        const user = await User.findByIdAndUpdate(req.params.id );
-        if (!user) {
-            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-        }
-        // Admin có thể cập nhật các trường sau
-        user.firstName = req.body.firstName || user.firstName;
-        user.email = req.body.email || user.email;
-        user.role = req.body.role || user.role;
-
-        const updatedUser = await user.save();
-
-        res.status(200).json({ message: 'Cập nhật người dùng thành công', data: updatedUser });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Lỗi server khi xóa người dùng', error: error.message });
     }
 };
 
@@ -273,13 +250,106 @@ const getCart = async (req, res) => {
     }
 };
 
+// --- [ADMIN] LẤY DANH SÁCH USER (Phân trang & Tìm kiếm) ---
+const getAllUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+
+        // Tạo bộ lọc tìm kiếm
+        const query = {
+            role: { $ne: 'admin' }, // Không lấy tài khoản admin
+            $or: [
+                { email: { $regex: search, $options: 'i' } },
+                { firstName: { $regex: search, $options: 'i' } },
+                { lastName: { $regex: search, $options: 'i' } },
+                { phone: { $regex: search, $options: 'i' } }
+            ]
+        };
+
+        const totalUsers = await User.countDocuments(query);
+        const users = await User.find(query)
+            .select('-password') // Không trả về mật khẩu
+            .sort({ createdAt: -1 }) // User mới nhất lên đầu
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        // Map dữ liệu để khớp với Frontend (cần fullname)
+        const formattedUsers = users.map(user => ({
+            _id: user._id,
+            fullname: `${user.lastName || ''} ${user.firstName}`.trim(),
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            isBlocked: user.isBlocked, // Đã thêm ở Bước 1
+            avatar: user.avatar
+        }));
+
+        res.status(200).json({
+            users: formattedUsers,
+            totalPages: Math.ceil(totalUsers / limit),
+            currentPage: page,
+            totalUsers
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+};
+
+// --- [ADMIN] KHÓA / MỞ KHÓA USER ---
+const toggleBlockUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isBlocked } = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            id, 
+            { isBlocked: isBlocked }, 
+            { new: true }
+        );
+
+        if (!user) return res.status(404).json({ message: 'User không tồn tại' });
+
+        res.status(200).json({ message: 'Cập nhật trạng thái thành công', user });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+};
+
+// --- [ADMIN] XÓA USER ---
+const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Kiểm tra xem user có tồn tại không
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ message: 'User không tồn tại' });
+
+        // Không cho phép xóa Admin
+        if (user.role === 'admin') {
+            return res.status(403).json({ message: 'Không thể xóa tài khoản Admin' });
+        }
+
+        await User.findByIdAndDelete(id);
+        res.status(200).json({ message: 'Xóa user thành công' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+};
+
 const forgotPassword = async (req, res) => { res.status(501).json({ message: "Chức năng đang bảo trì" }); };
 const resetPassword = async (req, res) => { res.status(501).json({ message: "Chức năng đang bảo trì" }); };
 
 module.exports = {
-    registerUser, loginUser, getUserProfile, updateUserProfile,
+    registerUser, loginUser,loginAdmin,
+    getUserProfile, updateUserProfile,
     forgotPassword, resetPassword, getWishlist, addToWishlist, removeFromWishlist,
     addAddress, updateAddress, removeAddress,
     updateCart, getCart,
-    getAllUsers, deleteUser, updateUserByAdmin,
+    getAllUsers,
+    toggleBlockUser,
+    deleteUser,
+
 };

@@ -38,7 +38,6 @@ const SignInPage = () => {
     }
 
     try {
-      // Gọi API đăng nhập
       const response = await axios.post(
         'http://localhost:8080/api/users/login',
         { email, password }
@@ -47,40 +46,23 @@ const SignInPage = () => {
       if (response.data && (response.data.token || response.data.access_token)) {
         message.success('Đăng nhập thành công!')
         
+        if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user))
+        }
         const token = response.data.token || response.data.access_token;
-        const user = response.data.user;
-
-        // Lưu thông tin cơ bản
         localStorage.setItem('access_token', token) 
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user))
-        }
 
-        // KIỂM TRA QUYỀN ADMIN
-        if (user?.role === 'admin' || user?.isAdmin) {
-            // Lưu token riêng cho Admin
-            localStorage.setItem('adminToken', token);
-            localStorage.setItem('adminUser', JSON.stringify(user));
-            
-            navigate('/admin');
-            return;
-        }
-        // --- Logic cho User (Khách hàng) ---
-        
-        // Lấy giỏ hàng cũ từ server
+        // --- LẤY GIỎ HÀNG CŨ TỪ SERVER ---
         try {
-            // Cần set header token thủ công vì axiosClient có thể chưa cập nhật kịp
-            const cartRes = await axiosClient.get('/api/users/get-cart', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const cartRes = await axiosClient.get('/api/users/get-cart');
             if (cartRes.data.success) {
                 dispatch(setCart(cartRes.data.cartItems));
             }
         } catch (e) {
-            console.log('Chưa có giỏ hàng cũ hoặc lỗi lấy giỏ hàng');
+            console.log('Chưa có giỏ hàng cũ hoặc lỗi');
         }
 
-        // Điều hướng về trang trước đó hoặc trang chủ
+        // --- ĐIỀU HƯỚNG ---
         if (location.state && location.state.from) {
             navigate(location.state.from);
         } else if (location.state && typeof location.state === 'string') {
@@ -88,7 +70,6 @@ const SignInPage = () => {
         } else {
             navigate('/');
         }
-
       } else {
         message.error('Lỗi đăng nhập: Không nhận được dữ liệu người dùng.')
       }
