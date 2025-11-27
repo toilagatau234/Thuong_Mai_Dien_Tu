@@ -20,7 +20,7 @@ const UserEditPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await apiService.get(`/users/get-details/${id}`);
+        const response = await apiService.get(`/user/get-details/${id}`);
         const user = response.data.data;
         setFormData({
             firstName: user.firstName || '',
@@ -45,7 +45,7 @@ const UserEditPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await apiService.put(`/users/update/${id}`, formData);
+      await apiService.put(`/user/update/${id}`, formData);
       toast.success('Cập nhật thành công!');
       navigate('/admin/users');
     } catch (error) {
@@ -59,7 +59,7 @@ const UserEditPage = () => {
     <UserWrapper>
       <UserPageHeader>
         <h2>Edit User</h2>
-        <Link to="/admin/users" className="btn btn-secondary">Back</Link>
+        <Link to="/admin/user" className="btn btn-secondary">Back</Link>
       </UserPageHeader>
 
       <div className="card">

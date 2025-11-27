@@ -135,26 +135,37 @@ const getProductById = async (req, res) => {
 // TẠO SẢN PHẨM MỚI (Admin)
 const createProduct = async (req, res) => {
     try {
-        const { name, price, originalPrice, description, category, brand, countInStock } = req.body;
+        const { name, price, originalPrice, description, category, brand, countInStock, variants } = req.body;
         
-        // Xử lý ảnh upload
-        let images = [];
+        // 1. Xử lý ảnh: Chuyển đổi file path thành object { url: ... }
+        let imageObjects = [];
         if (req.files && req.files.length > 0) {
-            // Lưu đường dẫn tương đối: /uploads/ten-anh.jpg
-            images = req.files.map(file => `/uploads/${file.filename}`);
+            imageObjects = req.files.map(file => ({ 
+                url: `/uploads/${file.filename}` 
+            }));
+        }
+
+        // 2. Xử lý Variants (Frontend gửi lên dạng chuỗi JSON)
+        let parsedVariants = [];
+        if (variants) {
+            try {
+                parsedVariants = JSON.parse(variants);
+            } catch (e) {
+                console.error("Lỗi parse variants:", e);
+            }
         }
 
         const product = new Product({
             name,
-            price,
-            originalPrice,
+            price: price || 0,
+            originalPrice: originalPrice || 0,
             description,
             category,
             brand,
-            countInStock,
-            images: images,
-            // Nếu schema của bạn dùng 'image' (số ít) thì sửa dòng trên thành: image: images[0]
-            user: req.user._id // Người tạo
+            countInStock: countInStock || 0,
+            images: imageObjects, // Lưu đúng cấu trúc [{url: '...'}]
+            variations: parsedVariants,
+            user: req.user._id
         });
 
         const createdProduct = await product.save();
@@ -164,10 +175,10 @@ const createProduct = async (req, res) => {
     }
 };
 
-// CẬP NHẬT SẢN PHẨM (Admin)
+// --- 4. CẬP NHẬT SẢN PHẨM ---
 const updateProduct = async (req, res) => {
     try {
-        const { name, price, originalPrice, description, category, brand, countInStock } = req.body;
+        const { name, price, originalPrice, description, category, brand, countInStock, variants } = req.body;
         const product = await Product.findById(req.params.id);
 
         if (product) {
@@ -179,9 +190,18 @@ const updateProduct = async (req, res) => {
             product.brand = brand || product.brand;
             product.countInStock = countInStock || product.countInStock;
 
-            // Nếu có upload ảnh mới thì thay thế ảnh cũ
+            // Cập nhật variants
+            if (variants) {
+                try {
+                    product.variations = JSON.parse(variants);
+                } catch (e) {}
+            }
+
+            // Nếu có upload ảnh mới -> Thay thế ảnh cũ
             if (req.files && req.files.length > 0) {
-                const newImages = req.files.map(file => `/uploads/${file.filename}`);
+                const newImages = req.files.map(file => ({ 
+                    url: `/uploads/${file.filename}` 
+                }));
                 product.images = newImages; 
             }
 
