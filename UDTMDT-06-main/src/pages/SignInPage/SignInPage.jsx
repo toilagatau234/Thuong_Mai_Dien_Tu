@@ -39,7 +39,7 @@ const SignInPage = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8080/api/users/login',
+        'http://localhost:8080/api/user/login', 
         { email, password }
       )
 
@@ -52,9 +52,8 @@ const SignInPage = () => {
         const token = response.data.token || response.data.access_token;
         localStorage.setItem('access_token', token)
 
-        // --- LẤY GIỎ HÀNG CŨ TỪ SERVER ---
         try {
-          const cartRes = await axiosClient.get('/api/users/get-cart');
+          const cartRes = await axiosClient.get('/api/user/get-cart'); 
           if (cartRes.data.success) {
             dispatch(setCart(cartRes.data.cartItems));
           }
@@ -74,6 +73,7 @@ const SignInPage = () => {
         message.error('Lỗi đăng nhập: Không nhận được dữ liệu người dùng.')
       }
     } catch (error) {
+      // Xử lý tài khoản bị khóa
       if (error.response && error.response.status === 403 && error.response.data.isBlocked) {
         navigate('/account-locked');
       } else {
