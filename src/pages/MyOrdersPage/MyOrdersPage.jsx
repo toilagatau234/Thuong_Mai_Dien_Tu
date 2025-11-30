@@ -102,9 +102,29 @@ const MyOrdersPage = () => {
         }
     };
 
+    //đa chỉnh sửa để hiển thị trạng thái đơn hàng theo trường status
     const getOrderStatusText = (order) => {
+        // Ưu tiên hiển thị status text từ Admin quản lý
+        if (order.status) {
+            switch (order.status) {
+                case 'Pending':
+                    return <span style={{color: '#d35400', fontWeight: 'bold'}}>Đang chờ xử lý</span>;
+                case 'Confirmed':
+                    return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đã xác nhận</span>;
+                case 'Shipped':
+                    return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đang vận chuyển</span>;
+                case 'Delivered':
+                    return <span style={{color: '#27ae60', fontWeight: 'bold'}}>Giao hàng thành công</span>;
+                case 'Cancelled':
+                    return <span style={{color: 'red', fontWeight: 'bold'}}>Đã hủy</span>;
+                default:
+                    return <span style={{color: '#333', fontWeight: 'bold'}}>{order.status}</span>;
+            }
+        }
+        
+        // Fallback cho dữ liệu cũ chưa có trường status
         if (order.isDelivered) return <span style={{color: '#27ae60', fontWeight: 'bold'}}>Giao hàng thành công</span>;
-        if (order.isPaid) return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đã thanh toán (Chờ giao hàng)</span>;
+        if (order.isPaid) return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đã thanh toán</span>;
         return <span style={{color: '#d35400', fontWeight: 'bold'}}>Chờ xác nhận</span>;
     };
 

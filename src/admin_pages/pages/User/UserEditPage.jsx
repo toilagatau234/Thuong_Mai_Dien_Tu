@@ -59,7 +59,7 @@ const UserEditPage = () => {
     <UserWrapper>
       <UserPageHeader>
         <h2>Edit User</h2>
-        <Link to="/admin/user" className="btn btn-secondary">Back</Link>
+        <Link to="/admin/users" className="btn btn-secondary">Back</Link>
       </UserPageHeader>
 
       <div className="card">

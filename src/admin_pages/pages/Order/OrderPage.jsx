@@ -121,6 +121,7 @@ const OrderPage = () => {
                 <table className="table table-hover table-center mb-0">
                   <thead>
                     <tr>
+                      <th>Order ID</th>
                       <th>Customer</th>
                       <th>Phone</th>
                       <th>Date</th>

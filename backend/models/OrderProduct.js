@@ -21,12 +21,17 @@ const orderSchema = new mongoose.Schema({
         address: { type: String, required: true },
         city: { type: String, required: true },
         phone: { type: String, required: true },
+        email: { type: String },// thêm mới by quanh
     },
     paymentMethod: { type: String, required: true },
     itemsPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
+
+    // Thêm trường status để đồng bộ Admin & User
+    status: { type: String, default: 'Pending' }, // Các giá trị: Pending, Confirmed, Shipped, Delivered, Cancelled
+
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date },
     isDelivered: { type: Boolean, default: false },

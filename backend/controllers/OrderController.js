@@ -187,11 +187,11 @@ const getAllOrdersSystem = async (req, res) => {
     }
 };
 
-// --- CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG ---
+// --- CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (Sửa lại logic) ---
 const updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status } = req.body; // status nhận từ Admin: 'Shipped', 'Delivered', v.v.
 
         if (!status) {
             return res.status(400).json({ message: 'Thiếu trạng thái mới' });
@@ -202,12 +202,22 @@ const updateOrderStatus = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
         }
 
+        // Cập nhật Status text (Cái này để hiển thị cho User & Admin)
         order.status = status;
-        
-        // Tự động cập nhật isDelivered nếu status là Delivered
+
+        // Logic tự động cập nhật các trường Boolean (isPaid, isDelivered)
         if (status === 'Delivered') {
             order.isDelivered = true;
             order.deliveredAt = Date.now();
+
+            // Nếu là COD mà đã giao hàng -> Coi như đã thanh toán
+            if (!order.isPaid && (order.paymentMethod === 'COD' || order.paymentMethod === 'Tiền mặt')) {
+                order.isPaid = true;
+                order.paidAt = Date.now();
+            }
+        } else if (status === 'Cancelled') {
+            // Nếu muốn xử lý hủy
+            // order.isCancelled = true; (nếu model có field này)
         }
 
         await order.save();

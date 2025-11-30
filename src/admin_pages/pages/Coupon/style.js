@@ -2,12 +2,12 @@ import styled from 'styled-components';
 import AdminPageWrapper from '../../components/PageLayout.style';
 
 export const CouponWrapper = styled(AdminPageWrapper)`
-    padding: 20px;
+    padding: 30px;
 
     .btn-primary {
         background: #00d165;
         border: none;
-        padding: 8px 20px;
+        padding: 12px 20px;
         border-radius: 5px;
         color: white;
         display: flex;
@@ -26,7 +26,7 @@ export const PageHeader = styled.div`
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    h2 { color: #333; margin: 0; font-size: 24px; }
+    h2 { color: #333; margin: 0; font-size: 28px; }
 `;
 
 export const SearchSection = styled.div`
@@ -34,6 +34,6 @@ export const SearchSection = styled.div`
     input {
         border-radius: 5px;
         border: 1px solid #ddd;
-        padding: 8px 12px;
+        padding: 12px 15px;
     }
 `;

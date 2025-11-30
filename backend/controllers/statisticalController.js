@@ -14,9 +14,15 @@ const getDashboardStats = async (req, res) => {
         const revenueStats = await Order.aggregate([
             { 
                 $match: { 
-                    // Chỉ tính đơn hàng thành công (sửa lại theo status thực tế: 'Delivered', 'Completed'...)
-                    // Nếu muốn tính tất cả, bạn có thể comment dòng $match này lại
-                    status: { $in: ['Delivered', 'Completed'] }
+                    // SỬA Ở ĐÂY: Tính doanh thu nếu Đã thanh toán (isPaid=true) HOẶC Đã giao thành công
+                    // Điều này bao gồm: 
+                    // 1. VNPay (isPaid: true ngay từ đầu)
+                    // 2. COD sau khi Admin set Delivered (lúc này isPaid sẽ bật lên true nhờ code ở bước 2)
+                    $or: [
+                        { isPaid: true },
+                        { status: 'Delivered' },
+                        { status: 'Completed' }
+                    ]
                 }
             },
             {
