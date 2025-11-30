@@ -29,15 +29,25 @@ const OrderDetailPage = () => {
     fetchOrder();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!order) return <div>Order not found</div>;
+  if (loading) return <div className="text-center mt-5"><div className="spinner-border text-primary"></div></div>;
+  if (!order) return <div className="text-center mt-5">Order not found</div>;
 
   const { shippingAddress } = order;
+
+  // Logic hiển thị Badge thanh toán giống trang danh sách
+  const renderPaymentStatus = () => {
+    const isCod = (order.paymentMethod || '').toLowerCase().includes('cod');
+
+    if (order.isPaid) {
+      return <span className="badge bg-success" style={{ fontSize: '14px' }}>Paid {isCod ? '(COD)' : ''}</span>;
+    }
+    return <span className="badge bg-danger" style={{ fontSize: '14px' }}>Not Paid</span>;
+  };
 
   return (
     <OrderWrapper>
       <OrderHeader>
-        <div><h2>Order Detail #{order._id}</h2></div>
+        <div><h2>Order Detail #{order._id.substring(0, 8).toUpperCase()}</h2></div>
         <div><Link to="/admin/orders" className="btn btn-secondary">Back</Link></div>
       </OrderHeader>
 
@@ -60,7 +70,7 @@ const OrderDetailPage = () => {
                     <tr key={index}>
                       <td>
                         <div className="d-flex align-items-center">
-                          <img src={item.image} alt={item.name} style={{width: '50px', height: '50px', objectFit: 'cover', marginRight: '10px'}} />
+                          <img src={item.image} alt={item.name} style={{ width: '50px', height: '50px', objectFit: 'cover', marginRight: '10px' }} />
                           <span>{item.name}</span>
                         </div>
                       </td>
@@ -87,12 +97,16 @@ const OrderDetailPage = () => {
           </div>
 
           <div className="card">
-            <div className="card-header">Payment Info</div>
+            <div className="card-header font-weight-bold">Payment Info</div>
             <div className="card-body">
-              <p><strong>Method:</strong> {order.paymentMethod}</p>
-              <p><strong>Paid:</strong> {order.isPaid ? <span className="text-success">Yes</span> : <span className="text-danger">No</span>}</p>
-              <p><strong>Status:</strong> <b>{order.status || 'Pending'}</b></p>
-              <hr/>
+              <p><strong>Method:</strong> <span style={{ textTransform: 'uppercase' }}>{order.paymentMethod}</span></p>
+              <p><strong>Paid:</strong> {renderPaymentStatus()}</p>
+              <p><strong>Status:</strong>
+                <span className={`badge ms-2 ${order.status === 'Delivered' ? 'bg-success' : 'bg-warning'}`}>
+                  {order.status || 'Pending'}
+                </span>
+              </p>
+              <hr />
               <div className="d-flex justify-content-between">
                 <span>Items Price:</span>
                 <span>{formatCurrency(order.itemsPrice)}</span>

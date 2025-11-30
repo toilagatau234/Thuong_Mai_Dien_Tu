@@ -115,28 +115,41 @@ const getDetailsOrder = async (req, res) => {
     }
 };
 
-// --- HÀM 4: cancelOrderProduct (Chuẩn) ---
+// --- HÀM: cancelOrderProduct (User hủy đơn) ---
 const cancelOrderProduct = async (req, res) => {
     try {
         const orderId = req.params.id;
+        // Có thể lấy thêm userId từ middleware auth để đảm bảo chính chủ hủy (nếu cần)
+        
         if (!orderId) {
             return res.status(400).json({ status: 'ERR', message: 'Thiếu Order ID' });
         }
 
-        const updatedOrder = await Order.findByIdAndUpdate(
-            orderId,
-            { isCancelled: true }, // Lưu ý: Model phải có trường này nếu muốn lưu
-            { new: true }
-        );
-
-        if (!updatedOrder) {
+        const order = await Order.findById(orderId);
+        if (!order) {
             return res.status(404).json({ status: 'ERR', message: 'Không tìm thấy đơn hàng' });
         }
+
+        // KIỂM TRA ĐIỀU KIỆN: Chỉ được hủy khi trạng thái là 'Pending'
+        if (order.status !== 'Pending') {
+            return res.status(400).json({ 
+                status: 'ERR', 
+                message: 'Không thể hủy đơn hàng đã được xác nhận hoặc đang vận chuyển.' 
+            });
+        }
+
+        // CẬP NHẬT TRẠNG THÁI
+        order.status = 'Cancelled';
+        
+        // Nếu muốn hủy thì reset luôn các trạng thái khác (tùy chọn)
+        order.isDelivered = false;
+        
+        await order.save();
 
         return res.status(200).json({
             status: 'OK',
             message: 'Hủy đơn hàng thành công',
-            data: updatedOrder
+            data: order
         });
     } catch (e) {
         return res.status(500).json({
@@ -146,7 +159,6 @@ const cancelOrderProduct = async (req, res) => {
         });
     }
 };
-
 // --- ADMIN ---
 // --- LẤY TẤT CẢ ĐƠN HÀNG ---
 const getAllOrdersSystem = async (req, res) => {
@@ -191,7 +203,7 @@ const getAllOrdersSystem = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // status nhận từ Admin: 'Shipped', 'Delivered', v.v.
+        const { status } = req.body;
 
         if (!status) {
             return res.status(400).json({ message: 'Thiếu trạng thái mới' });
@@ -202,33 +214,54 @@ const updateOrderStatus = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
         }
 
-        // Cập nhật Status text (Cái này để hiển thị cho User & Admin)
+        // Chuẩn hóa thông tin phương thức thanh toán
+        const method = String(order.paymentMethod || '').toLowerCase().trim();
+        const isCOD = method === 'cod' || 
+                      method.includes('cod') || 
+                      method.includes('tiền mặt') || 
+                      method.includes('cash');
+
+        console.log(`[UPDATE] ID: ${id} | Status: ${order.status} -> ${status} | isCOD: ${isCOD}`);
+
+        // Cập nhật Status text
         order.status = status;
 
-        // LOGIC MỚI: Xử lý khi Giao Hàng Thành Công
+        // XỬ LÝ LOGIC TRẠNG THÁI (BẬT/TẮT isPaid)
         if (status === 'Delivered') {
+            // --- TRƯỜNG HỢP GIAO THÀNH CÔNG ---
             order.isDelivered = true;
             order.deliveredAt = Date.now();
 
-            // Lấy paymentMethod ra và chuẩn hóa về chữ thường để so sánh cho dễ
-            const method = (order.paymentMethod || '').toLowerCase();
-
-            // Kiểm tra: nếu chưa thanh toán VÀ là loại thanh toán sau (COD / Tiền mặt)
-            if (!order.isPaid && (method.includes('cod') || method.includes('tiền mặt') || method.includes('cash'))) {
+            // Nếu là COD -> Đánh dấu ĐÃ THANH TOÁN
+            if (isCOD) {
                 order.isPaid = true;
                 order.paidAt = Date.now();
+                console.log('-> Auto Update: COD Delivered => isPaid = TRUE');
             }
-        }
-        // Reset lại nếu admin lỡ tay chuyển nhầm trạng thái (Optional)
-        else if (status !== 'Delivered' && status !== 'Completed') {
+        } else {
+            // --- TRƯỜNG HỢP CÒN LẠI (Pending, Shipped, Cancelled...) ---
+            // Revert lại trạng thái giao hàng
             order.isDelivered = false;
             order.deliveredAt = null;
+
+            // Nếu là COD mà trạng thái không phải Delivered -> CHƯA THU TIỀN
+            // (Chỉ áp dụng cho COD, không áp dụng cho VNPay vì VNPay trả trước rồi)
+            if (isCOD) {
+                order.isPaid = false;
+                order.paidAt = null;
+                console.log('-> Auto Revert: COD Not Delivered => isPaid = FALSE');
+            }
         }
 
-        await order.save();
+        const updatedOrder = await order.save();
 
-        res.status(200).json({ status: 'OK', message: 'Cập nhật thành công', data: order });
+        res.status(200).json({ 
+            status: 'OK', 
+            message: 'Cập nhật thành công', 
+            data: updatedOrder 
+        });
     } catch (e) {
+        console.error(e);
         res.status(500).json({ message: 'Lỗi server', error: e.message });
     }
 };

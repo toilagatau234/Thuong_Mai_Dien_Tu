@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    WrapperContainer, 
-    WrapperContent, 
-    WrapperSidebar, 
-    WrapperMainContent 
-} from '../ProfilePage/style'; 
+import {
+    WrapperContainer,
+    WrapperContent,
+    WrapperSidebar,
+    WrapperMainContent
+} from '../ProfilePage/style';
 import ProfileSidebar from '../../components/ProfileSidebar/ProfileSidebar';
 import {
     WrapperTabs,
@@ -20,7 +20,7 @@ import {
     TotalPrice
 } from './style';
 import axios from 'axios';
-import { message, Button, Popconfirm, Tag } from 'antd'; 
+import { message, Button, Popconfirm, Tag } from 'antd';
 
 const MyOrdersPage = () => {
     const navigate = useNavigate();
@@ -83,10 +83,10 @@ const MyOrdersPage = () => {
                     Authorization: `Bearer ${cleanToken}`
                 }
             });
-            
+
             if (res.data.status === 'OK' || res.status === 200) {
                 message.success('Đã hủy đơn hàng thành công!');
-                fetchMyOrders(); 
+                fetchMyOrders();
             } else {
                 message.error(res.data.message || 'Hủy thất bại');
             }
@@ -108,48 +108,58 @@ const MyOrdersPage = () => {
         if (order.status) {
             switch (order.status) {
                 case 'Pending':
-                    return <span style={{color: '#d35400', fontWeight: 'bold'}}>Đang chờ xử lý</span>;
+                    return <span style={{ color: '#d35400', fontWeight: 'bold' }}>Đang chờ xử lý</span>;
                 case 'Confirmed':
-                    return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đã xác nhận</span>;
+                    return <span style={{ color: '#2980b9', fontWeight: 'bold' }}>Đã xác nhận</span>;
                 case 'Shipped':
-                    return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đang vận chuyển</span>;
+                    return <span style={{ color: '#2980b9', fontWeight: 'bold' }}>Đang vận chuyển</span>;
                 case 'Delivered':
-                    return <span style={{color: '#27ae60', fontWeight: 'bold'}}>Giao hàng thành công</span>;
+                    return <span style={{ color: '#27ae60', fontWeight: 'bold' }}>Giao hàng thành công</span>;
                 case 'Cancelled':
-                    return <span style={{color: 'red', fontWeight: 'bold'}}>Đã hủy</span>;
+                    return <span style={{ color: 'red', fontWeight: 'bold' }}>Đã hủy</span>;
                 default:
-                    return <span style={{color: '#333', fontWeight: 'bold'}}>{order.status}</span>;
+                    return <span style={{ color: '#333', fontWeight: 'bold' }}>{order.status}</span>;
             }
         }
-        
+
         // Fallback cho dữ liệu cũ chưa có trường status
-        if (order.isDelivered) return <span style={{color: '#27ae60', fontWeight: 'bold'}}>Giao hàng thành công</span>;
-        if (order.isPaid) return <span style={{color: '#2980b9', fontWeight: 'bold'}}>Đã thanh toán</span>;
-        return <span style={{color: '#d35400', fontWeight: 'bold'}}>Chờ xác nhận</span>;
+        if (order.isDelivered) return <span style={{ color: '#27ae60', fontWeight: 'bold' }}>Giao hàng thành công</span>;
+        if (order.isPaid) return <span style={{ color: '#2980b9', fontWeight: 'bold' }}>Đã thanh toán</span>;
+        return <span style={{ color: '#d35400', fontWeight: 'bold' }}>Chờ xác nhận</span>;
+    };
+
+    // 1. Thêm hàm này bên cạnh các hàm handleCancelOrder, handleReview
+    const handleBuyAgain = (order) => {
+        // Logic đơn giản: Chuyển hướng về trang sản phẩm đầu tiên để mua lại
+        // Hoặc bạn có thể code logic add to cart tại đây nếu muốn phức tạp hơn
+        if (order.orderItems && order.orderItems.length > 0) {
+            const firstProductId = order.orderItems[0].product || order.orderItems[0]._id;
+            navigate(`/product-detail/${firstProductId}`);
+        }
     };
 
     const renderOrders = (orderList) => {
         if (isLoading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Đang tải...</p>;
         if (!orderList || orderList.length === 0) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Chưa có đơn hàng nào.</p>;
-        
+
         return orderList.map(order => (
             <WrapperOrderCard key={order._id}>
                 <WrapperOrderHeader>
                     <span>Mã đơn: #{order._id.substring(0, 8).toUpperCase()}</span>
                     <OrderStatus>{getOrderStatusText(order)}</OrderStatus>
                 </WrapperOrderHeader>
-                
+
                 {order.orderItems?.map((item) => (
                     <WrapperProductItem key={item._id || item.product}>
-                        <img 
-                            src={item.image} 
-                            alt={item.name} 
-                            style={{width: '70px', height: '70px', objectFit: 'cover', border: '1px solid #eee'}}
+                        <img
+                            src={item.image}
+                            alt={item.name}
+                            style={{ width: '70px', height: '70px', objectFit: 'cover', border: '1px solid #eee' }}
                         />
                         <ProductInfo>
                             <ProductName>{item.name}</ProductName>
                             <ProductQuantity>x {item.amount || item.quantity}</ProductQuantity>
-                            <div style={{color: '#ff424e', marginTop: '4px'}}>
+                            <div style={{ color: '#ff424e', marginTop: '4px' }}>
                                 {item.price?.toLocaleString('vi-VN')}đ
                             </div>
                         </ProductInfo>
@@ -157,34 +167,26 @@ const MyOrdersPage = () => {
                 ))}
 
                 <WrapperOrderFooter>
-                    <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                         <div>
                             <span>Tổng tiền: </span>
                             <TotalPrice>{order.totalPrice?.toLocaleString('vi-VN')}đ</TotalPrice>
                         </div>
-                        
-                        <div style={{display: 'flex', gap: '10px'}}>
-                            
-                            {/* --- 1. NÚT ĐÁNH GIÁ (HIỆN KHI ĐÃ GIAO HÀNG) --- */}
-                            {order.isDelivered && (
-                                <Button 
-                                    style={{
-                                        borderColor: '#ee4d2d', 
-                                        color: '#fff', 
-                                        background: '#ee4d2d',
-                                        fontWeight: 'bold'
-                                    }}
-                                    onClick={() => handleReview(order)}
-                                >
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+
+                            {/* --- TRƯỜNG HỢP 1: ĐÃ GIAO -> HIỆN NÚT ĐÁNH GIÁ --- */}
+                            {order.status === 'Delivered' && (
+                                <Button onClick={() => handleReview(order)} >
                                     Đánh giá
                                 </Button>
                             )}
 
-                            {/* --- 2. NÚT HỦY ĐƠN (HIỆN KHI CHƯA GIAO & CHƯA THANH TOÁN) --- */}
-                            {!order.isDelivered && !order.isPaid && (
+                            {/* --- TRƯỜNG HỢP 2: ĐANG CHỜ (PENDING) -> HIỆN NÚT HỦY --- */}
+                            {order.status === 'Pending' && (
                                 <Popconfirm
                                     title="Hủy đơn hàng?"
-                                    description="Bạn có chắc chắn muốn hủy đơn hàng này không?"
+                                    description="Bạn chắc chắn muốn hủy đơn này?"
                                     onConfirm={() => handleCancelOrder(order._id)}
                                     okText="Đồng ý"
                                     cancelText="Không"
@@ -193,13 +195,24 @@ const MyOrdersPage = () => {
                                 </Popconfirm>
                             )}
 
-                            {/* --- 3. TRẠNG THÁI VNPAY (ĐÃ THANH TOÁN - CHƯA GIAO) --- */}
-                            {!order.isDelivered && order.isPaid && (
-                                <Tag color="blue" style={{fontSize: '14px', padding: '5px 10px'}}>
-                                    Đang vận chuyển
-                                </Tag>
+                            {/* --- TRƯỜNG HỢP 3: ĐÃ HỦY (CANCELLED) -> HIỆN NÚT MUA LẠI --- */}
+                            {order.status === 'Cancelled' && (
+                                <Button
+                                    type="primary"
+                                    ghost
+                                    onClick={() => handleBuyAgain(order)}
+                                    style={{ borderColor: '#00d165', color: '#00d165' }}
+                                >
+                                    Mua lại
+                                </Button>
                             )}
-                            
+
+                            {/* --- TRƯỜNG HỢP 4: CÁC TRẠNG THÁI KHÁC (Shipped, Confirmed...) --- */}
+                            {/* Không hiện nút hủy, có thể hiện tag trạng thái */}
+                            {(order.status === 'Shipped' || order.status === 'Confirmed') && (
+                                <Tag color="blue">Đang xử lý/Vận chuyển</Tag>
+                            )}
+
                         </div>
                     </div>
                 </WrapperOrderFooter>

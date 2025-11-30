@@ -75,24 +75,20 @@ const OrderPage = () => {
     try {
       // Gọi API cập nhật
       const response = await apiService.put(`/order/status/${orderId}`, { status: newStatus });
-      
-      toast.success('Cập nhật trạng thái thành công!', { id: toastId });
 
-      // Lấy dữ liệu mới từ Backend (response.data.data) để cập nhật state
-      // Thay vì chỉ cập nhật status, ta thay thế toàn bộ object đơn hàng đó
-      if (response.data && response.data.data) {
-          const updatedOrder = response.data.data;
-          setOrders(orders.map(o => o._id === orderId ? updatedOrder : o));
+      if (response.data.status === 'OK') {
+        toast.success('Cập nhật trạng thái thành công!', { id: toastId });
+
+        // Gọi lại hàm lấy danh sách đơn hàng
+        // Việc này đảm bảo UI hiển thị đúng 100% những gì đã lưu trong DB (bao gồm isPaid: true)
+        await fetchOrders(currentPage, searchTerm, statusFilter);
       } else {
-          // Fallback nếu API không trả về data (ít khi xảy ra nếu Controller đúng)
-          setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
-          // Nên reload lại để chắc chắn
-          fetchOrders(currentPage, searchTerm, statusFilter);
+        toast.error('Cập nhật thất bại: ' + response.data.message, { id: toastId });
       }
 
     } catch (error) {
       console.error('Failed to update status:', error);
-      toast.error('Cập nhật thất bại.', { id: toastId });
+      toast.error('Lỗi hệ thống khi cập nhật.', { id: toastId });
     }
   };
 
@@ -150,7 +146,11 @@ const OrderPage = () => {
                       <tr><td colSpan="7" className="text-center"><div className="spinner-border text-primary"></div></td></tr>
                     ) : orders.length > 0 ? (
                       orders.map((order) => (
-                        <tr key={order._id}>
+                        <tr key={order._id} style={{
+                          // Nếu status là Cancelled thì nền màu đỏ nhạt, chữ hơi đậm
+                          backgroundColor: order.status === 'Cancelled' ? '#ffe5e5' : 'transparent',
+                          color: order.status === 'Cancelled' ? '#d9534f' : 'inherit'
+                        }}>
                           <td><small>#{order._id.substring(0, 8).toUpperCase()}</small></td>
                           <td>{order.shippingAddress?.fullName || 'Guest'}</td>
                           <td>{order.shippingAddress?.phone || 'N/A'}</td>
@@ -169,12 +169,17 @@ const OrderPage = () => {
                           <td>
                             {/* Dropdown cập nhật trạng thái */}
                             <select
-                              className={`form-select form-select-sm 
-                                ${order.status === 'Delivered' ? 'border-success' :
-                                  order.status === 'Cancelled' ? 'border-danger' :
-                                    order.status === 'Pending' ? 'border-warning' : 'border-primary'}`}
+                              className="form-select form-select-sm"
                               value={order.status}
                               onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
+                              style={{
+                                // Nếu đã hủy thì viền đỏ
+                                borderColor: order.status === 'Cancelled' ? '#dc3545' : '',
+                                color: order.status === 'Cancelled' ? '#dc3545' : '#333',
+                                fontWeight: order.status === 'Cancelled' ? 'bold' : 'normal'
+                              }}
+                            // (Tùy chọn) Nếu muốn Admin KHÔNG ĐƯỢC CHỈNH SỬA đơn đã hủy thì thêm disabled
+                            // disabled={order.status === 'Cancelled'} 
                             >
                               {ORDER_STATUSES.map(status => (
                                 <option key={status} value={status}>{status}</option>
