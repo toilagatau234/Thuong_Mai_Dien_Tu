@@ -1,25 +1,32 @@
 const express = require('express');
 const router = express.Router();
+
+// 1. Import Middleware xác thực
+const { protect, adminOnly} = require('../middleware/authMiddleware');
+
+// 2. Import Controller
 const OrderController = require('../controllers/OrderController');
-const { protect: auth, adminOnly} = require('../middleware/authMiddleware');
 
-// 1. Tạo đơn hàng
-router.post('/create', auth, OrderController.createOrder);
+// --- CÁC ROUTE ---
 
-// 2. Lấy tất cả đơn của 1 user (Frontend truyền ID user vào URL)
-router.get('/get-all-order/:id', auth, OrderController.getAllOrder);
+// 1. Tạo đơn hàng (Cần đăng nhập)
+router.post('/create', protect, OrderController.createOrder);
 
-// 3. Lấy chi tiết 1 đơn hàng
-router.get('/get-details-order/:id', auth, OrderController.getDetailsOrder);
+// 2. Lấy tất cả đơn của 1 user (Cần đăng nhập)
+router.get('/get-all-order/:id', protect, OrderController.getAllOrder);
 
-// 4. Hủy đơn hàng
-router.delete('/cancel-order/:id', auth, OrderController.cancelOrderProduct);
+// 3. Lấy chi tiết 1 đơn hàng (Cần đăng nhập)
+router.get('/get-details-order/:id', protect, OrderController.getDetailsOrder);
+
+// 4. Hủy đơn hàng (Cần đăng nhập)
+// Đây là route để nút "Hủy đơn hàng" ở Frontend gọi vào
+router.delete('/cancel-order/:id', protect, OrderController.cancelOrderProduct);
 
 // --- ADMIN ROUTES ---
 // 1. Lấy tất cả đơn hàng
-router.get('/all-orders', auth, adminOnly, OrderController.getAllOrdersSystem);
+router.get('/all-orders', protect, adminOnly, OrderController.getAllOrdersSystem);
 
 // 2. Cập nhật trạng thái
-router.put('/status/:id', auth, adminOnly, OrderController.updateOrderStatus);
+router.put('/status/:id', protect, adminOnly, OrderController.updateOrderStatus);
 
 module.exports = router;

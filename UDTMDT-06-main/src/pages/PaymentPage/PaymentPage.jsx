@@ -14,103 +14,90 @@ import {
 } from './style'
 import { useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
+import { useDispatch } from 'react-redux';
+import { resetCart } from '../../redux/slides/cartSlice';
 
 const PaymentPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useDispatch()
   const [form] = Form.useForm()
   const [paymentMethod, setPaymentMethod] = useState('cod')
 
-  // Lấy thông tin đơn hàng từ state (dữ liệu này sẽ mất nếu reload hoặc chuyển trang lâu)
+  // Lấy URL API từ biến môi trường
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
   const { items: orderItems, subtotal: itemsPrice, total: totalPrice } = location.state || {}
   const [shippingPrice, setShippingPrice] = useState(0)
   const [discountPrice, setDiscountPrice] = useState(0)
 
-  // State hiển thị (khởi tạo rỗng)
   const [stateUserDetails, setStateUserDetails] = useState({
     name: '',
     phone: '',
     address: '',
-    city: ''
+    city: '',
+    email: '' 
   });
 
-  // --- 1. LOGIC TỰ ĐỘNG LẤY ĐỊA CHỈ ---
+  // --- 1. LOGIC TỰ ĐỘNG ĐIỀN FORM ---
   useEffect(() => {
-    // Lấy user từ LocalStorage
     const userStorage = localStorage.getItem('user');
     let user = null;
     if(userStorage) {
-        user = JSON.parse(userStorage);
+        try { user = JSON.parse(userStorage); } catch (e) {}
     }
 
     if (user) {
-        // a. Xử lý Tên
         let name = user.name || '';
-        if (!name && user.firstName) {
-            name = `${user.firstName} ${user.lastName || ''}`.trim();
-        }
+        if (!name && user.firstName) name = `${user.firstName} ${user.lastName || ''}`.trim();
         
-        // b. Xử lý SĐT
         let phone = user.phone || '';
-        
         let address = '';
         let city = '';
+        let email = user.email || ''; 
 
-        // c. Xử lý Địa chỉ (Ưu tiên lấy từ Sổ địa chỉ mới)
         if (user.addresses && user.addresses.length > 0) {
-            // Tìm địa chỉ mặc định
             const defaultAddr = user.addresses.find(addr => addr.isDefault) || user.addresses[0]; 
             if (defaultAddr) {
-                // Ghép chuỗi
-                const parts = [
-                    defaultAddr.specificAddress, 
-                    defaultAddr.ward, 
-                    defaultAddr.district, 
-                    defaultAddr.province
-                ].filter(part => part); 
-                
+                const parts = [defaultAddr.specificAddress, defaultAddr.ward, defaultAddr.district, defaultAddr.province].filter(part => part); 
                 address = parts.join(', ');
                 city = defaultAddr.province;
             }
         } 
-        // d. Fallback (Schema cũ)
         else if (user.address) {
-            if (typeof user.address === 'object') {
-                address = Object.values(user.address).join(', ');
-            } else {
-                address = String(user.address);
-            }
+            if (typeof user.address === 'object') address = Object.values(user.address).join(', ');
+            else address = String(user.address);
             city = user.city || '';
         }
 
-        // Loại bỏ dữ liệu rác
         if (address === '[object Object]') address = '';
 
-        // Cập nhật State hiển thị
         const newState = {
-            name: name || 'Khách hàng',
+            name: name || '',
             phone: phone,
             address: address,
-            city: city
+            city: city,
+            email: email
         };
 
         setStateUserDetails(newState);
 
-        // Cập nhật Form Input (để submit)
+        // Tự động điền dữ liệu vào Form (Bao gồm cả Email)
         form.setFieldsValue({
             fullName: newState.name,
             phone: newState.phone,
             address: newState.address,
-            city: newState.city
+            city: newState.city,
+            email: newState.email // <--- Điền email vào ô input
         });
     }
   }, [form]);
 
-  // --- 2. KIỂM TRA ĐƠN HÀNG ---
+  // --- 2. KIỂM TRA GIỎ HÀNG ---
   useEffect(() => {
     if (!orderItems || orderItems.length === 0) {
         message.warning('Vui lòng chọn sản phẩm để thanh toán.', 3);
-        navigate('/order');
+        navigate('/order'); 
     } else {
         const calculatedShipping = itemsPrice >= 500000 ? 0 : 30000
         setShippingPrice(calculatedShipping)
@@ -123,28 +110,22 @@ const PaymentPage = () => {
     }
   }, [orderItems, itemsPrice, navigate])
 
-  // --- 3. CHUYỂN HƯỚNG THAY ĐỔI ĐỊA CHỈ (ĐÃ SỬA) ---
   const handleChangeAddress = () => {
-      // 👇 Gửi kèm vé khứ hồi { from: '/payment' }
       navigate('/address', { state: { from: '/payment' } }); 
   }
 
   const parseJwt = (token) => {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      return null;
-    }
+    try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; }
   };
 
   const onFinish = async (values) => {
-    // Xử lý token
+    // values chứa dữ liệu từ Form: { fullName, phone, address, email, note, ... }
+    
     let token = localStorage.getItem('access_token');
     if (token && typeof token === 'string') {
         if (token.startsWith('"') && token.endsWith('"')) token = token.slice(1, -1);
     }
     
-    // Lấy ID User
     let userId = null;
     if (token) {
         const decoded = parseJwt(token);
@@ -158,7 +139,14 @@ const PaymentPage = () => {
         return; 
     }
 
-    // Chuẩn bị dữ liệu
+    // --- 3. QUAN TRỌNG: LẤY EMAIL TỪ Ô INPUT NGƯỜI DÙNG NHẬP ---
+    const emailFinal = values.email; 
+
+    if (!emailFinal) {
+        message.error("Vui lòng nhập Email để nhận thông báo đơn hàng!");
+        return;
+    }
+
     const orderInfo = {
       orderItems: orderItems, 
       shippingAddress: {
@@ -169,9 +157,10 @@ const PaymentPage = () => {
       },
       paymentMethod,
       itemsPrice,
-      shippingPrice: shippingPrice, // Sử dụng state shippingPrice
+      shippingPrice: shippingPrice,
       totalPrice,
       user: userId,
+      email: emailFinal, // <--- Gửi email người dùng nhập lên Server
       isPaid: false,
       isDelivered: false
     }
@@ -183,19 +172,19 @@ const PaymentPage = () => {
         }
     };
 
-    // Gọi API
     if (paymentMethod === 'vnpay') {
       localStorage.setItem('PENDING_ORDER', JSON.stringify(orderInfo));
       try {
         message.loading({ content: 'Đang kết nối VNPAY...', key: 'payment_loading' });
         const { data } = await axios.post(
-            'http://localhost:8080/api/payment/create_payment_url', 
+            `${API_URL}/api/payment/create_payment_url`, 
             {
                 amount: totalPrice,
                 bankCode: '',
                 language: 'vn',
                 orderDescription: `Thanh toan don hang ${values.fullName}`,
-                orderType: 'billpayment'
+                orderType: 'billpayment',
+                email: emailFinal
             },
             config 
         );
@@ -206,16 +195,27 @@ const PaymentPage = () => {
       }
     } 
     else { 
+      // COD
       try {
-        const res = await axios.post('http://localhost:8080/api/order/create', orderInfo, config);
-        if(res.data.status === 'OK') {
+        const res = await axios.post(`${API_URL}/api/order/create`, orderInfo, config);
+        
+        if(res.data.status === 'OK' || res.status === 200 || res.status === 201) {
             message.success('Đặt hàng thành công!');
             localStorage.removeItem('PENDING_ORDER');
-            setTimeout(() => navigate('/my-orders'), 2000);
+            dispatch(resetCart());
+            navigate('/order-success', {
+                state: {
+                    paymentMethod: 'cod',
+                    order: orderInfo
+                }
+            });
+        } else {
+             message.error(res.data.message || 'Đặt hàng thất bại');
         }
       } catch (e) {
         console.error("Lỗi COD:", e);
-        message.error('Lỗi đặt hàng: ' + (e.response?.data?.message || e.message));
+        const errorMsg = e.response?.data?.message || e.message;
+        message.error('Lỗi đặt hàng: ' + errorMsg);
       }
     }
   }
@@ -235,33 +235,35 @@ const PaymentPage = () => {
                         <h3 style={{ fontSize: '18px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <EnvironmentOutlined style={{ color: '#326e51' }} /> Thông tin giao hàng
                         </h3>
-                        {/* 👇 Đã sửa onClick ở đây 👇 */}
                         <span onClick={handleChangeAddress} style={{color: '#3d6ef7', cursor:'pointer', fontWeight: '500'}}>Thay đổi</span>
                     </div>
 
-                    {/* Block hiển thị thông tin */}
-                    <div style={{ 
-                        background: '#f0f8ff', 
-                        padding: '15px', 
-                        borderRadius: '6px', 
-                        border: '1px solid #cceeff', 
-                        marginBottom: '20px' 
-                    }}>
+                    <div style={{ background: '#f0f8ff', padding: '15px', borderRadius: '6px', border: '1px solid #cceeff', marginBottom: '20px' }}>
                         <div style={{ fontWeight: 'bold', color: '#333', fontSize: '15px', marginBottom: '5px' }}>
                             {stateUserDetails.name} 
                             {stateUserDetails.phone && <span style={{fontWeight: 'normal', color: '#666'}}> ({stateUserDetails.phone})</span>}
                         </div>
                         <div style={{ color: '#555', lineHeight: '1.5' }}>
-                            {stateUserDetails.address && stateUserDetails.address !== '[object Object]' 
-                                ? stateUserDetails.address 
-                                : <span style={{color: '#ff4d4f'}}>Vui lòng thêm địa chỉ giao hàng</span>
-                            }
+                            {stateUserDetails.address || <span style={{color: '#ff4d4f'}}>Vui lòng thêm địa chỉ giao hàng</span>}
                         </div>
                     </div>
 
                     <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}>
                       <Input size="large" placeholder="Nhập họ tên" />
                     </Form.Item>
+                    
+                    {/* --- 4. THÊM Ô NHẬP EMAIL --- */}
+                    <Form.Item 
+                        label="Email (Để nhận thông báo)" 
+                        name="email" 
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập Email!' },
+                            { type: 'email', message: 'Email không hợp lệ!' }
+                        ]}
+                    >
+                      <Input size="large" placeholder="Nhập email của bạn (vd: abc@gmail.com)" />
+                    </Form.Item>
+
                     <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: 'Vui lòng nhập SĐT!' }]}>
                       <Input size="large" placeholder="Nhập SĐT" />
                     </Form.Item>

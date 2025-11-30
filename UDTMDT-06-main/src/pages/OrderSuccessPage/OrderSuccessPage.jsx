@@ -1,27 +1,33 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Result, Button, message, Spin } from 'antd'; 
+import { Result, Button, message } from 'antd'; 
 import axios from 'axios';
+// 1. IMPORT ĐỂ XÓA GIỎ HÀNG
+import { useDispatch } from 'react-redux';
+import { resetCart } from '../../redux/slides/cartSlice';
 
 const OrderSuccessPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const queryParams = new URLSearchParams(location.search);
+  const dispatch = useDispatch(); // 2. Khai báo dispatch
   
-  // === SỬA DÒNG NÀY ĐỂ BẮT ĐƯỢC MỌI TRƯỜNG HỢP ===
-  const responseCode = queryParams.get('code') || queryParams.get('vnp_ResponseCode');
-  // ===============================================
+  const state = location.state || {}; 
+  const { paymentMethod, order } = state; 
 
+  const queryParams = new URLSearchParams(location.search);
+  const responseCode = queryParams.get('code') || queryParams.get('vnp_ResponseCode');
+  
   const isCalled = useRef(false);
 
+  // Lấy URL API chuẩn
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
   useEffect(() => {
-    // Chỉ chạy khi mã lỗi = 00 (Thành công) và chưa gọi API lần nào
     if (responseCode === '00' && !isCalled.current) {
         isCalled.current = true;
         const pendingOrder = JSON.parse(localStorage.getItem('PENDING_ORDER'));
 
         if (pendingOrder) {
-            // === 1. LẤY TOKEN VÀ LÀM SẠCH (FIX LỖI 401) ===
             let token = localStorage.getItem('access_token');
             if (token && typeof token === 'string') {
                 if (token.startsWith('"') && token.endsWith('"')) {
@@ -29,13 +35,8 @@ const OrderSuccessPage = () => {
                 }
             }
             
-            // Nếu không có token thì không gửi được
-            if (!token) {
-                message.error("Lỗi xác thực: Không tìm thấy Token! Hãy đăng nhập lại.");
-                return;
-            }
+            if (!token) return;
 
-            // === 2. CẤU HÌNH HEADER ===
             const config = {
                 headers: {
                     token: `Bearer ${token}`,
@@ -43,7 +44,6 @@ const OrderSuccessPage = () => {
                 }
             };
 
-            // Thêm trạng thái đã thanh toán
             const finalOrder = { 
                 ...pendingOrder, 
                 isPaid: true, 
@@ -51,49 +51,61 @@ const OrderSuccessPage = () => {
                 paymentMethod: 'vnpay' 
             };
 
-            console.log("Đang lưu đơn hàng với Token:", token);
+            axios.post(`${API_URL}/api/order/create`, finalOrder, config)
+                .then(async (res) => {
+                    if(res.data.status === 'OK' || res.status === 200 || res.status === 201) {
+                        message.success('Thanh toán VNPAY thành công!');
+                        localStorage.removeItem('PENDING_ORDER');
 
-            // === 3. GỌI API VỚI CONFIG (QUAN TRỌNG NHẤT) ===
-            axios.post('http://localhost:8080/api/order/create', finalOrder, config)
-                .then(res => {
-                    if(res.data.status === 'OK') {
-                        message.success('Đã lưu đơn hàng thành công!');
-                        localStorage.removeItem('PENDING_ORDER'); // Xóa đơn chờ
+                        // --- 3. THÊM ĐOẠN NÀY: XÓA GIỎ HÀNG SAU KHI THANH TOÁN VNPAY ---
+                        
+                        // A. Xóa giỏ hàng trong Redux (Frontend)
+                        dispatch(resetCart());
+
+                        // B. Xóa giỏ hàng trong Database (Backend)
+                        // Gọi API update giỏ hàng thành rỗng []
+                        try {
+                            const user = JSON.parse(localStorage.getItem('user'));
+                            if (user?.id || user?._id) {
+                                await axios.put(`${API_URL}/api/users/update-cart`, { cartItems: [] }, config);
+                            }
+                        } catch (err) {
+                            console.log("Lỗi xóa giỏ hàng DB:", err);
+                        }
+                        // -------------------------------------------------------------
                     }
                 })
                 .catch(err => {
-                    console.error('Lỗi lưu đơn:', err);
-                    if(err.response?.status === 401) {
-                         message.error('Phiên đăng nhập hết hạn, không thể lưu đơn!');
-                    } else {
-                         message.error('Lỗi khi lưu đơn hàng!');
-                    }
+                    console.error('Lỗi lưu đơn VNPAY:', err);
+                    message.error('Đã thanh toán nhưng lỗi lưu đơn. Vui lòng liên hệ Admin!');
                 });
         }
     }
-  }, [responseCode]);
+  }, [responseCode, dispatch, API_URL]);
+
+  const isSuccess = responseCode === '00' || (paymentMethod === 'cod' && order);
 
   return (
-    <div style={{ padding: '50px', textAlign: 'center', background: '#f5f5fa', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      {responseCode === '00' ? (
+    <div style={{ padding: '50px', textAlign: 'center', background: '#f5f5fa', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      {isSuccess ? (
         <Result
           status="success"
-          title="Thanh toán thành công!"
-          subTitle="Đơn hàng của bạn đã được thanh toán và hệ thống đang xử lý."
+          title="Đặt hàng thành công!"
+          subTitle={`Cảm ơn bạn đã mua sắm. Đơn hàng ${paymentMethod === 'vnpay' ? 'đã thanh toán qua VNPAY' : ''} của bạn đang được xử lý.`}
           extra={[
             <Button type="primary" key="home" onClick={() => navigate('/')}>
               Về trang chủ
             </Button>,
             <Button key="orders" onClick={() => navigate('/my-orders')}>
-              Xem đơn hàng
+              Xem đơn hàng của tôi
             </Button>
           ]} 
         />
       ) : (
         <Result
           status="error"
-          title="Thanh toán thất bại"
-          subTitle="Giao dịch không thành công hoặc bị hủy."
+          title="Đặt hàng thất bại"
+          subTitle="Giao dịch bị hủy hoặc xảy ra lỗi trong quá trình xử lý."
           extra={[
             <Button type="primary" onClick={() => navigate('/payment')}>
               Thử lại

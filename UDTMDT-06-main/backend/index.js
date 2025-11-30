@@ -9,15 +9,15 @@ const path = require('path');
 const userRoutes = require('./routes/userRoutes.js');
 const productRoutes = require('./routes/productRoutes.js');
 const addressRoutes = require('./routes/addressRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
 
 // --- IMPORT ROUTES MỚI (Từ Dự án A) ---
 const paymentRouter = require('./routes/PaymentRoutes'); // <--- MỚI THÊM
 const orderRoutes = require('./routes/OrderRoutes');     // <--- MỚI THÊM
+
+const categoryRoutes = require('./routes/categoryRoutes');
 const statisticalRoutes = require('./routes/statisticalRoutes');
 const couponRoutes = require('./routes/couponRoutes');
 // const feedbackRoutes = require('./routes/feedbackRoutes');
-
 
 dotenv.config();
 const app = express();
@@ -55,18 +55,17 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch((err) => console.error('❌ Lỗi kết nối MongoDB:', err));
 
 // --- ĐĂNG KÝ ROUTES ---
-app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
-app.use('/api/statistical', statisticalRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/coupons', couponRoutes);
-// app.use('/api/feedbacks', feedbackRoutes);
-
 
 // --- ĐĂNG KÝ ROUTES MỚI (Từ Dự án A) ---
 app.use('/api/payment', paymentRouter); // <--- MỚI THÊM
 app.use('/api/order', orderRoutes);     // <--- MỚI THÊM
+app.use('/api/statistical', statisticalRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/coupons', couponRoutes);
+// app.use('/api/feedbacks', feedbackRoutes);
 
 // --- ROUTE KIỂM TRA SERVER ---
 app.get('/', (req, res) => {
@@ -75,6 +74,7 @@ app.get('/', (req, res) => {
 
 // --- uploads ảnh ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // --- XỬ LÝ 404 ---
 app.use((req, res) => {

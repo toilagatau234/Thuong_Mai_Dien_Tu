@@ -10,9 +10,6 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage"
 import MyOrdersPage from "../pages/MyOrdersPage/MyOrdersPage"
 import ChangePasswordPage from "../pages/ChangePasswordPage/ChangePasswordPage"
 import SearchPage from "../pages/SearchPage/SearchPage"
-import UserPage from '../pages/User/UserPage';
-import UserAddPage from '../pages/User/UserAddPage';
-import UserEditPage from '../pages/User/UserEditPage';
 import AccountLockedPage from '../pages/AccountLockedPage/AccountLockedPage';
 
 // === 👇 1. MỚI THÊM: Import trang OrderSuccess ===
@@ -93,7 +90,4 @@ export const routes = [
         page: AccountLockedPage,
         isShowHeader: false // Ẩn header nếu muốn trang trông giống trang lỗi
     },
-    { path: 'users', page: UserPage, isShowHeader: true },
-    { path: 'user/add', page: UserAddPage, isShowHeader: true },
-    { path: 'user/edit/:id', page: UserEditPage, isShowHeader: true },
 ]

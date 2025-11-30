@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // 1. SỬA ĐƯỜNG DẪN: từ '/auth/login' thành '/users/admin-login'
       // 2. SỬA PAYLOAD: gửi object { email, password } thay vì { username, password }
-      const response = await apiService.post('/user/admin-login', { 
+      const response = await apiService.post('/users/admin-login', { 
           email: email, 
           password: password 
       });

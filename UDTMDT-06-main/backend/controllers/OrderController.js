@@ -1,6 +1,7 @@
 const Order = require('../models/OrderProduct');
+const Product = require('../models/Product');
 
-// --- HÀM 1: createOrder (ĐÃ SỬA LỖI VALIDATION) ---
+// --- HÀM 1: createOrder (Đã sửa logic nhận Email) ---
 const createOrder = async (req, res) => {
     try {
         const { 
@@ -11,35 +12,46 @@ const createOrder = async (req, res) => {
             user,
             isPaid, 
             paidAt,
-            // Nếu Frontend gửi rời rạc thì lấy ở đây
-            fullName, address, city, phone 
+            // Thêm email vào đây để hứng dữ liệu từ Frontend
+            fullName, address, city, phone, email 
         } = req.body;
 
-        // === XỬ LÝ QUAN TRỌNG: Tự động bắt lấy shippingAddress ===
-        // Nếu Frontend gửi gói 'shippingAddress' thì dùng nó.
-        // Nếu Frontend gửi rời rạc thì tự gom lại.
-        const shippingAddress = req.body.shippingAddress ? req.body.shippingAddress : {
-            fullName,
-            address,
-            city,
-            phone
-        };
-        // ========================================================
-
+        // 1. Kiểm tra giỏ hàng
         if (!req.body.orderItems || req.body.orderItems.length === 0) {
             return res.status(400).json({ status: 'ERR', message: 'Giỏ hàng rỗng' });
         }
 
+        // 2. Xử lý địa chỉ (QUAN TRỌNG: Phải merge Email vào đây)
+        // Logic cũ của bạn bị lỗi vì nó ưu tiên lấy req.body.shippingAddress mà bên trong đó lại không có email.
+        // Logic mới: Tự tạo object shippingAddress chuẩn đầy đủ thông tin.
+        
+        const rawShipping = req.body.shippingAddress || {};
+        
+        const shippingAddress = {
+            fullName: rawShipping.fullName || fullName,
+            address: rawShipping.address || address,
+            city: rawShipping.city || city,
+            phone: rawShipping.phone || phone,
+            email: rawShipping.email || email // <--- BẮT BUỘC PHẢI CÓ DÒNG NÀY
+        };
+
+        // Kiểm tra lần cuối
+        if (!shippingAddress.email) {
+            return res.status(400).json({ status: 'ERR', message: 'Cần cung cấp Email để tạo đơn hàng' });
+        }
+
+        // 3. TẠO ĐƠN HÀNG
         const newOrder = await Order.create({
             orderItems: req.body.orderItems,
-            shippingAddress, // Truyền biến đã xử lý vào đây
+            shippingAddress, // Đã chứa email
             paymentMethod,
             itemsPrice,
             shippingPrice,
             totalPrice,
             user: user || null,
             isPaid: isPaid || false,
-            paidAt: paidAt || null
+            paidAt: paidAt || null,
+            email: shippingAddress.email // Lưu thêm email ở root nếu model yêu cầu
         });
 
         return res.status(200).json({
@@ -47,8 +59,9 @@ const createOrder = async (req, res) => {
             message: 'Tạo đơn hàng thành công',
             data: newOrder
         });
+
     } catch (e) {
-        console.error("Lỗi tạo đơn:", e);
+        console.error("Lỗi Controller CreateOrder:", e);
         return res.status(500).json({
             status: 'ERR',
             message: 'Lỗi server khi tạo đơn hàng',
@@ -57,7 +70,7 @@ const createOrder = async (req, res) => {
     }
 };
 
-// --- HÀM 2: getAllOrder (Chuẩn) ---
+// --- HÀM 2: getAllOrder ---
 const getAllOrder = async (req, res) => {
     try {
         const userId = req.params.id; 
@@ -78,7 +91,7 @@ const getAllOrder = async (req, res) => {
     }
 };
 
-// --- HÀM 3: getDetailsOrder (Chuẩn) ---
+// --- HÀM 3: getDetailsOrder ---
 const getDetailsOrder = async (req, res) => {
     try {
         const orderId = req.params.id;
@@ -134,6 +147,7 @@ const cancelOrderProduct = async (req, res) => {
     }
 };
 
+// --- ADMIN ---
 // --- LẤY TẤT CẢ ĐƠN HÀNG ---
 const getAllOrdersSystem = async (req, res) => {
     try {

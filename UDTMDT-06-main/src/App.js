@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import DefaultComponent from './components/DefaultComponent/DefaultComponent'
-import AdminApp from './admin_pages/AdminApp'
 // import { AuthProvider } from './admin_pages/context/AuthContext' // Nếu cần thì bỏ comment
 import 'antd/dist/reset.css'
 
@@ -23,11 +22,12 @@ import MyOrdersPage from './pages/MyOrdersPage/MyOrdersPage'
 import ChangePasswordPage from './pages/ChangePasswordPage/ChangePasswordPage'
 import SearchPage from './pages/SearchPage/SearchPage'
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
+import AdminApp from './admin_pages/AdminApp'
 import AccountLockedPage from './pages/AccountLockedPage/AccountLockedPage'
-
 
 // === 👇 MỚI THÊM: Import trang OrderSuccess ===
 import OrderSuccessPage from './pages/OrderSuccessPage/OrderSuccessPage'
+
 // ===========================================
 
 // 2. Định nghĩa các routes
@@ -53,8 +53,9 @@ const userRoutes = [
     // === 👇 MỚI THÊM: Định nghĩa đường dẫn Order Success ===
     { path: '/order-success', page: OrderSuccessPage, isShowHeader: true },
     // ======================================================
-    { path: '/account-locked', page: AccountLockedPage, isShowHeader: false },
+
     { path: '*', page: NotFoundPage, isShowHeader: false },
+    { path: '/account-locked', page: AccountLockedPage, isShowHeader: false },
 ];
 
 

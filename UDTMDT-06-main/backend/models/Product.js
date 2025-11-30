@@ -1,63 +1,69 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-    user: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
-    },
     name: {
         type: String,
         required: true
     },
-    images: [
-        { 
-            url: { type: String, required: true },
-            _id: false // Không tạo ID phụ cho từng ảnh
-        }
-    ],
-    brand: {
-        type: String
+    images: {
+        type: Array,
+        required: true,
+        default: []
+    }, // Stores image URLs
+    category: {
+        type: mongoose.Schema.Types.ObjectId, // MUST be ObjectId to link with Category
+        ref: 'Category',
+        required: true
     },
-    category: { // Giữ lại cái này (Ref), xóa cái String ở trên
+    brand: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Category'
+        ref: 'Brand' 
     },
-    description: {
-        type: String
-    },
-    price: { // Giá bán
+    price: { 
         type: Number,
-        default: 0
+        required: true, 
+        default: 0 
     },
-    originalPrice: { // Giá gốc (nếu có)
-        type: Number,
-        default: 0
-    },
-    countInStock: {
+    salePrice: { 
         type: Number, 
-        default: 0
+        default: 0 },
+    countInStock: { 
+        type: Number, 
+        required: true, 
+        default: 0 
     },
+    description: { 
+        type: String 
+    },
+    slug: { 
+        type: String 
+    },
+    status: { 
+        type: String, 
+        default: 'in_stock' 
+    }, // Fix status not saving
+    isFlashSale: { 
+        type: Boolean, 
+        default: false 
+    },
+    flashSalePrice: { 
+        type: Number, 
+        default: 0 
+    },
+
+    // --- ADD THIS FIELD TO STORE VARIANTS ---
     variations: [
         {
-            color: String,
-            size: String,
-            price: Number,
-            stock: Number, // JSON cũ dùng 'stock' hay 'quantity'? Kiểm tra JSON thấy có cả hai, ta nên map
-            image: String
+            color: { type: String },
+            size: { type: String },
+            quantity: { type: Number, default: 0 },
+            price: { type: Number, default: 0 }
         }
     ],
-    rating: {
-        type: Number,
-        default: 0
-    },
-    numReviews: {
-        type: Number,
-        default: 0
-    },
-    sold: {
-        type: Number,
-        default: 0
+    // ----------------------------------------
+    user: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
     }
 }, { timestamps: true });
 

@@ -30,6 +30,9 @@ const ProductDetailPage = () => {
     const [quantity, setQuantity] = useState(1);
     const [selectedVariation, setSelectedVariation] = useState(null);
     const dispatch = useDispatch();
+    
+    // Sử dụng Hook message của Ant Design để hiển thị ổn định nhất
+    const [messageApi, contextHolder] = message.useMessage();
 
     const formatDate = (date) => {
         const day = date.getDate();
@@ -40,25 +43,52 @@ const ProductDetailPage = () => {
     const checkLogin = () => {
         const token = localStorage.getItem('access_token');
         if (!token || token === 'null' || token === 'undefined') {
-            message.warning('Vui lòng đăng nhập để thực hiện chức năng này!');
+            messageApi.warning('Vui lòng đăng nhập để thực hiện chức năng này!');
             navigate('/sign-in', { state: { from: location.pathname } });
             return false;
         }
         return true;
     };
 
+    // --- HÀM ĐÃ SỬA LOGIC ĐỂ KHỚP VỚI BACKEND ---
     const handleAddToFavorites = async () => {
         if (!checkLogin()) return;
         if (!product) return;
+
         try {
-            const res = await axiosClient.post('/api/users/add-wishlist', { productId: product._id });
-            if (res.data.success) message.success('Đã thêm vào yêu thích!');
-        } catch (e) { message.error('Lỗi khi thêm yêu thích'); }
+            // SỬA ĐỔI QUAN TRỌNG TẠI ĐÂY:
+            // 1. Dùng /api/products (số nhiều) để khớp với index.js
+            // 2. Truyền ID sản phẩm vào URL để khớp với route backend
+            const res = await axiosClient.post(`/api/products/add-to-wishlist/${product._id}`);
+            
+            // Logic xử lý phản hồi
+            if (res.status === 'OK' || res.status === 200 || res.message) {
+                messageApi.open({
+                    type: 'success',
+                    content: 'Đã thêm vào danh sách yêu thích!',
+                    duration: 3,
+                });
+            } else {
+                messageApi.success('Đã thêm thành công');
+            }
+
+        } catch (e) { 
+            console.error('Lỗi API:', e);
+            // Kiểm tra nếu lỗi do trùng lặp (đã có trong danh sách) thì vẫn báo thành công hoặc thông báo nhẹ
+            if(e.response && e.response.status === 400) {
+                 messageApi.info('Sản phẩm này đã có trong danh sách yêu thích của bạn.');
+            } else {
+                 messageApi.error('Lỗi kết nối khi thêm yêu thích'); 
+            }
+        }
     };
+    // ------------------------------------
 
     const fetchProductDetails = async (productId) => {
         try {
-            const response = await axios.get(`/api/products/${productId}`);
+            // Chỗ này dùng axios thường hoặc axiosClient đều được, nhưng URL phải đúng
+            // Backend đang là /api/products (số nhiều)
+            const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/products/${productId}`);
             if (response.data && response.data.data) {
                 const productData = response.data.data;
                 setProduct(productData);
@@ -71,22 +101,26 @@ const ProductDetailPage = () => {
                 }
                 fetchRelatedProducts(productData);
             }
-        } catch (error) { message.error('Không tìm thấy sản phẩm'); }
+        } catch (error) { 
+            console.log(error);
+        }
     };
 
     const fetchRelatedProducts = async (productData) => {
         if (!productData) return;
         const categoryName = productData.categoryName || (productData.category && productData.category.name) || null;
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        
         try {
             let items = [];
             if (categoryName && typeof categoryName === 'string') {
-                const res = await axios.get(`/api/products?category=${encodeURIComponent(categoryName)}&limit=8`);
+                const res = await axios.get(`${apiUrl}/api/products?category=${encodeURIComponent(categoryName)}&limit=8`);
                 if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
                     items = res.data.data;
                 }
             }
             if (items.length === 0) {
-                const allRes = await axios.get(`/api/products?page=1&limit=24`);
+                const allRes = await axios.get(`${apiUrl}/api/products?page=1&limit=24`);
                 const all = allRes.data?.data || [];
                 items = all.filter(p => String(p.category) === String(productData.category));
             }
@@ -132,9 +166,8 @@ const ProductDetailPage = () => {
             quantity: quantity,
         }));
         
-        message.success("Đã thêm vào giỏ hàng!");
+        messageApi.success("Đã thêm vào giỏ hàng!");
 
-        // --- SYNC VỚI DATABASE ---
         setTimeout(async () => {
             try {
                 const currentCart = JSON.parse(localStorage.getItem('cartItems') || '{"items": []}');
@@ -197,6 +230,9 @@ const ProductDetailPage = () => {
 
     return (
         <WrapperContainer>
+            {/* ContextHolder bắt buộc phải có để hiện thông báo */}
+            {contextHolder}
+            
             <WrapperLayout>
                 <Row>
                     <WrapperStyleColImage span={10}>

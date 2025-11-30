@@ -46,14 +46,6 @@ const userSchema = new mongoose.Schema({
         enum: ['customer', 'admin'],
         default: 'customer',
     },
-    isBlocked: { 
-        type: Boolean, 
-        default: false 
-    },
-    avatar: {
-        type: String,
-        default: '' // Hoặc link ảnh mặc định
-    },
 
     addresses: [addressSchema],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
