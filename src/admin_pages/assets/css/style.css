@@ -1,260 +1,167 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-::after,
-::before {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-a {
-    text-decoration: none;
-}
-
-li {
-    list-style: none;
-}
-
-h1 {
-    font-weight: 600;
-    font-size: 1.5rem;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: #dc3545 !important;
-    box-shadow: none !important;
-}
-
+/* --- 1. GLOBAL RESET & FONT SIZE --- */
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Roboto', sans-serif; /* Hoặc font bạn đang dùng */
+    font-size: 16px !important; /* Chữ to toàn trang */
+    color: #333;
+    background-color: #f8f9fc;
+    line-height: 1.6;
 }
 
-.wrapper {
-    display: flex;
-}
-
-.main {
-    min-height: 100vh;
-    width: 100%;
-    overflow: hidden;
-    transition: all 0.35s ease-in-out;
-    background-color: #fff;
-    height: 100vh;
-    overflow: scroll;
-}
-
-#sidebar {
-    width: 70px;
-    min-width: 70px;
-    height: 100vh;
-    position: sticky;
-    left: 0;
-    z-index: 1000;
-    transition: all .25s ease-in-out;
-    display: flex;
-    flex-direction: column;
-}
-
-#sidebar.expand {
-    width: 260px;
-    min-width: 260px;
-}
-
-.toggle-btn {
-    background-color: transparent;
-    cursor: pointer;
-    border: 0;
-    padding: 1rem 1.5rem;
-}
-
-.toggle-btn i {
-    font-size: 1.5rem;
-    color: #000;
-}
-
-.sidebar-logo {
-    margin: auto 0;
-}
-
-.sidebar-logo a {
-    color: #000;
-    font-size: 1.15rem;
-    font-weight: 600;
-}
-
-#sidebar:not(.expand) .sidebar-logo,
-#sidebar:not(.expand) a.sidebar-link span {
-    display: none;
-}
-
-.sidebar-nav {
-    padding: 2rem 0;
-    flex: 1 1 auto;
-}
-
-a.sidebar-link {
-    padding: .625rem 1.625rem;
-    color: #000;
-    display: block;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    border-left: 3px solid transparent;
-}
-
-.sidebar-link i {
-    font-size: 1.1rem;
-    margin-right: .75rem;
-}
-
-a.sidebar-link:hover {
-    background-color: rgba(255, 255, 255, .075);
-    border-left: 3px solid #3b7ddd;
-}
-
-.sidebar-item {
-    position: relative;
-}
-
-.sidebar-nav .active {
-    background-color: #dc3545;
-}
-
-.sidebar-nav .active .sidebar-link {
-    color: #fff;
-    font-weight: 600;
-}
-
-#sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
-    position: absolute;
-    top: 0;
-    left: 70px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    padding: 0;
-    min-width: 15rem;
-    display: none;
-}
-
-#sidebar:not(.expand) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
-    display: block;
-    max-height: 15em;
-    width: 100%;
-    opacity: 1;
-}
-
-#sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
-    border: solid;
-    border-width: 0 .075rem .075rem 0;
-    content: "";
-    display: inline-block;
-    padding: 2px;
-    position: absolute;
-    right: 1.5rem;
-    top: 1.4rem;
-    transform: rotate(-135deg);
-    transition: all .2s ease-out;
-}
-
-#sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
-    transform: rotate(45deg);
-    transition: all .2s ease-out;
-}
-
-#avatar {
-    display: none;
-}
-
-.avatar {
-    border: 1px solid #dc3545;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: .3s all ease-in-out;
-}
-
-.avatar:hover {
-    background: #dc3545;
-    color: #fff;
-    border: 1px solid #dc3545;
-}
-
-.pagination-danger .page-link {
-    color: #dc3545;
-    background-color: #fff;
-    border-color: #dc3545;
-}
-
-.pagination-danger .page-link:hover {
-    color: #fff;
-    background-color: #bd2130 !important;
-    border-color: #bd2130;
-}
-
-.pagination-danger .page-item.active .page-link {
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-.pagination-danger .page-item.active .page-link:focus {
-    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.5);
-}
-
-/* --- CUSTOM SIZE TĂNG KÍCH THƯỚC GIAO DIỆN --- */
-
-/* 1. Tăng font chữ toàn bộ trang */
-body {
-    font-size: 16px !important; /* Tăng từ mặc định (thường 14px) lên 16px */
-    line-height: 1.6 !important;
+/* --- 2. LAYOUT CONTAINER (Mở rộng tối đa) --- */
+.container, .container-fluid, .content-container {
+    max-width: 98% !important;
+    padding-left: 30px !important;
+    padding-right: 30px !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 600 !important; /* Làm đậm tiêu đề hơn */
+    font-weight: 700 !important;
+    color: #2c3e50;
 }
 
-/* 2. Mở rộng khung nội dung ra toàn màn hình */
-/* Nếu giao diện đang bị bó hẹp ở giữa, dòng này sẽ ép nó bung ra 98% màn hình */
-.container, .container-fluid, .content-container {
-    max-width: 98% !important; 
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+/* --- 3. BẢNG DỮ LIỆU (Đồng bộ Order, Product, User, Category) --- */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #333;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
 }
 
-/* 3. Tăng kích thước Bảng dữ liệu (Order, Product...) */
-.table th, .table td {
-    padding: 16px 15px !important; /* Tăng khoảng cách trong ô */
-    font-size: 15px !important;    /* Chữ trong bảng to hơn */
+.table th {
+    background-color: #f1f3f6 !important;
+    color: #333 !important;
+    font-weight: 700 !important;
+    padding: 18px 20px !important; /* Header bảng to */
+    font-size: 16px !important;
+    border-bottom: 2px solid #e3e6f0;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 18px 20px !important; /* Dòng dữ liệu to, thoáng */
     vertical-align: middle !important;
+    font-size: 16px !important;
+    border-bottom: 1px solid #e3e6f0;
 }
 
-/* 4. Làm to các ô Input và Select */
-.form-control, .form-select {
-    height: 45px !important; /* Cao hơn dễ bấm */
+/* --- 4. NÚT ACTION (Sửa lỗi nút nhỏ) --- */
+/* Tăng kích thước nút Edit/Delete/View trong bảng */
+.table .btn {
+    padding: 10px 18px !important; /* Nút to hơn */
     font-size: 15px !important;
-    padding: 10px 15px !important;
+    border-radius: 6px !important;
+    margin: 0 4px; /* Khoảng cách giữa các nút */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px; /* Chiều cao cố định để tròn đẹp */
 }
 
-/* 5. Tăng kích thước nút bấm */
-.btn {
+/* Nút chính (Add New) ở góc trên */
+.page-header .btn-primary, .add-button {
+    padding: 12px 25px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    background-color: #00d165 !important;
+    border: none !important;
+    box-shadow: 0 4px 6px rgba(0, 209, 101, 0.2);
+}
+
+/* --- 5. ĐỒNG BỘ POPUP / MODAL (Add & Edit) --- */
+/* Cấu trúc Form bên trong Modal */
+.modal-content, .ant-modal-content {
+    border-radius: 12px !important;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+}
+
+.modal-header, .ant-modal-header {
+    background-color: #00d165 !important;
+    color: #fff !important;
+    padding: 20px 30px !important;
+}
+
+.modal-title, .ant-modal-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+}
+
+/* Ô nhập liệu trong Modal */
+.form-control, .form-select, .ant-input, .ant-select-selector {
+    height: 50px !important; /* Input cao 50px - Rất dễ nhập */
     padding: 10px 20px !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+    border: 1px solid #d1d3e2 !important;
+    margin-bottom: 15px; /* Khoảng cách dưới */
 }
 
-/* 6. Điều chỉnh Sidebar (Menu trái) nếu cần */
-.sidebar {
-    width: 260px !important; /* Nếu sidebar hiện tại quá nhỏ */
-}
-/* Đẩy nội dung chính sang phải tương ứng với sidebar mới */
-.page-wrapper {
-    margin-left: 260px !important; 
-    padding: 30px !important; /* Khoảng cách nội dung thoáng hơn */
+.form-label, label {
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    color: #4e5d78;
+    font-size: 16px !important;
 }
 
-/* Sửa lỗi hiển thị trên màn hình nhỏ (Mobile) */
-@media only screen and (max-width: 768px) {
-    .page-wrapper {
-        margin-left: 0 !important;
-        padding: 15px !important;
-    }
+/* Nút Submit trong Modal */
+.modal-footer .btn, .ant-modal-footer .ant-btn {
+    padding: 12px 30px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+}
+
+/* Container chứa form trong Modal */
+.modal-body .form-group {
+    margin-bottom: 20px; /* Khoảng cách giữa các dòng nhập liệu */
+}
+
+/* Label của form trong Modal */
+.modal-body label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #444;
+}
+
+/* Upload ảnh trong Modal */
+.modal-body .upload-box {
+    border: 2px dashed #00d165;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #f9fdfa;
+}
+
+/* Container chứa form trong Modal */
+.modal-body .form-group {
+    margin-bottom: 20px; /* Khoảng cách giữa các dòng nhập liệu */
+}
+
+/* Label của form trong Modal */
+.modal-body label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #444;
+}
+
+/* Upload ảnh trong Modal */
+.modal-body .upload-box {
+    border: 2px dashed #00d165;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #f9fdfa;
 }

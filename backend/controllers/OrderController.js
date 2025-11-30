@@ -4,16 +4,16 @@ const Product = require('../models/Product');
 // --- HÀM 1: createOrder (Đã sửa logic nhận Email) ---
 const createOrder = async (req, res) => {
     try {
-        const { 
-            paymentMethod, 
-            itemsPrice, 
-            shippingPrice, 
-            totalPrice, 
+        const {
+            paymentMethod,
+            itemsPrice,
+            shippingPrice,
+            totalPrice,
             user,
-            isPaid, 
+            isPaid,
             paidAt,
             // Thêm email vào đây để hứng dữ liệu từ Frontend
-            fullName, address, city, phone, email 
+            fullName, address, city, phone, email
         } = req.body;
 
         // 1. Kiểm tra giỏ hàng
@@ -24,9 +24,9 @@ const createOrder = async (req, res) => {
         // 2. Xử lý địa chỉ (QUAN TRỌNG: Phải merge Email vào đây)
         // Logic cũ của bạn bị lỗi vì nó ưu tiên lấy req.body.shippingAddress mà bên trong đó lại không có email.
         // Logic mới: Tự tạo object shippingAddress chuẩn đầy đủ thông tin.
-        
+
         const rawShipping = req.body.shippingAddress || {};
-        
+
         const shippingAddress = {
             fullName: rawShipping.fullName || fullName,
             address: rawShipping.address || address,
@@ -73,9 +73,9 @@ const createOrder = async (req, res) => {
 // --- HÀM 2: getAllOrder ---
 const getAllOrder = async (req, res) => {
     try {
-        const userId = req.params.id; 
+        const userId = req.params.id;
         if (!userId) {
-             return res.status(400).json({ status: 'ERR', message: 'Thiếu User ID' });
+            return res.status(400).json({ status: 'ERR', message: 'Thiếu User ID' });
         }
         const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
         return res.status(200).json({
@@ -96,7 +96,7 @@ const getDetailsOrder = async (req, res) => {
     try {
         const orderId = req.params.id;
         if (!orderId) {
-             return res.status(400).json({ status: 'ERR', message: 'Thiếu Order ID' });
+            return res.status(400).json({ status: 'ERR', message: 'Thiếu Order ID' });
         }
         const order = await Order.findById(orderId);
         if (!order) {
@@ -124,7 +124,7 @@ const cancelOrderProduct = async (req, res) => {
         }
 
         const updatedOrder = await Order.findByIdAndUpdate(
-            orderId, 
+            orderId,
             { isCancelled: true }, // Lưu ý: Model phải có trường này nếu muốn lưu
             { new: true }
         );
@@ -157,7 +157,7 @@ const getAllOrdersSystem = async (req, res) => {
         const status = req.query.status;
 
         let query = {};
-        
+
         // Lọc theo trạng thái nếu có
         if (status) {
             query.status = status;
@@ -205,19 +205,24 @@ const updateOrderStatus = async (req, res) => {
         // Cập nhật Status text (Cái này để hiển thị cho User & Admin)
         order.status = status;
 
-        // Logic tự động cập nhật các trường Boolean (isPaid, isDelivered)
+        // LOGIC MỚI: Xử lý khi Giao Hàng Thành Công
         if (status === 'Delivered') {
             order.isDelivered = true;
             order.deliveredAt = Date.now();
 
-            // Nếu là COD mà đã giao hàng -> Coi như đã thanh toán
-            if (!order.isPaid && (order.paymentMethod === 'COD' || order.paymentMethod === 'Tiền mặt')) {
+            // Lấy paymentMethod ra và chuẩn hóa về chữ thường để so sánh cho dễ
+            const method = (order.paymentMethod || '').toLowerCase();
+
+            // Kiểm tra: nếu chưa thanh toán VÀ là loại thanh toán sau (COD / Tiền mặt)
+            if (!order.isPaid && (method.includes('cod') || method.includes('tiền mặt') || method.includes('cash'))) {
                 order.isPaid = true;
                 order.paidAt = Date.now();
             }
-        } else if (status === 'Cancelled') {
-            // Nếu muốn xử lý hủy
-            // order.isCancelled = true; (nếu model có field này)
+        }
+        // Reset lại nếu admin lỡ tay chuyển nhầm trạng thái (Optional)
+        else if (status !== 'Delivered' && status !== 'Completed') {
+            order.isDelivered = false;
+            order.deliveredAt = null;
         }
 
         await order.save();
@@ -242,7 +247,7 @@ const getDetailsOrderAdmin = async (req, res) => {
     }
 };
 
-module.exports = { 
+module.exports = {
     createOrder,
     getAllOrder,
     getDetailsOrder,

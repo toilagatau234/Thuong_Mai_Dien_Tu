@@ -73,9 +73,23 @@ const OrderPage = () => {
   const handleUpdateStatus = async (orderId, newStatus) => {
     const toastId = toast.loading('Đang cập nhật...');
     try {
-      await apiService.put(`/order/status/${orderId}`, { status: newStatus }); toast.success('Cập nhật trạng thái thành công!', { id: toastId });
-      // Cập nhật UI
-      setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+      // Gọi API cập nhật
+      const response = await apiService.put(`/order/status/${orderId}`, { status: newStatus });
+      
+      toast.success('Cập nhật trạng thái thành công!', { id: toastId });
+
+      // Lấy dữ liệu mới từ Backend (response.data.data) để cập nhật state
+      // Thay vì chỉ cập nhật status, ta thay thế toàn bộ object đơn hàng đó
+      if (response.data && response.data.data) {
+          const updatedOrder = response.data.data;
+          setOrders(orders.map(o => o._id === orderId ? updatedOrder : o));
+      } else {
+          // Fallback nếu API không trả về data (ít khi xảy ra nếu Controller đúng)
+          setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+          // Nên reload lại để chắc chắn
+          fetchOrders(currentPage, searchTerm, statusFilter);
+      }
+
     } catch (error) {
       console.error('Failed to update status:', error);
       toast.error('Cập nhật thất bại.', { id: toastId });
@@ -137,14 +151,19 @@ const OrderPage = () => {
                     ) : orders.length > 0 ? (
                       orders.map((order) => (
                         <tr key={order._id}>
-                          <td><small>#{order._id.slice(-6)}</small></td>
+                          <td><small>#{order._id.substring(0, 8).toUpperCase()}</small></td>
                           <td>{order.shippingAddress?.fullName || 'Guest'}</td>
                           <td>{order.shippingAddress?.phone || 'N/A'}</td>
                           <td>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
                           <td>{formatCurrency(order.totalPrice)}</td>
                           <td>
-                            <span className={`badge ${order.isPaid ? 'bg-success' : 'bg-warning'}`}>
-                              {order.paymentMethod} {order.isPaid ? '(Paid)' : '(Not Paid)'}
+                            <span className={`badge ${order.isPaid ? 'bg-success' : 'bg-warning'}`}
+                              style={{ fontSize: '10px', padding: '6px 10px' }}>
+                              {/* Nếu là COD và đã trả -> COD(Paid), ngược lại -> COD(Not Paid) */}
+                              {order.paymentMethod === 'COD' || order.paymentMethod === 'Tiền mặt'
+                                ? `COD ${order.isPaid ? '(Paid)' : '(Not Paid)'}`
+                                : `${order.paymentMethod} ${order.isPaid ? '(Paid)' : '(Not Paid)'}`
+                              }
                             </span>
                           </td>
                           <td>

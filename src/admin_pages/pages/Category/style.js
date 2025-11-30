@@ -83,11 +83,10 @@ export const TableResponsive = styled.div`
         border-collapse: collapse;
 
         th, td {
-            padding: 18px;
+            padding: 15px;
             text-align: left;
             border-bottom: 1px solid #e3e6f0;
             vertical-align: middle;
-            font-size: 16px
         }
 
         th {
